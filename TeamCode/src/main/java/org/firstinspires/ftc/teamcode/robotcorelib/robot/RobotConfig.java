@@ -27,7 +27,7 @@ public class RobotConfig {
             2 = odo_right
             3 = lift
     SERVOS:
-        Control Hub:
+        Control Hub: NONE
 
         Expansion Hub:
             0 = release
@@ -35,14 +35,14 @@ public class RobotConfig {
             5 = duck_servo
 
     I2C SENSORS:
-        Control Hub:
+        Control Hub: NONE
 
-        Expansion Hub:
+        Expansion Hub: NONE
 
     ANALOG PORTS:
-        Control Hub:
+        Control Hub: NONE
 
-        Expansion Hub:
+        Expansion Hub: NONE
 
      */
 

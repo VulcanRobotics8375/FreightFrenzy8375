@@ -66,13 +66,9 @@ public class Lift extends Subsystem {
         if(!buttonPress && this.buttonPress) {
             this.buttonPress = false;
         }
-        if(open) {
+        if(open && pos > 150) {
             release.setPosition(OPENED_POS);
         } else {
-            release.setPosition(CLOSED_POS);
-        }
-
-        if(pos < 150 && release.getPosition() != CLOSED_POS){
             release.setPosition(CLOSED_POS);
         }
 
