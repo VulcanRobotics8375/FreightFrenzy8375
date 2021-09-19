@@ -14,14 +14,20 @@ public class Lift extends Subsystem {
     private boolean hold = false;
     private int holdPosition;
     private boolean open = false;
-    private boolean buttonPress = false;
+    private boolean buttonRelease = false;
+    private boolean goingToPosition = false;
 
     private final double HOLD_POS_GAIN = 0.0005;
     private final int LIMIT_RANGE = 300;
     private final int MAX_HEIGHT = 600;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
+    
     private final double CLOSED_POS = 0.05;
     private final double OPENED_POS = 0.65;
+    
+    private final int FIRST_LEVEL = 200;
+    private final int SECOND_LEVEL = 350;
+    private final int THIRD_LEVEL = 500;
 
 
     public void init(){
@@ -32,7 +38,7 @@ public class Lift extends Subsystem {
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
-    public void run(double stickPower, boolean buttonPress) {
+    public void run(double stickPower, boolean buttonRelease, boolean buttonA, boolean buttonB, boolean buttonY) {
         int pos = lift.getCurrentPosition();
         double outputPower;
         if(stickPower < 0) {
@@ -56,15 +62,29 @@ public class Lift extends Subsystem {
             int error = holdPosition - pos;
             outputPower = error * HOLD_POS_GAIN;
 
+            if(buttonA) {
+                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lift.setTargetPosition(FIRST_LEVEL);
+                outputPower = 1;
+            } else if(buttonB) {
+                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lift.setTargetPosition(SECOND_LEVEL);
+                outputPower = 1;
+            } else if(buttonY) {
+                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lift.setTargetPosition(THIRD_LEVEL);
+                outputPower = 1;
+            }
+
         }
 
         lift.setPower(outputPower);
-        if(buttonPress && !this.buttonPress) {
-            this.buttonPress = true;
+        if(buttonRelease && !this.buttonRelease) {
+            this.buttonRelease = true;
             open = !open;
         }
-        if(!buttonPress && this.buttonPress) {
-            this.buttonPress = false;
+        if(!buttonRelease && this.buttonRelease) {
+            this.buttonRelease = false;
         }
         if(open && pos > 150) {
             release.setPosition(OPENED_POS);
@@ -76,6 +96,7 @@ public class Lift extends Subsystem {
 //        telemetry.addData("hold", hold);
 
     }
+    
 
     public void test(double stickPower) {
         lift.setPower(stickPower);
