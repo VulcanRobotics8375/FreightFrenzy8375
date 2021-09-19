@@ -44,6 +44,9 @@ public class Lift extends Subsystem {
         if(stickPower < 0) {
             stickPower *= 0.2;
         }
+        if(hold){
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
 
         // Sigmoid
         //value to tune here is the numerator-- higher number == faster acceleration curve
