@@ -16,7 +16,7 @@ public class Lift extends Subsystem {
     private boolean open = false;
     private boolean buttonPress = false;
 
-    private final double HOLD_POS_GAIN = 0.0005;
+    private final double HOLD_POS_GAIN = 0.0008;
     private final int LIMIT_RANGE = 300;
     private final int MAX_HEIGHT = 600;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
@@ -36,7 +36,7 @@ public class Lift extends Subsystem {
         int pos = lift.getCurrentPosition();
         double outputPower;
         if(stickPower < 0) {
-            stickPower *= 0.2;
+            stickPower *= 0.3;
         }
 
         // Sigmoid
