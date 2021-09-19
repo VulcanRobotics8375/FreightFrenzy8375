@@ -72,7 +72,7 @@ public class Lift extends Subsystem {
             release.setPosition(CLOSED_POS);
         }
 
-        telemetry.addData("lift pos", pos);
+//        telemetry.addData("lift pos", pos);
 //        telemetry.addData("hold", hold);
 
     }

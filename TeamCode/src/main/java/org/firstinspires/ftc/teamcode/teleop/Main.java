@@ -29,11 +29,11 @@ public class Main extends TeleOpPipeline {
         subsystems.intake.run(
                 gamepad2.a, //intake
                 gamepad2.b, //outtake
-                gamepad2.left_bumper
+                gamepad2.x
         );
         subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y);
         subsystems.drivetrain.tankDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
-        subsystems.carousel.run(gamepad2.x);
+        subsystems.carousel.run(gamepad2.left_bumper);
 
 //        telemetry.addData("left", Robot.getConfiguration().localizer.getWheelPositions().get(0));
 //        telemetry.addData("right", Robot.getConfiguration().localizer.getWheelPositions().get(1));
