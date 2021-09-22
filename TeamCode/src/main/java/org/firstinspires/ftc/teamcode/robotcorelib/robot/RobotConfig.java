@@ -31,6 +31,7 @@ public class RobotConfig {
 
         Expansion Hub:
             0 = release
+            1 = cap
             4 = intake_wall
             5 = duck_servo
 

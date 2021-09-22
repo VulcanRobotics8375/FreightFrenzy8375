@@ -14,7 +14,7 @@ public class Intake extends Subsystem {
     private boolean intakeWallOn = false;
     private final double intakePower = 1.0;
     private final double intakeWallClosed = 0.01;
-    private final double intakeWallOpen = 1.0;
+    private final double intakeWallOpen = 0.5;
 
     public void init(){
         intake = hardwareMap.dcMotor.get("odo_right");
