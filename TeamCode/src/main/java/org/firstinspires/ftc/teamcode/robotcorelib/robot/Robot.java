@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotcorelib.robot;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -16,15 +17,16 @@ public class Robot {
 
     private static RobotConfig config;
 
-    public static void init(HardwareMap hwMap, Telemetry opModeTelemetry) {
-        hardwareMap = hwMap;
-        telemetry = opModeTelemetry;
+    public static void init(OpMode opMode) {
+        hardwareMap = opMode.hardwareMap;
+        telemetry = opMode.telemetry;
         config = new RobotConfig();
         config.init();
 
         for (Subsystem sub : config.subsystems) {
             sub.setHardwareMap(hardwareMap);
             sub.setTelemetry(telemetry);
+            sub.assignGamePads(opMode.gamepad1, opMode.gamepad2);
             sub.init();
         }
 

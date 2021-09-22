@@ -11,7 +11,7 @@ public abstract class TeleOpPipeline extends OpMode {
 
     @Override
     public void init() {
-        Robot.init(hardwareMap, telemetry);
+        Robot.init(this);
         subsystems = Robot.getConfiguration();
     }
 
