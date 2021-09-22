@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 public class Drivetrain extends Subsystem {
 
     private DcMotor fl, fr, bl, br;
+    private BNO055IMU imu;
     public static final DriveMode driveMode = DriveMode.TANK;
 
 
@@ -20,14 +22,24 @@ public class Drivetrain extends Subsystem {
         fr = hardwareMap.dcMotor.get("front_right");
         bl = hardwareMap.dcMotor.get("back_left");
         br = hardwareMap.dcMotor.get("back_right");
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
 
         setDrivetrainMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setDrivetrainMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        //set up IMU
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.mode = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled = false;
+        if(imu.initialize(parameters)) {
+            while (!imu.isGyroCalibrated()) {}
+        } else {
+            imu.initialize(parameters);
+        }
 
         if(Drivetrain.driveMode == DriveMode.TANK) {
             fl.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -101,6 +113,14 @@ public class Drivetrain extends Subsystem {
         bl.setMode(runMode);
         br.setMode(runMode);
     }
+
+    public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
+        fl.setZeroPowerBehavior(zeroPowerBehavior);
+        fr.setZeroPowerBehavior(zeroPowerBehavior);
+        bl.setZeroPowerBehavior(zeroPowerBehavior);
+        br.setZeroPowerBehavior(zeroPowerBehavior);
+    }
+
 }
 
 enum DriveMode {
