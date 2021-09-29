@@ -45,8 +45,8 @@ public class Robot {
             sub.setHardwareMap(hardwareMap);
             sub.setTelemetry(telemetry);
             sub.assignGamePads(opMode.gamepad1, opMode.gamepad2);
-            if(sub instanceof Drivetrain) {
-                drivetrain = (Drivetrain) sub; // cast drivetrain to drivetrainInterface, this is for backend controller stuff.
+            if(sub instanceof DrivetrainInterface) {
+                drivetrain = (DrivetrainInterface) sub; // cast drivetrain to drivetrainInterface, this is for backend controller stuff.
             }
             sub.init();
         }
