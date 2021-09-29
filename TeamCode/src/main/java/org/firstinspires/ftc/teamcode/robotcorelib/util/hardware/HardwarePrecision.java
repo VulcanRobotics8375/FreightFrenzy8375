@@ -7,7 +7,7 @@ public enum HardwarePrecision {
     HIGH (1.0),
     ULTRA_HIGH(0.1);
 
-    double value;
+    public double value;
     HardwarePrecision(double precision) {
         this.value = precision;
     }

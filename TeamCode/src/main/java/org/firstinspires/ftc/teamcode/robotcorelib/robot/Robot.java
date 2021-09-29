@@ -19,7 +19,7 @@ public class Robot {
     private static Pose2d robotVelocity = new Pose2d();
 
     private static List<LynxModule> hubs;
-    //default is manual since the SDK is set up to do so
+    //default is manual since robotcorelib is set up to do so
     private static LynxModule.BulkCachingMode bulkCachingMode = LynxModule.BulkCachingMode.MANUAL;
 
     private static RobotConfig config;

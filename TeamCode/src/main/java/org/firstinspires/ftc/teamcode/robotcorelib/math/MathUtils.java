@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.math;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
 
 import java.util.ArrayList;
 
@@ -199,7 +200,9 @@ public class MathUtils {
 
     }
 
-
+    public static boolean shouldHardwareUpdate(double input, double currentValue, HardwarePrecision precision) {
+        return Math.abs((input / currentValue) - 1) > (precision.value / 100.0);
+    }
 
 }
 
