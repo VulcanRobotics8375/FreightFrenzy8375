@@ -6,7 +6,10 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainInterface;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
+import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
 import java.util.List;
 
@@ -24,6 +27,9 @@ public class Robot {
 
     private static RobotConfig config;
 
+    public static RobotRunMode runMode;
+    public static DrivetrainInterface drivetrain;
+
     public static void init(OpMode opMode) {
         hardwareMap = opMode.hardwareMap;
         telemetry = opMode.telemetry;
@@ -39,6 +45,9 @@ public class Robot {
             sub.setHardwareMap(hardwareMap);
             sub.setTelemetry(telemetry);
             sub.assignGamePads(opMode.gamepad1, opMode.gamepad2);
+            if(sub instanceof Drivetrain) {
+                drivetrain = (Drivetrain) sub; // cast drivetrain to drivetrainInterface, this is for backend controller stuff.
+            }
             sub.init();
         }
 
@@ -93,6 +102,10 @@ public class Robot {
     public static void update() {
         clearBulkCache();
         updateGlobalPosition();
+    }
+
+    public static void setRunMode(RobotRunMode runMode) {
+        Robot.runMode = runMode;
     }
 
 }
