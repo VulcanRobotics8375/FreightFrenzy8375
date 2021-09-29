@@ -4,10 +4,10 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainInterface;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
-import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
 public class Drivetrain extends Subsystem implements DrivetrainInterface {
@@ -100,6 +100,7 @@ public class Drivetrain extends Subsystem implements DrivetrainInterface {
         setPowers(flSpeed, frSpeed, blSpeed, brSpeed);
     }
 
+    @Override
     public void setPowers(double[] powers) {
         this.fl.setPower(powers[0]);
         this.fr.setPower(powers[1]);
@@ -115,6 +116,11 @@ public class Drivetrain extends Subsystem implements DrivetrainInterface {
         br.setMode(runMode);
     }
 
+    @Override
+    public DriveMode getDriveMode() {
+        return driveMode;
+    }
+
     public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
         fl.setZeroPowerBehavior(zeroPowerBehavior);
         fr.setZeroPowerBehavior(zeroPowerBehavior);
@@ -124,8 +130,3 @@ public class Drivetrain extends Subsystem implements DrivetrainInterface {
 
 }
 
-enum DriveMode {
-    TANK,
-    MECANUM
-
-}

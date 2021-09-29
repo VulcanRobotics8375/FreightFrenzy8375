@@ -53,6 +53,7 @@ public class RobotConfig {
     public StandardTrackingWheelLocalizer localizer;
 
     //Subsystem objects go here
+    //IMPORTANT:: Don't add more than one class that implements DrivetrainInterface, things will break
     public Drivetrain drivetrain;
     public Intake intake;
     public Lift lift;
