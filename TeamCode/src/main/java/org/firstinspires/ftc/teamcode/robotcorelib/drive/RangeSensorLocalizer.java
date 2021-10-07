@@ -95,7 +95,7 @@ public class RangeSensorLocalizer {
     private Pose2d estimatePose() {
         List<Double> distances = getDistances();
 
-
+        return new Pose2d();
     }
 
     private ConfigurationValidator validateConfiguration(List<Pose2d> sensorPositions) {
