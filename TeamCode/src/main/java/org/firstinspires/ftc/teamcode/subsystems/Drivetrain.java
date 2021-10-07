@@ -14,7 +14,7 @@ public class Drivetrain extends Subsystem implements DrivetrainInterface {
 
     private DcMotor fl, fr, bl, br;
     private BNO055IMU imu;
-    public static final DriveMode driveMode = DriveMode.TANK;
+    public static final DriveMode driveMode = DriveMode.MECANUM;
 
 
     @Override
