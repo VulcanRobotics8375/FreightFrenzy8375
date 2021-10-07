@@ -6,11 +6,11 @@ import java.util.ArrayList;
 
 public class Path {
 
-    ArrayList<Point> points;
-    ArrayList<Double> lookaheads;
-    ArrayList<Double> turnSpeeds;
-    ArrayList<Double> speeds;
-    ArrayList<Double> angles;
+    private ArrayList<Point> points;
+    private ArrayList<Double> lookaheads;
+    private ArrayList<Double> turnSpeeds;
+    private ArrayList<Double> speeds;
+    private ArrayList<Double> angles;
 
     public Path(PathBuilder builder) {
         this.points = builder.points;
@@ -28,6 +28,48 @@ public class Path {
         angles.remove(i);
     }
 
+    public int size() {
+        return points.size();
+    }
 
+    public ArrayList<Point> getPoints() {
+        return points;
+    }
+
+    public ArrayList<Double> getLookaheads() {
+        return lookaheads;
+    }
+
+    public ArrayList<Double> getTurnSpeeds() {
+        return turnSpeeds;
+    }
+
+    public ArrayList<Double> getSpeeds() {
+        return speeds;
+    }
+
+    public ArrayList<Double> getAngles() {
+        return angles;
+    }
+
+    public Point getPoint(int i) {
+        return points.get(i);
+    }
+
+    public double getLookahead(int i) {
+        return lookaheads.get(i);
+    }
+
+    public double getTurnSpeed(int i) {
+        return turnSpeeds.get(i);
+    }
+
+    public double getSpeed(int i) {
+        return speeds.get(i);
+    }
+
+    public double getAngle(int i) {
+        return angles.get(i);
+    }
 
 }

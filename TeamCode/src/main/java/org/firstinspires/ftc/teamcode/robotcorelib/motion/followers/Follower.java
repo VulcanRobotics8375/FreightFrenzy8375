@@ -10,4 +10,6 @@ public abstract class Follower {
         this.drivetrain = Robot.drivetrain;
     }
 
+    public abstract void run();
+
 }
