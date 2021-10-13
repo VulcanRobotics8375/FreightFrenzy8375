@@ -26,8 +26,8 @@ public class Lift extends Subsystem {
     private final int MAX_HEIGHT = 600;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
     
-    private final double CLOSED_POS = 0.05;
-    private final double OPENED_POS = 0.65;
+    private final double CLOSED_POS = 0.25;
+    private final double OPENED_POS = 0.9;
     
     private final int FIRST_LEVEL = 200;
     private final int SECOND_LEVEL = 350;
@@ -124,9 +124,9 @@ public class Lift extends Subsystem {
         }
 
         if(capButtonOn) {
-            cap.setPosition(1.0);
+            cap.setPosition(0.59);
         } else {
-            cap.setPosition(0.0);
+            cap.setPosition(0.2);
         }
 
 //        telemetry.addData("lift pos", pos);
