@@ -8,6 +8,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.LVMaxbotixEZ4;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -38,7 +40,9 @@ public class RangeSensorLocalizer {
 
     public DistanceUnit distanceUnit = DistanceUnit.CM;
     private Pose2d poseEstimate = new Pose2d();
+    public Mode mode;
     public String configurationValidator;
+    private List<Pose2d> sensorPoses;
 
     private LVMaxbotixEZ4 forward_1, forward_2, normal_1, normal_2;
 
@@ -77,12 +81,13 @@ public class RangeSensorLocalizer {
     public RangeSensorLocalizer(HardwareMap hardwareMap) {
         // sensor positions relative to the center of the robot.
         // This is different from dead-wheel odo because it is not the center of rotation.
-        List<Pose2d> sensorPoses = Arrays.asList(
+        sensorPoses = Arrays.asList(
                 new Pose2d(0, 0, 0),
                 new Pose2d(0, 0, 0),
                 new Pose2d(0, 0, Math.toRadians(90)),
                 new Pose2d(0, 0, Math.toRadians(90))
         );
+
         configurationValidator = validateConfiguration(sensorPoses).toString();
 
         forward_1 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("forward_1");
@@ -94,6 +99,8 @@ public class RangeSensorLocalizer {
 
     private Pose2d estimatePose() {
         List<Double> distances = getDistances();
+
+
 
         return new Pose2d();
     }
