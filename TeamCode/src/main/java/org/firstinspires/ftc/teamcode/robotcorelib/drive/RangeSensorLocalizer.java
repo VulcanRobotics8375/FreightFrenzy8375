@@ -8,22 +8,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.LVMaxbotixEZ4;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
  * Range Sensor localization using 2 walls.
  *
  * Mode Enum Reference:
+ * --------- x ----------
  * ----------------------
- * |        north       |
- * |          |         |
- * |          |         |
- * |   west -- -- east  |
- * |          |         |
- * |          |         |
- * |        south       |
+ * |        north       |  |
+ * |          |         |  |
+ * |          |         |  |
+ * |   west -- -- east  |  y
+ * |          |         |  |
+ * |          |         |  |
+ * |        south       |  |
  * ----------------------
  *        AUDIENCE
  *
@@ -34,17 +33,16 @@ import java.util.List;
  *
  */
 public class RangeSensorLocalizer {
-    public static double LATERAL_DISTANCE_FRONT = 1;
-    public static double LATERAL_DISTANCE_SIDE = 1;
     public static double ANGLE_THRESHOLD = Math.toRadians(15);
 
-    public DistanceUnit distanceUnit = DistanceUnit.CM;
+    public DistanceUnit distanceUnit = DistanceUnit.INCH;
     private Pose2d poseEstimate = new Pose2d();
-    public Mode mode;
+    public Mode mode = Mode.NORTH_WEST;
     public String configurationValidator;
     private List<Pose2d> sensorPoses;
 
     private LVMaxbotixEZ4 forward_1, forward_2, normal_1, normal_2;
+    private double relativeOffsetX, relativeOffsetY, robotOffsetX, robotOffsetY, distanceX, distanceY;
 
 
     enum Mode {
@@ -90,6 +88,13 @@ public class RangeSensorLocalizer {
 
         configurationValidator = validateConfiguration(sensorPoses).toString();
 
+        robotOffsetX = (sensorPoses.get(0).getX() + sensorPoses.get(1).getX()) / 2.0;
+        robotOffsetY = (sensorPoses.get(2).getY() + sensorPoses.get(3).getY()) /2.0;
+        relativeOffsetX = (sensorPoses.get(0).getX() - sensorPoses.get(1).getX()) / 2.0;
+        relativeOffsetY = (sensorPoses.get(2).getY() - sensorPoses.get(3).getY()) / 2.0;
+        distanceX = Math.hypot(sensorPoses.get(1).getX() - sensorPoses.get(0).getX(), sensorPoses.get(1).getY() - sensorPoses.get(0).getY());
+        distanceY = Math.hypot(sensorPoses.get(3).getX() - sensorPoses.get(2).getX(), sensorPoses.get(3).getY() - sensorPoses.get(2).getY());
+
         forward_1 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("forward_1");
         forward_2 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("forward_2");
         normal_1 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("normal_1");
@@ -99,6 +104,14 @@ public class RangeSensorLocalizer {
 
     private Pose2d estimatePose() {
         List<Double> distances = getDistances();
+
+        //forward distances
+        double d1 = distances.get(0);
+        double d2 = distances.get(1);
+
+        //normal distances
+        double d3 = distances.get(2);
+        double d4 = distances.get(3);
 
 
 
