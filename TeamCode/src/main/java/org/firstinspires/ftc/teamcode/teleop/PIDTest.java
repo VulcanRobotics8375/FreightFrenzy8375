@@ -11,11 +11,11 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 @TeleOp
 public class PIDTest extends OpModePipeline {
     private DcMotor motor;
-    PID pid = new PID(0.01, 0, 0);
+    PID pid = new PID(0.005, 0.001, 0.0001);
     public void init(){
         runMode = RobotRunMode.TELEOP;
         super.init();
-        motor = hardwareMap.dcMotor.get("motor");
+        motor = hardwareMap.dcMotor.get("lift");
     }
 
     @Override
@@ -23,5 +23,9 @@ public class PIDTest extends OpModePipeline {
         Robot.update();
         double output = pid.run(200, motor.getCurrentPosition());
         motor.setPower(output);
+
+        telemetry.addData("motor pos", motor.getCurrentPosition());
+        telemetry.update();
+
     }
 }

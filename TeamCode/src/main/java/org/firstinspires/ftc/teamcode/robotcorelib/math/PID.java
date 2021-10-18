@@ -20,6 +20,9 @@ public class PID {
 
     public double run(double target, double measurement){
         error = target - measurement;
+        if(Math.abs(integral) > Math.abs(error) * Kp) {
+            integral = 0;
+        }
         integral += (error + lastError) / 2.0;
         derivative = error - lastError;
         lastError = error;
