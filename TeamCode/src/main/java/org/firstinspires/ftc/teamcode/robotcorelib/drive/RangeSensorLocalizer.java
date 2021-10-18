@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.drive;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -95,7 +96,7 @@ public class RangeSensorLocalizer {
         distanceX = Math.hypot(sensorPoses.get(1).getX() - sensorPoses.get(0).getX(), sensorPoses.get(1).getY() - sensorPoses.get(0).getY());
         distanceY = Math.hypot(sensorPoses.get(3).getX() - sensorPoses.get(2).getX(), sensorPoses.get(3).getY() - sensorPoses.get(2).getY());
 
-        forward_1 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("forward_1");
+        forward_1 = (LVMaxbotixEZ4) hardwareMap.get(AnalogInput.class, "forward_1");
         forward_2 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("forward_2");
         normal_1 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("normal_1");
         normal_2 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("normal_2");
