@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainInterface;
@@ -16,6 +19,7 @@ public class Drivetrain extends Subsystem implements DrivetrainInterface {
     private BNO055IMU imu;
     public static final DriveMode driveMode = DriveMode.MECANUM;
 
+    private CRServo odometryLift;
 
     @Override
     public void init() {
@@ -24,6 +28,7 @@ public class Drivetrain extends Subsystem implements DrivetrainInterface {
         bl = hardwareMap.dcMotor.get("back_left");
         br = hardwareMap.dcMotor.get("back_right");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
+        odometryLift = hardwareMap.crservo.get("odometry_lift");
 
         setDrivetrainMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setDrivetrainMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -107,6 +112,14 @@ public class Drivetrain extends Subsystem implements DrivetrainInterface {
         this.bl.setPower(powers[2]);
         this.br.setPower(powers[3]);
 
+    }
+
+    public void startOdometryLift() {
+        odometryLift.setPower(-1.0);
+    }
+
+    public void stopOdometryLift() {
+        odometryLift.setPower(0.0);
     }
 
     public void setDrivetrainMode(DcMotor.RunMode runMode) {
