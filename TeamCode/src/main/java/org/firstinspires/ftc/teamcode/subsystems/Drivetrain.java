@@ -81,9 +81,10 @@ public class Drivetrain extends Subsystem implements DrivetrainInterface {
 
     public void mechanumDrive(double forward, double strafe, double turn) {
         double multiplier = 2.0 / Math.sqrt(2.0);
-        double theta = Math.atan2(forward, strafe) - Math.PI / 4.0;
         forward = MathUtils.joystickCurve(forward, JoystickCurve.MODIFIED_CUBIC);
         strafe = MathUtils.joystickCurve(strafe, JoystickCurve.MODIFIED_CUBIC);
+
+        double theta = Math.atan2(forward, strafe) - Math.PI / 4.0;
 //        turn = MathUtils.joystickCurve(turn, JoystickCurve.MODIFIED_CUBIC);
 
         double magnitude = Math.abs(forward) + Math.abs(strafe) + Math.abs(turn);
