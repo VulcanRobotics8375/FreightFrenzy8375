@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robotcorelib.util;
+package org.firstinspires.ftc.teamcode.robotcorelib.util.hardware;
 
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
