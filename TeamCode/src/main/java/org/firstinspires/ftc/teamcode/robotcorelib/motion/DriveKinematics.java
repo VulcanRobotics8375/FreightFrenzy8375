@@ -27,11 +27,34 @@ public class DriveKinematics {
 
     public static double[] mecanumVelocityToWheelVelocities(Pose2d robotVelocity) {
         double multiplier = 2.0 / Math.sqrt(2.0);
+        double theta = Math.atan2(robotVelocity.getY(), robotVelocity.getX());
+        double xVel = robotVelocity.getX();
+        double yVel = robotVelocity.getY();
+        double headingVel = robotVelocity.getHeading();
+
+        double magnitude = Math.abs(xVel) + Math.abs(yVel) + Math.abs(headingVel);
+        if(magnitude > 1.0 ) {
+            xVel *= 1.0 / magnitude;
+            yVel *= 1.0 / magnitude;
+            headingVel *= 1.0 / magnitude;
+        }
+
+        double speed = multiplier * Math.hypot(xVel, yVel);
+
+        return new double[] {
+                (speed * Math.sin(theta)) + headingVel,
+                (speed * Math.cos(theta)) - headingVel,
+                (speed * Math.cos(theta)) + headingVel,
+                (speed * Math.sin(theta)) - headingVel
+        };
 
     }
 
-    public static double[] mecanumFieldVelocityToWheelVelocities(Pose2d robotFieldPose, Pose2d robotFieldVelocity) {
-
-    }
+//    /**
+//     * field centric mecanum
+//     */
+//    public static double[] mecanumFieldVelocityToWheelVelocities(Pose2d robotFieldPose, Pose2d robotFieldVelocity) {
+//
+//    }
 
 }
