@@ -7,7 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.ThreeTrackingWheelLocalizer;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.robotcorelib.util.Encoder;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.Encoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,11 +28,11 @@ import java.util.List;
 
 public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 8192;
-    public static double WHEEL_RADIUS = 1.75; // cm
+    public static double WHEEL_RADIUS = 4.445; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 22.304375; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = -14.7955; // in; offset of the lateral wheel
+    public static double LATERAL_DISTANCE = 8.78125; // in; distance between the left and right wheels
+    public static double FORWARD_OFFSET = -5.825; // in; offset of the lateral wheel
 
     private Encoder leftEncoder, rightEncoder, frontEncoder;
 
@@ -40,7 +40,7 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
         super(Arrays.asList(
                 new Pose2d(-2.164, LATERAL_DISTANCE / 2, 0), // left
                 new Pose2d(-2.164, -LATERAL_DISTANCE / 2, 0), // right
-                new Pose2d(FORWARD_OFFSET, -0.1, Math.toRadians(90)) // front
+                new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
         leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "odo_left"));
