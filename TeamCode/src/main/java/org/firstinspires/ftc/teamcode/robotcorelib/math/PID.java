@@ -4,19 +4,12 @@ import java.util.*;
 import java.io.*;
 
 public class PID {
-    private double Kp;
-    private double Ki;
-    private double Kd;
-    private double outputMaxLimit;
-    private double outputMinLimit;
-    private double error;
-    private double lastError;
-    private double integral;
-    private double derivative;
-    private double controllerOutput;
-    private double controllerOutputB;
-    private boolean isSaturating = false;
-    private boolean integratorSaturate = false;
+    private double Kp, Ki, Kd;
+    private double outputMaxLimit, outputMinLimit;
+    private double error, integralError, lastError;
+    private double integral, derivative;
+    private double controllerOutput, controllerOutputB;
+    private boolean isSaturating, integratorSaturate, integralClamp = false;
 
     public PID(double Kp, double Ki, double Kd, double outputMaxLimit, double outputMinLimit){
         this.Kp = Kp;
@@ -28,7 +21,12 @@ public class PID {
 
     public double run(double target, double measurement){
         error = target - measurement;
-        integral += (error + lastError) / 2.0;
+        if(!integralClamp){
+            integralError = (error + lastError) / 2.0;
+        }else{
+            integralError = 0;
+        }
+        integral += integralError;
         derivative = error - lastError;
         lastError = error;
 
@@ -54,7 +52,9 @@ public class PID {
         }
 
         if(isSaturating && integratorSaturate){
-            controllerOutput = Kp * error + Kd * derivative;
+            integralClamp = true;
+        }else{
+            integralClamp = false;
         }
         return controllerOutput;
     }
