@@ -1,51 +1,106 @@
 package org.firstinspires.ftc.teamcode.robotcorelib.motion.path;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+
+import org.firstinspires.ftc.teamcode.robotcorelib.util.PathPoint;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PathBuilder {
 
-    ArrayList<Point> points = new ArrayList<>();
-    ArrayList<Double> lookaheads = new ArrayList<>();
-    ArrayList<Double> turnSpeeds = new ArrayList<>();
-    ArrayList<Double> speeds = new ArrayList<>();
-    ArrayList<Double> angles = new ArrayList<>();
-    double lookahead = 0, speed = 0, turnSpeed = 0, angle = 0;
+    private PathPoint lastPoint;
+
+    private PathPoint startPoint;
+    private PathPoint endPoint;
+    private ArrayList<PathPoint> guidePoints = new ArrayList<>();
+    private HashMap<PathPoint, Runnable> tasks = new HashMap<>();
+
+    private double speed = 1;
+    private double turnSpeed = 1;
+    private double lookahead = 15;
 
     public PathBuilder() {}
 
-    public PathBuilder moveTo(Point p) {
-        points.add(p);
-        lookaheads.add(lookahead);
-        turnSpeeds.add(turnSpeed);
-        speeds.add(speed);
-        angles.add(angle);
+    public PathBuilder lineTo(Pose2d start, Pose2d end) {
+        startPoint = new PathPoint(start.getX(), start.getY(), start.getHeading(), speed, turnSpeed, lookahead);
+        endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
+        lastPoint = startPoint;
         return this;
     }
 
-    public PathBuilder setLookahead(double lookahead) {
-        this.lookahead = lookahead;
+    public PathBuilder lineTo(Pose2d start, Pose2d end, Pose2d... guidePoints) {
+
+        startPoint = new PathPoint(start.getX(), start.getY(), start.getHeading(), speed, turnSpeed, lookahead);
+        for (Pose2d point : guidePoints) {
+            this.guidePoints.add(new PathPoint(point.getX(), point.getY(), point.getHeading(), speed, turnSpeed, lookahead));
+        }
+        lastPoint = this.guidePoints.get(this.guidePoints.size() - 1);
+        endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
+
         return this;
     }
 
-    public PathBuilder setSpeed(double speed) {
+    public PathBuilder setStartPoint(Pose2d start) {
+        startPoint = new PathPoint(start.getX(), start.getY(), start.getHeading(), speed, turnSpeed, lookahead);
+        return this;
+    }
+
+    public PathBuilder addGuidePoint(Pose2d point) {
+        PathPoint pathPoint = new PathPoint(point.getX(), point.getY(), point.getHeading(), speed, turnSpeed, lookahead);
+        guidePoints.add(pathPoint);
+        lastPoint = pathPoint;
+        return this;
+    }
+
+    public PathBuilder addTask(Runnable runnable) {
+        tasks.put(lastPoint, runnable);
+        return this;
+    }
+
+    public PathBuilder setEndPoint(Pose2d end) {
+        return this;
+    }
+
+    public void test(double... numbers) {
+        double test = numbers[3];
+    }
+
+    public PathBuilder speed(double speed) {
         this.speed = speed;
         return this;
     }
 
-    public PathBuilder setTurnSpeed(double turnSpeed) {
+    public PathBuilder turnSpeed(double turnSpeed) {
         this.turnSpeed = turnSpeed;
         return this;
     }
 
-    public PathBuilder setTargetAngle(double angle) {
-        this.angle = angle;
+    public PathBuilder lookahead(double lookahead) {
+        this.lookahead = lookahead;
         return this;
     }
 
     public Path build() {
         return new Path(this);
     }
+
+    public PathPoint getStartPoint() {
+        return startPoint;
+    }
+
+    public PathPoint getEndPoint() {
+        return endPoint;
+    }
+
+    public HashMap<PathPoint, Runnable> getTasks() {
+        return tasks;
+    }
+
+    public ArrayList<PathPoint> getGuidePoints() {
+        return guidePoints;
+    }
+
 
 }

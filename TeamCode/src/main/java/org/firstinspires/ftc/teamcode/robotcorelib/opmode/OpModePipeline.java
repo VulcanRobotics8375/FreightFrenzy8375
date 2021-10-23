@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
 import org.firstinspires.ftc.teamcode.robotcorelib.robot.RobotConfig;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.AutoTask;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 
 public abstract class OpModePipeline extends OpMode {
@@ -30,5 +31,12 @@ public abstract class OpModePipeline extends OpMode {
     }
 
     public abstract void loop();
+
+    protected void runTask(AutoTask runnable) {
+        while(runnable.conditional()) {
+            Robot.update();
+            runnable.run();
+        }
+    }
 
 }
