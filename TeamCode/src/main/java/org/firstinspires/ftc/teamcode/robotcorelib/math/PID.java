@@ -9,7 +9,9 @@ public class PID {
     private double error, integralError, lastError;
     private double integral, derivative;
     private double controllerOutput, controllerOutputB;
-    private boolean isSaturating, integratorSaturate, integralClamp = false;
+    private boolean isSaturating = false;
+    private boolean integratorSaturate = false;
+    private boolean integralClamp = false;
 
     public PID(double Kp, double Ki, double Kd, double outputMaxLimit, double outputMinLimit){
         this.Kp = Kp;
