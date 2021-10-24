@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class TankPurePursuit extends Follower {
 
     Path path;
@@ -18,7 +19,7 @@ public class TankPurePursuit extends Follower {
         this.path = path;
     }
 
-    public void run() {
+    protected void run() {
         Pose2d robotPose2d = Robot.getRobotPose();
         Point robotPose = new Point(robotPose2d.getX(), robotPose2d.getY());
 
