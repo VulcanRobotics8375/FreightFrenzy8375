@@ -60,4 +60,11 @@ public class PID {
         }
         return controllerOutput;
     }
+
+    public double getIntegral(){
+        return integral;
+    }
+    public double getIntegralError(){
+        return integralError;
+    }
 }
