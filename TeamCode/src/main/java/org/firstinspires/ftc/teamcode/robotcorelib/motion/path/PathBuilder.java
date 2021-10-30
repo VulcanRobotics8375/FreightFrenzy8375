@@ -60,6 +60,7 @@ public class PathBuilder {
     }
 
     public PathBuilder setEndPoint(Pose2d end) {
+        endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
         return this;
     }
 

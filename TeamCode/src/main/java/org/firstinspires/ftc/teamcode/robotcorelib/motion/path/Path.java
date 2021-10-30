@@ -38,7 +38,7 @@ public class Path {
         return runnableTasks;
     }
 
-    public ArrayList<PathPoint> getPathAsList() {
+    public ArrayList<PathPoint> asList() {
         ArrayList<PathPoint> pathPoints = new ArrayList<>(guidePoints);
         pathPoints.add(0, start);
         pathPoints.add(end);

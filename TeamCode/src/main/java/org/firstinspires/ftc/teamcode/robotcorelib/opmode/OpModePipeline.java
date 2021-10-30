@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotcorelib.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
@@ -11,6 +12,8 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 public abstract class OpModePipeline extends OpMode {
     protected RobotConfig subsystems;
     protected RobotRunMode runMode;
+
+    private volatile boolean stopRequested;
 
     @Override
     public void init() {
@@ -32,11 +35,23 @@ public abstract class OpModePipeline extends OpMode {
 
     public abstract void loop();
 
+
+    public void stop() {
+        stopRequested = true;
+    }
+
+    public boolean isStopRequested() {
+        return stopRequested;
+    }
+
     protected void runTask(AutoTask runnable) {
-        while(runnable.conditional()) {
+        while(runnable.conditional() && isStopRequested()) {
+
             Robot.update();
             runnable.run();
         }
     }
+
+
 
 }

@@ -39,6 +39,7 @@ public class AutoPaths extends OpModePipeline {
         runTask(new AutoTask() {
             @Override
             public boolean conditional() {
+                return true;
 
             }
             @Override
