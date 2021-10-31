@@ -2,12 +2,12 @@ package org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
-import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
 
 /**
  * Kinematics class that translates velocity vector to wheel velocities for different drivebases.
  * the order in which wheel velocities are returned is defined in DrivetrainInterface.
- * @see org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainInterface
+ * @see DrivetrainImpl
  */
 public class DriveKinematics {
 

@@ -3,17 +3,15 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
-import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainInterface;
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
-public class Drivetrain extends Subsystem implements DrivetrainInterface {
+public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
     private DcMotor fl, fr, bl, br;
     private BNO055IMU imu;

@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.drive;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-public interface DrivetrainInterface {
+public interface DrivetrainImpl {
 
     //General Convention for writing setPowers() method:
     //4 motors(most drivetrains)-- front left, front right, back left, back right
