@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robotcorelib.motion;
+package org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 

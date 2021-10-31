@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robotcorelib.drive;
+package org.firstinspires.ftc.teamcode.robotcorelib.drive.localization;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -33,7 +33,7 @@ import java.util.List;
  * sensors are the second direction. ( FORWARD_NORMAL )
  *
  */
-public class RangeSensorLocalizer {
+public class RangeSensorLocalizer implements Localizer {
     public static double ANGLE_THRESHOLD = Math.toRadians(15);
 
     public DistanceUnit distanceUnit = DistanceUnit.INCH;
@@ -44,6 +44,21 @@ public class RangeSensorLocalizer {
 
     private LVMaxbotixEZ4 forward_1, forward_2, normal_1, normal_2;
     private double relativeOffsetX, relativeOffsetY, robotOffsetX, robotOffsetY, distanceX, distanceY;
+
+    @Override
+    public void update() {
+
+    }
+
+    @Override
+    public Pose2d getPose() {
+        return null;
+    }
+
+    @Override
+    public Pose2d getVelocity() {
+        return null;
+    }
 
 
     enum Mode {

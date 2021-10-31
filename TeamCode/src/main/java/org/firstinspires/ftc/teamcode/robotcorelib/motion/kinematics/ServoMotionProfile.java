@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robotcorelib.motion;
+package org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics;
 
 /*
  * Smoother Servo Motion, currently only only accelerates the end of the servo move

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainInterface;
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.localization.Localizer;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
@@ -17,6 +18,8 @@ public class Robot {
 
     private static HardwareMap hardwareMap;
     private static Telemetry telemetry;
+
+    private static Localizer localizer;
 
     private static Pose2d robotPose = new Pose2d();
     private static Pose2d robotVelocity = new Pose2d();
@@ -35,6 +38,7 @@ public class Robot {
         telemetry = opMode.telemetry;
         config = new RobotConfig();
         config.init();
+        localizer = config.localizer;
 
         hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : hubs) {
@@ -87,8 +91,8 @@ public class Robot {
 
     public static void updateGlobalPosition() {
         config.localizer.update();
-        robotPose = config.localizer.getPoseEstimate();
-        robotVelocity = config.localizer.getPoseVelocity();
+        robotPose = localizer.getPose();
+        robotVelocity = localizer.getVelocity();
     }
 
     public static void clearBulkCache() {
