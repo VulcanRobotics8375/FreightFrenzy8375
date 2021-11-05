@@ -35,10 +35,14 @@ public class Robot {
     public static void init(OpMode opMode) {
         hardwareMap = opMode.hardwareMap;
         telemetry = opMode.telemetry;
+        telemetry.addLine("loading configuration");
+        telemetry.update();
         config = new RobotConfig();
         config.init();
         localizer = config.localizer;
 
+        telemetry.addLine("updating REV hub cache mode");
+        telemetry.update();
         hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(bulkCachingMode);
@@ -52,7 +56,11 @@ public class Robot {
                 drivetrain = (DrivetrainImpl) sub; // cast drivetrain to drivetrainImpl, this is for backend controller stuff.
             }
             sub.init();
+            telemetry.addData("initializing subsystem", sub.toString());
+            telemetry.update();
         }
+        telemetry.addLine("init complete");
+        //no telemetry.update() here because that happens in OpModePipeline
 
     }
 
@@ -60,9 +68,8 @@ public class Robot {
         return robotPose;
     }
 
-    //currently doesnt work but I dont want to fix it lmfao
-    @Deprecated
     public static void setRobotPose(Pose2d robotPose) {
+        Robot.localizer.setPose(robotPose);
         Robot.robotPose = robotPose;
     }
 
@@ -91,7 +98,7 @@ public class Robot {
     }
 
     public static void updateGlobalPosition() {
-        config.localizer.update();
+        localizer.update();
         robotPose = localizer.getPose();
         robotVelocity = localizer.getVelocity();
     }

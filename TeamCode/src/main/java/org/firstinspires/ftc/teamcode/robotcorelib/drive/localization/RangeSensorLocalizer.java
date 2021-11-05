@@ -60,6 +60,11 @@ public class RangeSensorLocalizer implements Localizer {
         return null;
     }
 
+    @Override
+    public void setPose(Pose2d pose) {
+
+    }
+
 
     enum Mode {
         NORTH_WEST, //forward sensors on north wall, normal sensors on west wall

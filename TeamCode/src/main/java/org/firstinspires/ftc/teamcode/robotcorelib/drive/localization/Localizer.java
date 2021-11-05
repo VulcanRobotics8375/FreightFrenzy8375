@@ -9,4 +9,6 @@ public interface Localizer {
     Pose2d getPose();
     Pose2d getVelocity();
 
+    void setPose(Pose2d pose);
+
 }

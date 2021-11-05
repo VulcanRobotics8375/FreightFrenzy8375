@@ -26,7 +26,7 @@ import java.util.List;
  *
  */
 
-public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer implements Localizer{
+public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer implements Localizer {
     public static double TICKS_PER_REV = 8192;
     public static double WHEEL_RADIUS = 4.445; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
@@ -99,5 +99,10 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     @Override
     public Pose2d getVelocity() {
         return getPoseVelocity();
+    }
+
+    @Override
+    public void setPose(Pose2d pose) {
+        setPoseEstimate(pose);
     }
 }
