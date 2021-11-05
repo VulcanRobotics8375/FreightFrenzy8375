@@ -23,14 +23,14 @@ public class PathBuilder {
 
     public PathBuilder() {}
 
-    public PathBuilder lineTo(Pose2d start, Pose2d end) {
+    public PathBuilder lineToConstantHeading(Pose2d start, Pose2d end) {
         startPoint = new PathPoint(start.getX(), start.getY(), start.getHeading(), speed, turnSpeed, lookahead);
         endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
         lastPoint = startPoint;
         return this;
     }
 
-    public PathBuilder lineTo(Pose2d start, Pose2d end, Pose2d... guidePoints) {
+    public PathBuilder lineToConstantHeading(Pose2d start, Pose2d end, Pose2d... guidePoints) {
 
         startPoint = new PathPoint(start.getX(), start.getY(), start.getHeading(), speed, turnSpeed, lookahead);
         for (Pose2d point : guidePoints) {
@@ -38,6 +38,14 @@ public class PathBuilder {
         }
         lastPoint = this.guidePoints.get(this.guidePoints.size() - 1);
         endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
+
+        return this;
+    }
+
+    public PathBuilder lineTo(Pose2d start, Pose2d end) {
+        double theta = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX());
+        startPoint = new PathPoint(start.getX(), start.getY(), theta, speed, turnSpeed, lookahead);
+        endPoint = new PathPoint(end.getX(), end.getY(), theta, speed, turnSpeed, lookahead);
 
         return this;
     }
@@ -62,10 +70,6 @@ public class PathBuilder {
     public PathBuilder setEndPoint(Pose2d end) {
         endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
         return this;
-    }
-
-    public void test(double... numbers) {
-        double test = numbers[3];
     }
 
     public PathBuilder speed(double speed) {
