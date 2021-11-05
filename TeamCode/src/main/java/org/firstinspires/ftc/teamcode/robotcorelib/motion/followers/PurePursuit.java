@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.motion.followers;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.Path;
 import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
@@ -9,6 +10,8 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.PathPoint;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
 
 import java.util.ArrayList;
+
+import static org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants.*;
 
 public class PurePursuit extends Follower {
 
@@ -38,6 +41,8 @@ public class PurePursuit extends Follower {
 
     private PathPoint findFollowPoint(ArrayList<PathPoint> path, Pose2d robotPose) {
         PathPoint followPoint = path.get(0);
+        PathPoint startPoint = path.get(0);
+        PathPoint endPoint = path.get(path.size() - 1);
 
         ArrayList<Point> circleIntersections;
 
@@ -65,12 +70,25 @@ public class PurePursuit extends Follower {
 
                 double maxX = Math.max(start.x, end.x);
                 double minX = Math.min(start.x, end.x);
+                if(followPoint.x > maxX || followPoint.x < minX) {
+                    followPoint.setPoint(end.toPoint());
+                }
             }
+        }
 
-            double maxX = Math.max(start.x, end.x);
-            double minX = Math.min(start.x, end.x);
+        //Motion Profile Generation
+        // convert continuous, time-variant motion profile to discrete, time-invariant motion profile
+        //transfer function-- https://www.desmos.com/calculator/rlv4hdqutl
+        double targetVel = MAX_VELOCITY * followPoint.speed;
+        double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
+        double m = 1 / accelDistance;
 
-
+        double distanceFromStart = Math.hypot(startPoint.x - robotPose.getX(), startPoint.y - robotPose.getY());
+        double distanceFromEnd = Math.hypot(endPoint.x - robotPose.getX(), endPoint.y - robotPose.getY());
+        if(distanceFromEnd < accelDistance) {
+            followPoint.speed *= (m * (distanceFromEnd - accelDistance)) + 1;
+        } else if(distanceFromStart < accelDistance) {
+            followPoint.speed *= (m * (distanceFromStart - accelDistance)) + 1;
         }
 
         return followPoint;
