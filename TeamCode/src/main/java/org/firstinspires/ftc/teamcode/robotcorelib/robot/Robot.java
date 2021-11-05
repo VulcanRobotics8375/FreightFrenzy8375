@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.localization.Localizer;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.ErrorHandler;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
@@ -17,6 +18,7 @@ public class Robot {
 
     private static HardwareMap hardwareMap;
     private static Telemetry telemetry;
+    private static ErrorHandler errorHandler;
 
     private static Localizer localizer;
 
@@ -37,6 +39,7 @@ public class Robot {
         telemetry = opMode.telemetry;
         telemetry.addLine("loading configuration");
         telemetry.update();
+        errorHandler = new ErrorHandler(telemetry);
         config = new RobotConfig();
         config.init();
         localizer = config.localizer;
@@ -111,9 +114,14 @@ public class Robot {
         }
     }
 
+    public static void addErrorMessage(String message) {
+        errorHandler.addMessage(message);
+    }
+
     public static void update() {
         clearBulkCache();
         updateGlobalPosition();
+        errorHandler.update(runMode == RobotRunMode.AUTONOMOUS);
     }
 
     public static void setRunMode(RobotRunMode runMode) {
