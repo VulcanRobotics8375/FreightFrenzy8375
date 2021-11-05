@@ -61,6 +61,7 @@ public class RobotConfig {
 
     //initialization of subsystems goes here
     public void init() {
+        subsystems.clear();
         localizer = new StandardTrackingWheelLocalizer(Robot.getHardwareMap());
         drivetrain = new Drivetrain();
         intake = new Intake();

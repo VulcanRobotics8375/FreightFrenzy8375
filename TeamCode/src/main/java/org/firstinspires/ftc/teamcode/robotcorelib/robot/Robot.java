@@ -49,7 +49,7 @@ public class Robot {
             sub.setTelemetry(telemetry);
             sub.assignGamePads(opMode.gamepad1, opMode.gamepad2);
             if(sub instanceof DrivetrainImpl) {
-                drivetrain = (DrivetrainImpl) sub; // cast drivetrain to drivetrainInterface, this is for backend controller stuff.
+                drivetrain = (DrivetrainImpl) sub; // cast drivetrain to drivetrainImpl, this is for backend controller stuff.
             }
             sub.init();
         }
@@ -60,6 +60,8 @@ public class Robot {
         return robotPose;
     }
 
+    //currently doesnt work but I dont want to fix it lmfao
+    @Deprecated
     public static void setRobotPose(Pose2d robotPose) {
         Robot.robotPose = robotPose;
     }
