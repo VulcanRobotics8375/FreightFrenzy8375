@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 @TeleOp
 public class PIDTest extends OpModePipeline {
     private DcMotor motor;
-    PID pid = new PID(0.01, 0, 0, 0.95, -0.95);
+    PID pid = new PID(0.01, 0.001, 0, 0.95, -0.95);
     public void init(){
         runMode = RobotRunMode.TELEOP;
         super.init();
@@ -25,6 +25,8 @@ public class PIDTest extends OpModePipeline {
         motor.setPower(output);
 
         telemetry.addData("motor pos", motor.getCurrentPosition());
+        telemetry.addData("Integral ", pid.getIntegral());
+        telemetry.addData("Integral Error ", pid.getIntegralError());
         telemetry.update();
 
     }

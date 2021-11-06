@@ -47,6 +47,11 @@ public class PID {
             isSaturating = true;
         }
 
+        if(Ki * integral > Kp * error){
+            integral = error * (Kp/Ki);
+            controllerOutput = Kp * error + Ki * integral + Kd * derivative;
+        }
+
         if((controllerOutputB > 0 && error > 0) || (controllerOutputB < 0 && error < 0)){
             integratorSaturate = true;
         } else{
