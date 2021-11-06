@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
+import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 
 /**
  * Kinematics class that translates velocity vector to wheel velocities for different drivebases.
@@ -50,11 +51,33 @@ public class DriveKinematics {
 
     }
 
-//    /**
-//     * field centric mecanum
-//     */
-//    public static double[] mecanumFieldVelocityToWheelVelocities(Pose2d robotFieldPose, Pose2d robotFieldVelocity) {
-//
-//    }
+    /**
+     * field centric mecanum
+     *
+     * @param robotFieldVelocity should be a normalized vector with components [x,y,theta]
+     */
+    public static double[] mecanumFieldVelocityToWheelVelocities(Pose2d robotFieldPose, Pose2d robotFieldVelocity) {
+        double multiplier = 2.0 / Math.sqrt(2.0);
+        double vx = robotFieldVelocity.getX();
+        double vy = robotFieldVelocity.getY();
+        double vHeading = robotFieldVelocity.getHeading();
+
+        double magnitude = Math.abs(vx) + Math.abs(vy) + Math.abs(vHeading);
+        if(magnitude > 1.0) {
+            vx *= 1.0 / magnitude;
+            vy *= 1.0 / magnitude;
+            vHeading *= 1.0 / magnitude;
+        }
+
+        double speed = multiplier * Math.hypot(vx, vy);
+        double theta = robotFieldPose.getHeading() - MathUtils.fullAngleWrap(Math.atan2(vy, vx));
+
+        return new double[] {
+                (speed * Math.sin(theta)) + vHeading,
+                (speed * Math.cos(theta)) - vHeading,
+                (speed * Math.cos(theta)) + vHeading,
+                (speed * Math.sin(theta)) - vHeading
+        };
+    }
 
 }
