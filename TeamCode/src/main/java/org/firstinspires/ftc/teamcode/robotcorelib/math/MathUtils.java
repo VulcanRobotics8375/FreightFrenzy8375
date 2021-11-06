@@ -42,6 +42,14 @@ public class MathUtils {
     }
 
     /**
+     * BOTH ANGLES SHOULD BE IN RANGE [0,2pi]
+     */
+    public static double calcAngularError(double expected, double measurement) {
+        double correctedExpectedValue = Math.abs(expected - measurement) > PI ? expected - (Math.signum(expected - measurement) * 2.0 * PI) : expected;
+        return correctedExpectedValue - measurement;
+    }
+
+    /**
      *
      * @param in joystick input
      * @param curveType curve type based on what drivers want
