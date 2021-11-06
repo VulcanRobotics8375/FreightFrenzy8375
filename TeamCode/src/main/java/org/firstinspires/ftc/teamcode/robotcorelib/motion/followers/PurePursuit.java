@@ -4,6 +4,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
+import org.firstinspires.ftc.teamcode.robotcorelib.math.PID;
+import org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics.DriveKinematics;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.Path;
 import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.PathPoint;
@@ -15,7 +17,9 @@ import static org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants.*
 
 public class PurePursuit extends Follower {
 
-     boolean following;
+    boolean following;
+    private PID velocityPid = new PID(1.0, 0.0, 0.0, 1.0, -1.0);
+    private PID turnPid = new PID(1.0, 0.0, 0.0, -1.0, 1.0);
 
     public PurePursuit() {}
 
@@ -31,7 +35,7 @@ public class PurePursuit extends Follower {
 
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose);
 
-
+            moveToPoint(followPoint, robotPose, robotVel);
 
         }
 
@@ -92,6 +96,25 @@ public class PurePursuit extends Follower {
         }
 
         return followPoint;
+    }
+
+
+    private void moveToPoint(PathPoint point, Pose2d robotPose, Pose2d robotVelocity) {
+        switch (Robot.drivetrain.getDriveMode()) {
+            case MECANUM:
+                double absoluteAngleToPoint = Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x);
+                double targetVelocityX = point.speed * Math.cos(absoluteAngleToPoint);
+                double targetVelocityY = point.speed * Math.sin(absoluteAngleToPoint);
+                double targetVelocityHeading = point.turnSpeed * MathUtils.calcAngularError(point.theta, robotPose.getHeading());
+
+                Pose2d outputVelocity = new Pose2d(targetVelocityX, targetVelocityY, targetVelocityHeading);
+
+                double[] powers = DriveKinematics.mecanumFieldVelocityToWheelVelocities(robotPose, outputVelocity);
+                Robot.drivetrain.setPowers(powers);
+                break;
+            case TANK:
+            default:
+        }
     }
 
 }
