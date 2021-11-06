@@ -25,5 +25,9 @@ public class ErrorHandler {
         }
     }
 
+    public void clear() {
+        messages.clear();
+    }
+
 
 }
