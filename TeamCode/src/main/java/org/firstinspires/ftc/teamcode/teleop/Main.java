@@ -49,8 +49,6 @@ public class Main extends OpModePipeline {
 //        telemetry.addData("y", robotPose.getY());
 //        telemetry.addData("heading", robotPose.getHeading());
 
-        telemetry.update();
-
     }
 
 }

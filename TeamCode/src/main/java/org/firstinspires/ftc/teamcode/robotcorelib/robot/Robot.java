@@ -121,7 +121,8 @@ public class Robot {
     public static void update() {
         clearBulkCache();
         updateGlobalPosition();
-        errorHandler.update(runMode == RobotRunMode.AUTONOMOUS);
+        errorHandler.update(false);
+        telemetry.update();
     }
 
     public static void setRunMode(RobotRunMode runMode) {
