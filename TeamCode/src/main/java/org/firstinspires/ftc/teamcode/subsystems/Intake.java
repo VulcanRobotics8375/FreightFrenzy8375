@@ -1,50 +1,59 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
-@SuppressWarnings("FieldCanBeLocal")
 public class Intake extends Subsystem {
     private DcMotor intake;
-    private Servo intakeWall;
+    private DcMotor transfer;
 
-    private boolean intakeToggle = false;
-    private boolean intakeWallOn = false;
-    private final double intakePower = 1.0;
-    private final double intakeWallClosed = 0.01;
-    private final double intakeWallOpen = 0.5;
+    private boolean indexer = false;
 
-    public void init(){
-        intake = hardwareMap.dcMotor.get("odo_right");
-        intakeWall = hardwareMap.servo.get("intake_wall");
+    public final double INTAKE_POWER = 1;
+    public final double TRANSFER_POWER = 1;
+    public final int INDEXER_POS = 200;
+
+    @Override
+    public void init() {
+        intake = hardwareMap.dcMotor.get("intake");
+        transfer = hardwareMap.dcMotor.get("transfer");
+
+        transfer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        transfer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public void run(boolean buttonIntake, boolean buttonOuttake, boolean intakeToggle){
-        if(buttonIntake){
-            intake.setPower(intakePower);
-        }else if (buttonOuttake){
-            intake.setPower(-intakePower);
-        }else {
-            intake.setPower(0);
+
+    public void run(boolean on) {
+        double intakePower;
+        double transferPower;
+        boolean currentIndex = indexer;
+        int indexerPos = transfer.getCurrentPosition();
+        if(on) {
+            transferPower = TRANSFER_POWER;
+            intakePower = indexer ? 0 : INTAKE_POWER;
+
+        } else {
+            intakePower = 0;
+            transferPower = 0;
         }
 
-        if(intakeToggle && !this.intakeToggle) {
-            this.intakeToggle = true;
-            intakeWallOn = !intakeWallOn;
+        if(indexerPos > INDEXER_POS && on) {
+            indexer = true;
         }
-        if(!intakeToggle && this.intakeToggle) {
-            this.intakeToggle = false;
-        }
-
-        if(intakeWallOn) {
-            intakeWall.setPosition(intakeWallClosed);
-        }
-        else {
-            intakeWall.setPosition(intakeWallOpen);
+        if(!on) {
+            indexer = false;
         }
 
+        if(currentIndex != indexer && indexer) {
+            gamepad1.rumble(500);
+            gamepad2.rumble(500);
+        }
+
+//        telemetry.addData("indexing", indexer);
+        intake.setPower(intakePower);
+        transfer.setPower(transferPower);
 
     }
 

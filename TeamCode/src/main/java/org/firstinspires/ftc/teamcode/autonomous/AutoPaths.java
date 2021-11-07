@@ -30,7 +30,7 @@ public class AutoPaths extends OpModePipeline {
                 .setStartPoint(new Pose2d(0, 0, 0))
                 .addGuidePoint(new Pose2d(50, 150, 0))
                 .addTask(() -> {
-                    subsystems.intake.run(true, false, false);
+//                    subsystems.intake.run(true, false, false);
                 })
                 .setEndPoint(new Pose2d(100, 100, 0))
                 .build();

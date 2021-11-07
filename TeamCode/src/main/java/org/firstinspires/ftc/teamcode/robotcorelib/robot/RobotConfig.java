@@ -4,8 +4,6 @@ import org.firstinspires.ftc.teamcode.robotcorelib.drive.localization.StandardTr
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.Lift;
-import org.firstinspires.ftc.teamcode.subsystems.Carousel;
 
 import java.util.ArrayList;
 
@@ -56,8 +54,6 @@ public class RobotConfig {
     //IMPORTANT:: Don't add more than one class that implements DrivetrainInterface, things will break
     public Drivetrain drivetrain;
     public Intake intake;
-    public Lift lift;
-    public Carousel carousel;
 
     //initialization of subsystems goes here
     public void init() {
@@ -65,8 +61,6 @@ public class RobotConfig {
         localizer = new StandardTrackingWheelLocalizer(Robot.getHardwareMap());
         drivetrain = new Drivetrain();
         intake = new Intake();
-        lift = new Lift();
-        carousel = new Carousel();
 
     }
 
