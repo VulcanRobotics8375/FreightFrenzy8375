@@ -23,11 +23,9 @@ public class PID {
 
     public double run(double target, double measurement){
         error = target - measurement;
-        if(!integralClamp){
-            integralError = (error + lastError) / 2.0;
-        }else{
-            integralError = 0;
-        }
+
+        clampIntegral();
+
         integral += integralError;
         derivative = error - lastError;
         lastError = error;
@@ -35,43 +33,44 @@ public class PID {
         // Matt Attempt at Integral AntiWindup: Clamping
         controllerOutput = Kp * error + Ki * integral + Kd * derivative;
         controllerOutputB = controllerOutput;
+        clampOutput();
+
+        isSaturating = controllerOutput != controllerOutputB;
+
+        dynamicClampIntegral();
+
+        integratorSaturate = controllerOutputB * error > 0;
+        integralClamp = isSaturating && integratorSaturate;
+
+        return controllerOutput;
+    }
+
+    public void clampOutput() {
+        //
         if(controllerOutput > outputMaxLimit){
             controllerOutput = outputMaxLimit;
         } else if(controllerOutput < outputMinLimit){
             controllerOutput = outputMinLimit;
         }
+    }
 
-        if(controllerOutputB == controllerOutput){
-            isSaturating = false;
-        }else{
-            isSaturating = true;
-        }
-        // Dynamic integral Clamping I think
-        if(Ki * integral > Kp * error){
-            integral = error * (Kp/Ki);
+    public void dynamicClampIntegral() {
+        if(Math.abs(Ki * integral) > Math.abs(Kp * error)){
+            integral = (error * Kp)/Ki;
             controllerOutput = Kp * error + Ki * integral + Kd * derivative;
         }
+    }
 
-        if((controllerOutputB > 0 && error > 0) || (controllerOutputB < 0 && error < 0)){
-            integratorSaturate = true;
-        } else{
-            integratorSaturate = false;
-        }
-
-        if(isSaturating && integratorSaturate){
-            integralClamp = true;
+    public void clampIntegral() {
+        if(!integralClamp){
+            integralError = (error + lastError) / 2.0;
         }else{
-            integralClamp = false;
+            integralError = 0;
         }
-        return controllerOutput;
     }
 
-    public double getIntegral(){
-        return integral;
-    }
-    public double getIntegralError(){
-        return integralError;
-    }
+    public double getIntegral(){ return integral; }
+    public double getIntegralError(){ return integralError; }
     public double getError() { return error; }
     public double getControllerOutput(){return controllerOutput; };
 }
