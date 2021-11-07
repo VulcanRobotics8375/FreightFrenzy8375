@@ -38,6 +38,7 @@ public abstract class OpModePipeline extends OpMode {
 
     public void stop() {
         stopRequested = true;
+        Robot.stop();
     }
 
     public boolean isStopRequested() {
@@ -46,12 +47,9 @@ public abstract class OpModePipeline extends OpMode {
 
     protected void runTask(AutoTask runnable) {
         while(runnable.conditional() && isStopRequested()) {
-
             Robot.update();
             runnable.run();
         }
     }
-
-
 
 }

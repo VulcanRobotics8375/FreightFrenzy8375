@@ -125,6 +125,12 @@ public class Robot {
         telemetry.update();
     }
 
+    public static void stop() {
+        for (Subsystem sub : config.subsystems) {
+            sub.stop();
+        }
+    }
+
     public static void setRunMode(RobotRunMode runMode) {
         Robot.runMode = runMode;
     }

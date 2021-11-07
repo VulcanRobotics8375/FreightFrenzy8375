@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotcorelib.motion.followers;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
@@ -19,7 +20,7 @@ public class PurePursuit extends Follower {
 
     boolean following;
     private PID velocityPid = new PID(1.0, 0.0, 0.0, 1.0, -1.0);
-    private PID turnPid = new PID(1.0, 0.0, 0.0, -1.0, 1.0);
+    private PID turnPid = new PID(1.0, 0.0, 0.0, 1.0, -1.0);
 
     public PurePursuit() {}
 
@@ -103,11 +104,13 @@ public class PurePursuit extends Follower {
         switch (Robot.drivetrain.getDriveMode()) {
             case MECANUM:
                 double absoluteAngleToPoint = Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x);
-                double targetVelocityX = point.speed * Math.cos(absoluteAngleToPoint);
-                double targetVelocityY = point.speed * Math.sin(absoluteAngleToPoint);
+                Vector2d translationalVelocity = robotVelocity.vec();
+                Vector2d targetVelocity = new Vector2d(point.speed * Math.cos(absoluteAngleToPoint), point.speed * Math.sin(absoluteAngleToPoint));
+                //TODO add heading PID (+ heading velo PID?)
                 double targetVelocityHeading = point.turnSpeed * MathUtils.calcAngularError(point.theta, robotPose.getHeading());
+                double outputVelocityNorm = velocityPid.run(targetVelocity.norm(), translationalVelocity.norm());
 
-                Pose2d outputVelocity = new Pose2d(targetVelocityX, targetVelocityY, targetVelocityHeading);
+                Pose2d outputVelocity = new Pose2d(outputVelocityNorm*Math.cos(absoluteAngleToPoint), outputVelocityNorm * Math.sin(absoluteAngleToPoint), targetVelocityHeading);
 
                 double[] powers = DriveKinematics.mecanumFieldVelocityToWheelVelocities(robotPose, outputVelocity);
                 Robot.drivetrain.setPowers(powers);
