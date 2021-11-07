@@ -47,9 +47,9 @@ public class PID {
             isSaturating = true;
         }
         // Dynamic integral Clamping I think
-        if(Ki * integral > Kp * error){
+        if(Math.abs(Ki * integral) > Math.abs(Kp * error)){
             integral = error * (Kp/Ki);
-            controllerOutput = Kp * error + Ki * integral + Kd * derivative;
+            controllerOutput = Kp * error + integral + Kd * derivative;
         }
 
         if((controllerOutputB > 0 && error > 0) || (controllerOutputB < 0 && error < 0)){
