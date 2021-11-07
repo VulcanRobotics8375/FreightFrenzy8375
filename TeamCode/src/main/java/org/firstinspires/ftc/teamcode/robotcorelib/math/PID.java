@@ -46,7 +46,7 @@ public class PID {
         }else{
             isSaturating = true;
         }
-
+        // Dynamic integral Clamping I think
         if(Ki * integral > Kp * error){
             integral = error * (Kp/Ki);
             controllerOutput = Kp * error + Ki * integral + Kd * derivative;
@@ -72,4 +72,6 @@ public class PID {
     public double getIntegralError(){
         return integralError;
     }
+    public double getError() { return error; }
+    public double getControllerOutput(){return controllerOutput; };
 }
