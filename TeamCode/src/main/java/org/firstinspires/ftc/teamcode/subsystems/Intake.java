@@ -22,10 +22,11 @@ public class Intake extends Subsystem {
         transfer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         transfer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
 
-    public void run(boolean on) {
+    public void run(boolean on, boolean outtake) {
         double intakePower;
         double transferPower;
         boolean currentIndex = indexer;
@@ -34,6 +35,9 @@ public class Intake extends Subsystem {
             transferPower = TRANSFER_POWER;
             intakePower = indexer ? 0 : INTAKE_POWER;
 
+        } else if(outtake) {
+            intakePower = -INTAKE_POWER;
+            transferPower = -TRANSFER_POWER;
         } else {
             intakePower = 0;
             transferPower = 0;
@@ -51,7 +55,7 @@ public class Intake extends Subsystem {
             gamepad2.rumble(500);
         }
 
-//        telemetry.addData("indexing", indexer);
+//        telemetry.addData("indexer pos", indexerPos);
         intake.setPower(intakePower);
         transfer.setPower(transferPower);
 
