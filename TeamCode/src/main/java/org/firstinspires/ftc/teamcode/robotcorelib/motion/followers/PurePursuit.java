@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.PathPoint;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants.*;
 
@@ -21,6 +22,8 @@ public class PurePursuit extends Follower {
     boolean following;
     private PID velocityPid = new PID(1.0, 0.0, 0.0, 1.0, -1.0);
     private PID turnPid = new PID(1.0, 0.0, 0.0, 1.0, -1.0);
+
+    private int pathPointIdx;
 
     public PurePursuit() {}
 
@@ -37,6 +40,7 @@ public class PurePursuit extends Follower {
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose);
 
             moveToPoint(followPoint, robotPose, robotVel);
+            Objects.requireNonNull(path.getRunnableTasks().get(pathPoints.get(pathPointIdx))).run();
 
         }
 
@@ -71,6 +75,7 @@ public class PurePursuit extends Follower {
                     closestAngle = deltaAngle;
                     followPoint.setPathPoint(end);
                     followPoint.setPoint(intersection);
+                    pathPointIdx = i;
                 }
 
                 double maxX = Math.max(start.x, end.x);

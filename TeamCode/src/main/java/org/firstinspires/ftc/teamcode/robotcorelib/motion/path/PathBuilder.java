@@ -26,7 +26,7 @@ public class PathBuilder {
     public PathBuilder lineToConstantHeading(Pose2d start, Pose2d end) {
         startPoint = new PathPoint(start.getX(), start.getY(), start.getHeading(), speed, turnSpeed, lookahead);
         endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
-        lastPoint = startPoint;
+        lastPoint = endPoint;
         return this;
     }
 
@@ -36,8 +36,8 @@ public class PathBuilder {
         for (Pose2d point : guidePoints) {
             this.guidePoints.add(new PathPoint(point.getX(), point.getY(), point.getHeading(), speed, turnSpeed, lookahead));
         }
-        lastPoint = this.guidePoints.get(this.guidePoints.size() - 1);
         endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
+        lastPoint = endPoint;
 
         return this;
     }
@@ -46,6 +46,7 @@ public class PathBuilder {
         double theta = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX());
         startPoint = new PathPoint(start.getX(), start.getY(), theta, speed, turnSpeed, lookahead);
         endPoint = new PathPoint(end.getX(), end.getY(), theta, speed, turnSpeed, lookahead);
+        lastPoint = endPoint;
 
         return this;
     }
