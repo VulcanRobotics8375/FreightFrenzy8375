@@ -34,6 +34,7 @@ public class SimplePID {
         limMaxInt = Math.min(proportional, limMax);
         limMinInt = Math.max(proportional, limMin);
 
+        proportional = Range.clip(proportional, limMin, limMax);
         integral = Range.clip(integral, limMinInt, limMaxInt) * Ki;
 
         lastError = error;
