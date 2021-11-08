@@ -17,6 +17,9 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
     private BNO055IMU imu;
     public static final DriveMode driveMode = DriveMode.MECANUM;
 
+
+    BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
     private CRServo odometryLift;
 
     @Override
@@ -34,16 +37,11 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         //set up IMU
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled = false;
-        if(imu.initialize(parameters)) {
-            while (!imu.isGyroCalibrated()) {}
-        } else {
-            imu.initialize(parameters);
-        }
+        imu.initialize(parameters);
 
         if(Drivetrain.driveMode == DriveMode.TANK) {
             fl.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -126,6 +124,10 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         fr.setMode(runMode);
         bl.setMode(runMode);
         br.setMode(runMode);
+    }
+
+    public BNO055IMU getIMU() {
+        return imu;
     }
 
     @Override
