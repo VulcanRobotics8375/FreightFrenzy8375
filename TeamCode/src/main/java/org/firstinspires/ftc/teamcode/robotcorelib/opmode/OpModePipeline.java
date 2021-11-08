@@ -30,7 +30,7 @@ public abstract class OpModePipeline extends OpMode {
     }
 
     public void start() {
-
+        resetStartTime();
     }
 
     public abstract void loop();
@@ -50,6 +50,29 @@ public abstract class OpModePipeline extends OpMode {
             Robot.update();
             runnable.run();
         }
+    }
+
+    protected synchronized void maintainConstantLoopTime(int targetLoopNum, double elapsedTime) {
+        double targetLoopTimeMs = 1000.0 / targetLoopNum;
+
+        long maxWaitTimeMs = (long) Math.floor(targetLoopTimeMs);
+        int maxWaitTimeNs = (int)((targetLoopTimeMs - maxWaitTimeMs)*100000);
+
+        long elapsedTimeMs = (long) Math.floor(elapsedTime);
+        int elapsedTimeNs = (int) ((elapsedTime - elapsedTimeMs)*100000);
+
+        if(maxWaitTimeMs > elapsedTimeMs || maxWaitTimeMs - elapsedTimeMs > targetLoopTimeMs) {
+            try {
+//                telemetry.addData("wait time ms", maxWaitTimeMs - elapsedTimeMs);
+                wait(maxWaitTimeMs - elapsedTimeMs, 0);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+//            telemetry.addLine("not waiting");
+        }
+//        telemetry.addData("wait time ns", maxWaitTimeNs - elapsedTimeNs);
+
     }
 
 }
