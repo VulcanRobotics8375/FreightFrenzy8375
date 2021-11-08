@@ -31,39 +31,32 @@ public class Robot {
 
     private static RobotConfig config;
 
+    private static double lastTime;
+
     public static RobotRunMode runMode;
     public static DrivetrainImpl drivetrain;
 
     public static void init(OpMode opMode) {
         hardwareMap = opMode.hardwareMap;
         telemetry = opMode.telemetry;
-        telemetry.addLine("loading configuration");
-        telemetry.update();
-        errorHandler = new ErrorHandler(telemetry);
         config = new RobotConfig();
         config.init();
         localizer = config.localizer;
 
-        telemetry.addLine("updating REV hub cache mode");
-        telemetry.update();
-        hubs = hardwareMap.getAll(LynxModule.class);
+        errorHandler = new ErrorHandler(telemetry);
+        hubs = opMode.hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(bulkCachingMode);
         }
-
         for (Subsystem sub : config.subsystems) {
-            sub.setHardwareMap(hardwareMap);
-            sub.setTelemetry(telemetry);
+            sub.setHardwareMap(opMode.hardwareMap);
+            sub.setTelemetry(opMode.telemetry);
             sub.assignGamePads(opMode.gamepad1, opMode.gamepad2);
             if(sub instanceof DrivetrainImpl) {
                 drivetrain = (DrivetrainImpl) sub; // cast drivetrain to drivetrainImpl, this is for backend controller stuff.
             }
             sub.init();
-            telemetry.addData("initializing subsystem", sub.toString());
-            telemetry.update();
         }
-        telemetry.addLine("init complete");
-        //no telemetry.update() here because that happens in OpModePipeline
 
     }
 
