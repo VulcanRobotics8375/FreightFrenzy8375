@@ -12,6 +12,9 @@ public class Intake extends Subsystem {
 
     private boolean indexer = false;
 
+    private double intakePower;
+    private double transferPower;
+
     public final double INTAKE_POWER = 1;
     public final double TRANSFER_POWER = 1;
     public final int INDEXER_POS = 200;
@@ -29,10 +32,10 @@ public class Intake extends Subsystem {
 
 
     public void run(boolean on, boolean outtake) {
-        double intakePower;
-        double transferPower;
         boolean currentIndex = indexer;
 
+        double intakePower;
+        double transferPower;
         int indexerPos = transfer.getCurrentPosition();
         if(on) {
             transferPower = TRANSFER_POWER;
@@ -58,13 +61,15 @@ public class Intake extends Subsystem {
             gamepad2.rumble(1.0, 1.0, 500);
         }
 
-        if(MathUtils.shouldHardwareUpdate(intakePower, intake.getPower(), HardwarePrecision.LOW)) {
+        if(MathUtils.shouldHardwareUpdate(intakePower, this.intakePower, HardwarePrecision.LOW)) {
             intake.setPower(intakePower);
         }
-        if(MathUtils.shouldHardwareUpdate(transferPower, transfer.getPower(), HardwarePrecision.LOW)) {
+        if(MathUtils.shouldHardwareUpdate(transferPower, this.transferPower, HardwarePrecision.LOW)) {
             transfer.setPower(transferPower);
         }
 
+        this.intakePower = intakePower;
+        this.transferPower = transferPower;
     }
 
 }

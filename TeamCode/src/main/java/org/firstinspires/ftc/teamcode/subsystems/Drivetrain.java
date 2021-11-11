@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
 
 public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
@@ -57,13 +58,6 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         }
     }
 
-    public void setPowers(double fl, double fr, double bl, double br) {
-        this.fl.setPower(fl);
-        this.fr.setPower(fr);
-        this.bl.setPower(bl);
-        this.br.setPower(br);
-    }
-
     public void tankDrive(double forward, double turn) {
         forward = MathUtils.joystickCurve(forward, JoystickCurve.MODIFIED_CUBIC);
         turn = MathUtils.joystickCurve(turn, JoystickCurve.MODIFIED_CUBIC);
@@ -104,11 +98,16 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
     @Override
     public void setPowers(double[] powers) {
-        this.fl.setPower(powers[0]);
-        this.fr.setPower(powers[1]);
-        this.bl.setPower(powers[2]);
-        this.br.setPower(powers[3]);
+        DcMotor[] motors = getMotorsAsList();
+        for (int i = 0; i < 4; i++) {
+            if(MathUtils.shouldHardwareUpdate(powers[i], motors[i].getPower(), HardwarePrecision.HIGH)) {
+                motors[i].setPower(powers[i]);
+            }
+        }
+    }
 
+    public void setPowers(double fl, double fr, double bl, double br) {
+        setPowers(new double[] { fl, fr, bl, br });
     }
 
     public void startOdometryLift() {
@@ -124,6 +123,10 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         fr.setMode(runMode);
         bl.setMode(runMode);
         br.setMode(runMode);
+    }
+
+    public DcMotor[] getMotorsAsList() {
+        return new DcMotor[] { fl, fr, bl, br };
     }
 
     public BNO055IMU getIMU() {

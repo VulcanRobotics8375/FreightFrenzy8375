@@ -133,7 +133,7 @@ public class PurePursuit extends Follower {
     private void mitigatePoseError(PathPoint pose) {
         Robot.update();
         Pose2d robotPose = Robot.getRobotPose();
-        Pose2d robotVelocity = Robot.getRobotVelocity();
+        Pose2d robotVelocity;
         double poseError = Math.hypot(pose.x - robotPose.getX(), pose.y - robotPose.getY());
         double headingError = MathUtils.calcAngularError(pose.theta, robotPose.getHeading());
         while(poseError > 2 || headingError > Math.toRadians(5.0)) {
