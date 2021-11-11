@@ -8,9 +8,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
-import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
+
+import static org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils.*;
 
 public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
@@ -59,8 +60,8 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
     }
 
     public void tankDrive(double forward, double turn) {
-        forward = MathUtils.joystickCurve(forward, JoystickCurve.MODIFIED_CUBIC);
-        turn = MathUtils.joystickCurve(turn, JoystickCurve.MODIFIED_CUBIC);
+        forward = joystickCurve(forward, JoystickCurve.MODIFIED_CUBIC);
+        turn = joystickCurve(turn, JoystickCurve.MODIFIED_CUBIC);
          double magnitude = Math.abs(forward) + Math.abs(turn);
          if(magnitude > 1) {
              forward *= 1 / magnitude;
@@ -71,8 +72,8 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
     public void mechanumDrive(double forward, double strafe, double turn) {
         double multiplier = 2.0 / Math.sqrt(2.0);
-        forward = MathUtils.joystickCurve(forward, JoystickCurve.MODIFIED_CUBIC);
-        strafe = MathUtils.joystickCurve(strafe, JoystickCurve.MODIFIED_CUBIC);
+        forward = joystickCurve(forward, JoystickCurve.MODIFIED_CUBIC);
+        strafe = joystickCurve(strafe, JoystickCurve.MODIFIED_CUBIC);
 
         double theta = Math.atan2(forward, strafe) - Math.PI / 4.0;
 //        turn = MathUtils.joystickCurve(turn, JoystickCurve.MODIFIED_CUBIC);
@@ -96,11 +97,14 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         setPowers(flSpeed, frSpeed, blSpeed, brSpeed);
     }
 
+    /*
+     * All setPowers() methods should follow the {fl, fr, bl, br} motor order all the time
+     */
     @Override
     public void setPowers(double[] powers) {
         DcMotor[] motors = getMotorsAsList();
         for (int i = 0; i < 4; i++) {
-            if(MathUtils.shouldHardwareUpdate(powers[i], motors[i].getPower(), HardwarePrecision.HIGH)) {
+            if(shouldHardwareUpdate(powers[i], motors[i].getPower(), HardwarePrecision.HIGH)) {
                 motors[i].setPower(powers[i]);
             }
         }
