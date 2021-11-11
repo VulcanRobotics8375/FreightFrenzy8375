@@ -43,7 +43,7 @@ public class RangeSensorLocalizer implements Localizer {
     private List<Pose2d> sensorPoses;
 
     private LVMaxbotixEZ4 forward_1, forward_2, normal_1, normal_2;
-    private double relativeOffsetX, relativeOffsetY, robotOffsetX, robotOffsetY, distanceX, distanceY;
+    private double relativeOffsetForward, relativeOffsetNormal, robotOffsetForward, robotOffsetNormal, distanceForward, distanceNormal;
 
     @Override
     public void update() {
@@ -109,12 +109,12 @@ public class RangeSensorLocalizer implements Localizer {
 
         configurationValidator = validateConfiguration(sensorPoses).toString();
 
-        robotOffsetX = (sensorPoses.get(0).getX() + sensorPoses.get(1).getX()) / 2.0;
-        robotOffsetY = (sensorPoses.get(2).getY() + sensorPoses.get(3).getY()) /2.0;
-        relativeOffsetX = (sensorPoses.get(0).getX() - sensorPoses.get(1).getX()) / 2.0;
-        relativeOffsetY = (sensorPoses.get(2).getY() - sensorPoses.get(3).getY()) / 2.0;
-        distanceX = Math.hypot(sensorPoses.get(1).getX() - sensorPoses.get(0).getX(), sensorPoses.get(1).getY() - sensorPoses.get(0).getY());
-        distanceY = Math.hypot(sensorPoses.get(3).getX() - sensorPoses.get(2).getX(), sensorPoses.get(3).getY() - sensorPoses.get(2).getY());
+        robotOffsetForward = (sensorPoses.get(0).getX() + sensorPoses.get(1).getX()) / 2.0;
+        robotOffsetNormal = (sensorPoses.get(2).getY() + sensorPoses.get(3).getY()) /2.0;
+        relativeOffsetForward = (sensorPoses.get(0).getX() - sensorPoses.get(1).getX()) / 2.0;
+        relativeOffsetNormal = (sensorPoses.get(2).getY() - sensorPoses.get(3).getY()) / 2.0;
+        distanceForward = Math.hypot(sensorPoses.get(1).getX() - sensorPoses.get(0).getX(), sensorPoses.get(1).getY() - sensorPoses.get(0).getY());
+        distanceNormal = Math.hypot(sensorPoses.get(3).getX() - sensorPoses.get(2).getX(), sensorPoses.get(3).getY() - sensorPoses.get(2).getY());
 
         forward_1 = (LVMaxbotixEZ4) hardwareMap.get(AnalogInput.class, "forward_1");
         forward_2 = (LVMaxbotixEZ4) hardwareMap.analogInput.get("forward_2");
@@ -126,17 +126,63 @@ public class RangeSensorLocalizer implements Localizer {
     private Pose2d estimatePose() {
         List<Double> distances = getDistances();
 
+        Pose2d poseEstimate = new Pose2d();
+        double thetaEstimate;
+        double xEstimate = 0;
+        double yEstimate = 0;
+
         //forward distances
-        double d1 = distances.get(0);
-        double d2 = distances.get(1);
+        double d1 = distances.get(0) - relativeOffsetForward;
+        double d2 = distances.get(1) + relativeOffsetForward;
+
+        double forwardTheta = Math.atan((d1 - d2) / distanceForward);
+        double forwardDistance = ((d1 + d2) / 2.0) * Math.cos(forwardTheta);
 
         //normal distances
-        double d3 = distances.get(2);
-        double d4 = distances.get(3);
+        double d3 = distances.get(2) - relativeOffsetNormal;
+        double d4 = distances.get(3) + relativeOffsetNormal;
 
+        double normalTheta = Math.atan((d3 - d4) / distanceNormal);
+        double normalDistance = ((d3 + d4) / 2.0) * Math.cos(normalTheta);
 
+        thetaEstimate = (forwardTheta + normalTheta) / 2.0;
 
-        return new Pose2d();
+        switch(mode) {
+            case NORTH_WEST:
+                xEstimate = normalDistance - 72.0;
+                yEstimate = 72.0 - forwardDistance;
+                break;
+            case NORTH_EAST:
+                xEstimate = 72.0 - normalDistance;
+                yEstimate = 72.0 - forwardDistance;
+                break;
+            case SOUTH_WEST:
+                xEstimate = normalDistance - 72.0;
+                yEstimate = forwardDistance - 72.0;
+                break;
+            case SOUTH_EAST:
+                xEstimate = 72.0 - normalDistance;
+                yEstimate = forwardDistance - 72.0;
+                break;
+            case EAST_NORTH:
+                xEstimate = 72.0 - forwardDistance;
+                yEstimate = 72.0 - normalDistance;
+                break;
+            case EAST_SOUTH:
+                xEstimate = 72.0 - forwardDistance;
+                yEstimate = normalDistance - 72.0;
+                break;
+            case WEST_NORTH:
+                xEstimate = forwardDistance - 72.0;
+                yEstimate = 72.0 - normalDistance;
+                break;
+            case WEST_SOUTH:
+                xEstimate = forwardDistance - 72.0;
+                yEstimate = normalDistance - 72.0;
+                break;
+        }
+
+        return new Pose2d(xEstimate, yEstimate, thetaEstimate);
     }
 
     private ConfigurationValidator validateConfiguration(List<Pose2d> sensorPositions) {

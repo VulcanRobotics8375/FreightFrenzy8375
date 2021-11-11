@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants;
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.PID;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics.DriveKinematics;
@@ -31,11 +32,11 @@ public class PurePursuit extends Follower {
         following = true;
 
         // base follower
+        ArrayList<PathPoint> pathPoints = path.asList();
         while(following) {
             Robot.update();
             Pose2d robotPose = Robot.getRobotPose();
             Pose2d robotVel = Robot.getRobotVelocity();
-            ArrayList<PathPoint> pathPoints = path.asList();
 
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose);
 
@@ -45,6 +46,10 @@ public class PurePursuit extends Follower {
         }
 
         //mitigate pose error
+        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
+            PathPoint endPoint = pathPoints.get(pathPoints.size() - 1);
+            mitigatePoseError(endPoint);
+        }
 
     }
 
@@ -113,7 +118,7 @@ public class PurePursuit extends Follower {
                 Vector2d targetVelocity = new Vector2d(point.speed * Math.cos(absoluteAngleToPoint), point.speed * Math.sin(absoluteAngleToPoint));
                 //TODO add heading PID (+ heading velo PID?)
                 double targetVelocityHeading = point.turnSpeed * MathUtils.calcAngularError(point.theta, robotPose.getHeading());
-                double outputVelocityNorm = velocityPid.run(targetVelocity.norm(), translationalVelocity.norm());
+                double outputVelocityNorm = velocityPid.run(targetVelocity.norm(), translationalVelocity.norm() / MAX_VELOCITY);
 
                 Pose2d outputVelocity = new Pose2d(outputVelocityNorm*Math.cos(absoluteAngleToPoint), outputVelocityNorm * Math.sin(absoluteAngleToPoint), targetVelocityHeading);
 
@@ -122,6 +127,24 @@ public class PurePursuit extends Follower {
                 break;
             case TANK:
             default:
+        }
+    }
+
+    private void mitigatePoseError(PathPoint pose) {
+        Robot.update();
+        Pose2d robotPose = Robot.getRobotPose();
+        Pose2d robotVelocity = Robot.getRobotVelocity();
+        double poseError = Math.hypot(pose.x - robotPose.getX(), pose.y - robotPose.getY());
+        double headingError = MathUtils.calcAngularError(pose.theta, robotPose.getHeading());
+        while(poseError > 2 || headingError > Math.toRadians(5.0)) {
+            Robot.update();
+            robotPose = Robot.getRobotPose();
+            robotVelocity = Robot.getRobotVelocity();
+            poseError = Math.hypot(pose.x - robotPose.getX(), pose.y - robotPose.getY());
+            headingError = MathUtils.calcAngularError(pose.theta, robotPose.getHeading());
+            pose.speed = poseError * 0.1; //pose gain
+            pose.turnSpeed = headingError * 2.0; //heading gain
+            moveToPoint(pose, robotPose, robotVelocity);
         }
     }
 

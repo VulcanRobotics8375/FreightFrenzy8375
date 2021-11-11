@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
 
 public class Intake extends Subsystem {
     private DcMotor intake;
@@ -30,6 +32,7 @@ public class Intake extends Subsystem {
         double intakePower;
         double transferPower;
         boolean currentIndex = indexer;
+
         int indexerPos = transfer.getCurrentPosition();
         if(on) {
             transferPower = TRANSFER_POWER;
@@ -51,13 +54,16 @@ public class Intake extends Subsystem {
         }
 
         if(currentIndex != indexer && indexer) {
-            gamepad1.rumble(500);
-            gamepad2.rumble(500);
+            gamepad1.rumble(1.0, 1.0, 500);
+            gamepad2.rumble(1.0, 1.0, 500);
         }
 
-//        telemetry.addData("indexer pos", indexerPos);
-        intake.setPower(intakePower);
-        transfer.setPower(transferPower);
+        if(MathUtils.shouldHardwareUpdate(intakePower, intake.getPower(), HardwarePrecision.LOW)) {
+            intake.setPower(intakePower);
+        }
+        if(MathUtils.shouldHardwareUpdate(transferPower, transfer.getPower(), HardwarePrecision.LOW)) {
+            transfer.setPower(transferPower);
+        }
 
     }
 
