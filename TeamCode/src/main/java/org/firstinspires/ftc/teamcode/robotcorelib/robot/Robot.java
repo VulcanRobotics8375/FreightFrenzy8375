@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.localization.Localizer;
+import org.firstinspires.ftc.teamcode.robotcorelib.opmode.OpModePipeline;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.ErrorHandler;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
@@ -31,15 +32,13 @@ public class Robot {
 
     private static RobotConfig config;
 
-    private static double lastTime;
-
     public static RobotRunMode runMode;
     public static DrivetrainImpl drivetrain;
 
-    public static void init(OpMode opMode) {
+    public static void init(OpModePipeline opMode) {
         hardwareMap = opMode.hardwareMap;
         telemetry = opMode.telemetry;
-        config = new RobotConfig();
+        config = opMode.subsystems;
         config.init();
         localizer = config.localizer;
 
@@ -48,12 +47,17 @@ public class Robot {
         for (LynxModule hub : hubs) {
             hub.setBulkCachingMode(bulkCachingMode);
         }
+        boolean drivetrainExists = false;
         for (Subsystem sub : config.subsystems) {
             sub.setHardwareMap(opMode.hardwareMap);
             sub.setTelemetry(opMode.telemetry);
             sub.assignGamePads(opMode.gamepad1, opMode.gamepad2);
             if(sub instanceof DrivetrainImpl) {
                 drivetrain = (DrivetrainImpl) sub; // cast drivetrain to drivetrainImpl, this is for backend controller stuff.
+                drivetrainExists = true;
+            }
+            if(!drivetrainExists) {
+                errorHandler.addMessage("ERR: No Drivetrain Found in RobotConfig");
             }
             sub.init();
         }

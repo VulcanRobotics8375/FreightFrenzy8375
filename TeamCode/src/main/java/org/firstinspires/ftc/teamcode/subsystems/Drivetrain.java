@@ -97,6 +97,10 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         setPowers(flSpeed, frSpeed, blSpeed, brSpeed);
     }
 
+    //This method is what we are going to use if we have any extra drivetrain control enhancements that aren't just the normal driving methods.
+    //The reason for this 2nd method is so we have a barebones method available to us at all times for other use cases not specific to teleop driving
+    public void drive() {}
+
     /*
      * All setPowers() methods should follow the {fl, fr, bl, br} motor order all the time
      */

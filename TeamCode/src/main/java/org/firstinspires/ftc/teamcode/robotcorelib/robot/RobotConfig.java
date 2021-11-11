@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 
 //Configuration class for all subsystems to interface with the system properly.
-public class RobotConfig {
+public abstract class RobotConfig {
 
     /*
     HardwareMap Reference:
@@ -45,6 +45,8 @@ public class RobotConfig {
 
      */
 
+    public RobotConfig() {}
+
     public ArrayList<Subsystem> subsystems = new ArrayList<>();
 
     //localization
@@ -52,16 +54,8 @@ public class RobotConfig {
 
     //Subsystem objects go here
     //IMPORTANT:: Don't add more than one class that implements DrivetrainInterface, things will break
-    public Drivetrain drivetrain;
-    public Intake intake;
 
     //initialization of subsystems goes here
-    public void init() {
-        subsystems.clear();
-        localizer = new StandardTrackingWheelLocalizer(Robot.getHardwareMap());
-        drivetrain = new Drivetrain();
-        intake = new Intake();
-
-    }
+    public abstract void init();
 
 }

@@ -10,21 +10,25 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.AutoTask;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 
 public abstract class OpModePipeline extends OpMode {
-    protected RobotConfig subsystems;
-    protected RobotRunMode runMode;
+    public RobotConfig subsystems;
+    public RobotRunMode runMode;
 
     private volatile boolean stopRequested;
 
     @Override
     public void init() {
-        Robot.init(this);
-        subsystems = Robot.getConfiguration();
-        if(runMode == RobotRunMode.TELEOP) {
-            //teleop specific init
-            telemetry.addLine("teleop mode");
-        } else if(runMode == RobotRunMode.AUTONOMOUS) {
-            //auton specific init
-            telemetry.addLine("auton mode");
+        if(subsystems != null && runMode != null) {
+            Robot.init(this);
+            if (runMode == RobotRunMode.TELEOP) {
+                //teleop specific init
+                telemetry.addLine("teleop mode");
+            } else if (runMode == RobotRunMode.AUTONOMOUS) {
+                //auton specific init
+                telemetry.addLine("auton mode");
+            }
+        }
+        else {
+            telemetry.addLine("robot not initialized! RobotConfig or RobotRunMode does not exist");
         }
         telemetry.update();
     }
