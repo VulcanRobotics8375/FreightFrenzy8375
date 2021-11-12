@@ -9,6 +9,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.LVMaxbotixEZ4;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -106,6 +108,15 @@ public class RangeSensorLocalizer implements Localizer {
                 new Pose2d(0, 0, Math.toRadians(90)),
                 new Pose2d(0, 0, Math.toRadians(90))
         );
+        Collections.sort(sensorPoses, (o1, o2) -> {
+            if (o1.getHeading() < o2.getHeading()) {
+                return -1;
+            } else if(o1.getHeading() > o2.getHeading()) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
 
         configurationValidator = validateConfiguration(sensorPoses).toString();
 
@@ -194,9 +205,9 @@ public class RangeSensorLocalizer implements Localizer {
             int normalNum = 0;
             for (int i = 0; i < 4; i++) {
                 Vector2d headingVec = sensorPositions.get(i).headingVec();
-                if(Math.abs(headingVec.getY()) < Math.sin(ANGLE_THRESHOLD)) {
+                if(Math.abs(headingVec.getX()) == 1) {
                     forwardNum++;
-                } else if(Math.abs(headingVec.getX()) < Math.cos(ANGLE_THRESHOLD)) {
+                } else if(Math.abs(headingVec.getY()) == 1) {
                     normalNum++;
                 }
             }
