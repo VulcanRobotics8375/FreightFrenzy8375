@@ -49,34 +49,31 @@ public abstract class OpModePipeline extends OpMode {
         return stopRequested;
     }
 
-    protected void runTask(AutoTask runnable) {
-        while(runnable.conditional() && isStopRequested()) {
+    protected void runTask(AutoTask task) {
+        while(task.conditional() && !isStopRequested()) {
             Robot.update();
-            runnable.run();
+            task.run();
         }
     }
 
     protected synchronized void maintainConstantLoopTime(int targetLoopNum, double elapsedTime) {
-        double targetLoopTimeMs = 1000.0 / targetLoopNum;
+        synchronized (this) {
+            double targetLoopTimeMs = 1000.0 / targetLoopNum;
 
-        long maxWaitTimeMs = (long) Math.floor(targetLoopTimeMs);
-        int maxWaitTimeNs = (int)((targetLoopTimeMs - maxWaitTimeMs)*100000);
+            long maxWaitTimeMs = (long) Math.floor(targetLoopTimeMs);
+            int maxWaitTimeNs = (int) ((targetLoopTimeMs - maxWaitTimeMs) * 100000);
 
-        long elapsedTimeMs = (long) Math.floor(elapsedTime);
-        int elapsedTimeNs = (int) ((elapsedTime - elapsedTimeMs)*100000);
+            long elapsedTimeMs = (long) Math.floor(elapsedTime);
+            int elapsedTimeNs = (int) ((elapsedTime - elapsedTimeMs) * 100000);
 
-        if(maxWaitTimeMs > elapsedTimeMs || maxWaitTimeMs - elapsedTimeMs > targetLoopTimeMs) {
-            try {
-//                telemetry.addData("wait time ms", maxWaitTimeMs - elapsedTimeMs);
-                wait(maxWaitTimeMs - elapsedTimeMs, 0);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (maxWaitTimeMs > elapsedTimeMs || maxWaitTimeMs - elapsedTimeMs > targetLoopTimeMs) {
+                try {
+                    wait(maxWaitTimeMs - elapsedTimeMs, 0);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        } else {
-//            telemetry.addLine("not waiting");
         }
-//        telemetry.addData("wait time ns", maxWaitTimeNs - elapsedTimeNs);
-
     }
 
 }
