@@ -15,6 +15,26 @@
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 
+android {
+
+    // Encapsulates your external native build configurations.
+    externalNativeBuild {
+
+        // Encapsulates your CMake build configurations.
+        cmake {
+
+            // Provides a relative path to your CMake build script.
+            path "CMakeLists.txt"
+        }
+    }
+
+    packagingOptions {
+        exclude '/lib/armeabi-v7a/libOpenCvAndroid453.so'
+        exclude '/lib/arm64-v8a/libOpenCvAndroid453.so'
+    }
+
+}
+
 dependencies {
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
