@@ -11,16 +11,17 @@ cmake_minimum_required(VERSION 3.4.1)
 # automatically packages shared libraries with your APK.
 
 add_library( # Specifies the name of the library.
-             TeamCode
+        TeamCode
 
-             # Sets the library as a shared library.
-             SHARED
+         # Sets the library as a shared library.
+        SHARED
 
-             # Provides a relative path to your source file(s).
-             src/main/cpp/aruco.cpp
-             src/main/cpp/apriltag_quad_thresh.cpp
-             src/main/cpp/dictionary.cpp
-             src/main/cpp/zmaxheap.cpp
+         # Provides a relative path to your source file(s).
+        src/main/cpp/aruco.cpp
+        src/main/cpp/apriltag_quad_thresh.cpp
+        src/main/cpp/dictionary.cpp
+        src/main/cpp/zmaxheap.cpp
+        src/main/cpp/arucoJNI.cpp
             )
 
 ############################################################
