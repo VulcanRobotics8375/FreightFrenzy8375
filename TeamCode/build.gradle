@@ -13,7 +13,6 @@
 
 // Include common definitions from above.
 apply from: '../build.common.gradle'
-apply from: '../build.dependencies.gradle'
 
 android {
 
@@ -35,6 +34,7 @@ android {
 
 }
 
+apply from: '../build.dependencies.gradle'
 dependencies {
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
