@@ -17,7 +17,7 @@ public abstract class BasicMotionProfile {
         this.end = end;
     }
 
-    public abstract void build();
+    public abstract BasicMotionProfile build();
 
     public abstract Pose2d getPosition(double t);
     public abstract Pose2d getVelocity(double t);
