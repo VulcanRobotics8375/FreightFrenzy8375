@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.PID;
+import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics.DriveKinematics;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.Path;
 import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
@@ -21,10 +22,15 @@ import static org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants.*
 public class PurePursuit extends Follower {
 
     boolean following;
-    private PID velocityPid = new PID(1.0, 0.0, 0.0, 1.0, -1.0);
-    private PID turnPid = new PID(1.0, 0.0, 0.0, 1.0, -1.0);
+    private SimplePID velocityPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
+    private SimplePID turnPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
 
     private int pathPointIdx;
+
+    public static final double ALLOWED_POSE_ERROR = 2.0;
+    public static final double ALLOWED_HEADING_ERROR = 5.0;
+    public static final double POSE_ERROR_GAIN = 0.1;
+    public static final double HEADING_ERROR_GAIN = 2.0;
 
     public PurePursuit() {}
 
@@ -114,13 +120,31 @@ public class PurePursuit extends Follower {
         switch (Robot.drivetrain.getDriveMode()) {
             case MECANUM:
                 double absoluteAngleToPoint = Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x);
-                Vector2d translationalVelocity = robotVelocity.vec();
-                Vector2d targetVelocity = new Vector2d(point.speed * Math.cos(absoluteAngleToPoint), point.speed * Math.sin(absoluteAngleToPoint));
-                //TODO add heading PID (+ heading velo PID?)
-                double targetVelocityHeading = point.turnSpeed * MathUtils.calcAngularError(point.theta, robotPose.getHeading());
-                double outputVelocityNorm = velocityPid.run(targetVelocity.norm(), translationalVelocity.norm() / MAX_VELOCITY);
 
-                Pose2d outputVelocity = new Pose2d(outputVelocityNorm*Math.cos(absoluteAngleToPoint), outputVelocityNorm * Math.sin(absoluteAngleToPoint), targetVelocityHeading);
+                Vector2d poseVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(point.speed);
+
+                double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
+                double headingOutput = turnPid.run(headingError);
+                Pose2d outputVelocity;
+                switch(Robot.drivetrain.getVelocityControlMode()) {
+                    case DRIVE_MOTOR_ENCODERS:
+                        outputVelocity = new Pose2d(poseVelocity, headingOutput);
+                        break;
+                    case FEEDFORWARD:
+                        //lmao idek how to start ff
+                        //TODO figure out feedforward velocity control
+                        outputVelocity = new Pose2d(0, 0, 0);
+                        break;
+                    case PID:
+                        //TODO add heading velocity PID to this
+                        double velocityNorm = velocityPid.run(poseVelocity.norm(), robotVelocity.vec().norm() / MAX_VELOCITY);
+                        Vector2d PidOutputVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(velocityNorm);
+                        outputVelocity = new Pose2d(PidOutputVelocity, headingOutput);
+                        break;
+                    default:
+                        outputVelocity = new Pose2d();
+                        break;
+                }
 
                 double[] powers = DriveKinematics.mecanumFieldVelocityToWheelVelocities(robotPose, outputVelocity);
                 Robot.drivetrain.setPowers(powers);
@@ -136,14 +160,14 @@ public class PurePursuit extends Follower {
         Pose2d robotVelocity;
         double poseError = Math.hypot(pose.x - robotPose.getX(), pose.y - robotPose.getY());
         double headingError = MathUtils.calcAngularError(pose.theta, robotPose.getHeading());
-        while(poseError > 2 || headingError > Math.toRadians(5.0)) {
+        while(poseError > ALLOWED_POSE_ERROR || headingError > Math.toRadians(ALLOWED_HEADING_ERROR)) {
             Robot.update();
             robotPose = Robot.getRobotPose();
             robotVelocity = Robot.getRobotVelocity();
             poseError = Math.hypot(pose.x - robotPose.getX(), pose.y - robotPose.getY());
             headingError = MathUtils.calcAngularError(pose.theta, robotPose.getHeading());
-            pose.speed = poseError * 0.1; //pose gain
-            pose.turnSpeed = headingError * 2.0; //heading gain
+            pose.speed = poseError * POSE_ERROR_GAIN; //pose gain
+            pose.turnSpeed = headingError * HEADING_ERROR_GAIN; //heading gain
             moveToPoint(pose, robotPose, robotVelocity);
         }
     }

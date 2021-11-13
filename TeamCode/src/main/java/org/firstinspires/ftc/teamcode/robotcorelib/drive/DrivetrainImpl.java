@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.robotcorelib.drive;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-
 public interface DrivetrainImpl {
 
     //General Convention for writing setPowers() method:
@@ -12,6 +10,7 @@ public interface DrivetrainImpl {
     void setPowers(double[] powers);
 
     DriveMode getDriveMode();
+    DrivetrainVelocityMode getVelocityControlMode();
 
     //might not need more than this honestly. Really depends on what we need tho.
 
