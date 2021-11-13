@@ -27,6 +27,7 @@ public class PurePursuit extends Follower {
 
     private int pathPointIdx;
 
+    //TODO make these something accessible by the user
     public static final double ALLOWED_POSE_ERROR = 2.0;
     public static final double ALLOWED_HEADING_ERROR = 5.0;
     public static final double POSE_ERROR_GAIN = 0.1;
