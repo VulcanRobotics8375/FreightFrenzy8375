@@ -35,10 +35,10 @@ public class SimplePID {
         limMinInt = Math.max(proportional, limMin);
 
         proportional = Range.clip(proportional, limMin, limMax);
-        integral = Range.clip(integral, limMinInt, limMaxInt) * Ki;
+        integral = Range.clip(integral, limMinInt, limMaxInt);
 
         lastError = error;
-        return proportional + integral + derivative;
+        return proportional + Ki * integral + derivative;
     }
 
 }

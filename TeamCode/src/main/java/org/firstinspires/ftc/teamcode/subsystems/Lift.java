@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.robotcorelib.math.PID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
 public class Lift extends Subsystem {
@@ -12,10 +13,11 @@ public class Lift extends Subsystem {
 
     private boolean hold = false;
     private int holdPosition;
+    PID pid = new PID(0.0005, 0, 0, 1, -1);
+
     private boolean open = false;
     private boolean buttonPress = false;
 
-    private final double HOLD_POS_GAIN = 0.0005;
     private final int LIMIT_RANGE = 300;
     private final int MAX_HEIGHT = 600;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
@@ -51,13 +53,11 @@ public class Lift extends Subsystem {
                 holdPosition = pos;
                 hold = true;
             }
-
-            int error = holdPosition - pos;
-            outputPower = error * HOLD_POS_GAIN;
-
+            outputPower = pid.run(holdPosition, pos);
         }
 
         lift.setPower(outputPower);
+
         if(buttonPress && !this.buttonPress) {
             this.buttonPress = true;
             open = !open;
@@ -65,11 +65,10 @@ public class Lift extends Subsystem {
         if(!buttonPress && this.buttonPress) {
             this.buttonPress = false;
         }
-        if(open) {
+        if(open)
             release.setPosition(OPENED_POS);
-        } else {
+        else
             release.setPosition(CLOSED_POS);
-        }
 
         if(pos < 150 && release.getPosition() != CLOSED_POS){
             release.setPosition(CLOSED_POS);
