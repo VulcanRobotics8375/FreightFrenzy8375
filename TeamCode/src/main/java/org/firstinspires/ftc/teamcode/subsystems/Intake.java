@@ -14,7 +14,7 @@ public class Intake extends Subsystem {
 
     private boolean indexer = false;
     private boolean filterButton = false;
-    private double filterOn = -1;
+    private double filterOn = -1.0;
 
     private double intakePower;
     private double transferPower;
@@ -62,8 +62,8 @@ public class Intake extends Subsystem {
         }
 
         if(currentIndex != indexer && indexer) {
-            gamepad1.rumble(1.0, 1.0, 500);
-            gamepad2.rumble(1.0, 1.0, 500);
+         //   gamepad1.rumble(1.0, 1.0, 500);
+          //  gamepad2.rumble(1.0, 1.0, 500);
         }
 
         if(MathUtils.shouldHardwareUpdate(intakePower, this.intakePower, HardwarePrecision.LOW)) {
@@ -81,7 +81,7 @@ public class Intake extends Subsystem {
             this.filterButton = false;
         }
         if(filterOn > 0){
-            filter.setPosition(.5);
+            filter.setPosition(0.5);
         }
         if(filterOn < 0){
             filter.setPosition(0.05);
