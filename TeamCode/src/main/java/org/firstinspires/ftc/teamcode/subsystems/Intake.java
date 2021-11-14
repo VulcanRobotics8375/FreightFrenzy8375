@@ -44,7 +44,9 @@ public class Intake extends Subsystem {
         int indexerPos = transfer.getCurrentPosition();
         if(on) {
             transferPower = TRANSFER_POWER;
-            intakePower = indexer ? 0 : INTAKE_POWER;
+            //TODO change indexer code to match
+            intakePower = INTAKE_POWER;
+//            intakePower = indexer ? 0 : INTAKE_POWER;
 
         } else if(outtake) {
             intakePower = -INTAKE_POWER;

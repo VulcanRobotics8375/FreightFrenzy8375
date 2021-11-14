@@ -30,7 +30,7 @@ public class Lift extends Subsystem {
         lift = hardwareMap.dcMotor.get("lift");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lift.setDirection(DcMotorSimple.Direction.FORWARD);
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void run(double stickPower, boolean buttonPress) {
