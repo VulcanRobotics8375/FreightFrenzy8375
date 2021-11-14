@@ -9,7 +9,8 @@ public class Carousel extends Subsystem {
     private CRServo carousel;
     private Servo opener;
 
-    private boolean opened = false;
+    private double CarouselToggle = -1;
+    private boolean CarouselButton = false;
     private double close = 0.3;
     private double open = 0.6;
 
@@ -24,10 +25,16 @@ public class Carousel extends Subsystem {
             carousel.setPower(1);
         }
 
-        if(changeOpen && !opened) {
-            opener.setPosition(open);
-        } else if(changeOpen && opened) {
-            opener.setPosition(close);
+        if(changeOpen && !CarouselButton) {
+            CarouselToggle *=-1;
+            CarouselButton = true;
+        } else if(!changeOpen && CarouselButton) {
+            CarouselButton = false;
         }
+
+        if(CarouselToggle==1)  opener.setPosition(open);
+        else if(CarouselToggle ==-1) opener.setPosition(close);
+
+
     }
 }

@@ -7,6 +7,8 @@ public class Cap extends Subsystem {
     private Servo arm;
     private double down = 0.7;
     private double up = 0.1;
+    private boolean open = false;
+    boolean currentButton= false;
 
     @Override
     public void init() {
@@ -14,9 +16,18 @@ public class Cap extends Subsystem {
         arm.setPosition(up);
     }
 
-    public void run(boolean changePos) {
-        if (changePos && arm.getPosition() == down) arm.setPosition(up);
-        else if (changePos && arm.getPosition() == up) arm.setPosition(down);
+    public void run(boolean changeOpen) {
+
+       if(currentButton==changeOpen) return;
+        if (changeOpen && !open) {
+            arm.setPosition(up);
+            open = true;
+        }
+        else if (changeOpen && open) {
+            arm.setPosition(down);
+            open = false;
+        }
+        currentButton = changeOpen;
     }
 
 
