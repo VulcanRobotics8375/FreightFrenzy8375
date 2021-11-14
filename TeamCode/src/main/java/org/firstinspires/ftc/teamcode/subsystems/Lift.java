@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 public class Lift extends Subsystem {
     private DcMotor lift;
     private Servo release;
+    private Servo linkage;
 
     private boolean hold = false;
     private int holdPosition;
@@ -17,6 +18,9 @@ public class Lift extends Subsystem {
 
     private boolean open = false;
     private boolean buttonPress = false;
+
+    private boolean linkageButton = false;
+    private double linkageOn = -1;
 
     private final int LIMIT_RANGE = 300;
     private final int MAX_HEIGHT = 600;
@@ -28,12 +32,13 @@ public class Lift extends Subsystem {
     public void init(){
         release = hardwareMap.servo.get("release");
         lift = hardwareMap.dcMotor.get("lift");
+        linkage = hardwareMap.servo.get("linkage");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
-    public void run(double stickPower, boolean buttonPress) {
+    public void run(double stickPower, boolean buttonPress, boolean linkageButton) {
         int pos = lift.getCurrentPosition();
         double outputPower;
         if(stickPower < 0) {
@@ -72,6 +77,20 @@ public class Lift extends Subsystem {
 
         if(pos < 150 && release.getPosition() != CLOSED_POS){
             release.setPosition(CLOSED_POS);
+        }
+
+        if(linkageButton && !this.linkageButton){
+            linkageOn *= -1;
+            this.linkageButton = true;
+        }
+        if(!linkageButton && this.linkageButton){
+            this.linkageButton = false;
+        }
+        if(linkageOn > 0){
+            linkage.setPosition(0.5);
+        }
+        if(linkageOn < 0){
+            linkage.setPosition(0.1);
         }
 
         telemetry.addData("lift pos", pos);
