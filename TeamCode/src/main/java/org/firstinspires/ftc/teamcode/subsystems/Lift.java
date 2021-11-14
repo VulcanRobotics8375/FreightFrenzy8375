@@ -4,49 +4,86 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
+import org.firstinspires.ftc.teamcode.robotcorelib.math.PID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
-import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
 
 public class Lift extends Subsystem {
-
-    private Servo extend;
     private DcMotor lift;
+    private Servo release;
 
-    private boolean extended;
-    private boolean extendButton;
-    private double liftPower;
+    private boolean hold = false;
+    private int holdPosition;
+    PID pid = new PID(0.0005, 0, 0, 1, -1);
 
-    @Override
-    public void init() {
+    private boolean open = false;
+    private boolean buttonPress = false;
+
+    private final int LIMIT_RANGE = 300;
+    private final int MAX_HEIGHT = 600;
+    private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
+    private final double CLOSED_POS = 0.05;
+    private final double OPENED_POS = 0.65;
+
+
+    public void init(){
+        release = hardwareMap.servo.get("release");
         lift = hardwareMap.dcMotor.get("lift");
-        extend = hardwareMap.servo.get("extend");
-
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        lift.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
-    public void run(double liftPower, boolean extend) {
-        if(extend && !extendButton) {
-            extended = !extended;
-            extendButton = true;
-        }
-        if(!extend && extendButton) {
-            extendButton = false;
+    public void run(double stickPower, boolean buttonPress) {
+        int pos = lift.getCurrentPosition();
+        double outputPower;
+        if(stickPower < 0) {
+            stickPower *= 0.2;
         }
 
-        if(extended) {
-            this.extend.setPosition(0.01);
+        // Sigmoid
+        //value to tune here is the numerator-- higher number == faster acceleration curve
+        if(stickPower > 0) {
+            hold = false;
+            outputPower = stickPower / (1 + Math.exp(CONVERGENCE_SPEED * (pos - (MAX_HEIGHT - (LIMIT_RANGE / 2.0)))));
+        } else if(stickPower < 0) {
+            hold = false;
+            outputPower = stickPower / (1 + Math.exp(CONVERGENCE_SPEED * (LIMIT_RANGE/2.0 - pos)));
         } else {
-            this.extend.setPosition(1);
-        }
-        if(MathUtils.shouldHardwareUpdate(liftPower, this.liftPower, HardwarePrecision.HIGH)) {
-            lift.setPower(liftPower);
+            if(!hold) {
+                holdPosition = pos;
+                hold = true;
+            }
+            outputPower = pid.run(holdPosition, pos);
         }
 
-        this.liftPower = liftPower;
+        lift.setPower(outputPower);
+
+        if(buttonPress && !this.buttonPress) {
+            this.buttonPress = true;
+            open = !open;
+        }
+        if(!buttonPress && this.buttonPress) {
+            this.buttonPress = false;
+        }
+        if(open)
+            release.setPosition(OPENED_POS);
+        else
+            release.setPosition(CLOSED_POS);
+
+        if(pos < 150 && release.getPosition() != CLOSED_POS){
+            release.setPosition(CLOSED_POS);
+        }
+
+        telemetry.addData("lift pos", pos);
+//        telemetry.addData("hold", hold);
+
     }
+
+
+    public void test(double stickPower) {
+        lift.setPower(stickPower);
+        telemetry.addData("lift pos", lift.getCurrentPosition());
+    }
+
 
 }

@@ -95,6 +95,7 @@ public class PurePursuit extends Follower {
                 if(followPoint.x > maxX || followPoint.x < minX) {
                     followPoint.setPoint(end.toPoint());
                 }
+
             }
         }
 
@@ -108,9 +109,9 @@ public class PurePursuit extends Follower {
         double distanceFromStart = Math.hypot(startPoint.x - robotPose.getX(), startPoint.y - robotPose.getY());
         double distanceFromEnd = Math.hypot(endPoint.x - robotPose.getX(), endPoint.y - robotPose.getY());
         if(distanceFromEnd < accelDistance) {
-            followPoint.speed *= (m * (distanceFromEnd - accelDistance)) + 1;
+            followPoint.speed *= m * distanceFromEnd;
         } else if(distanceFromStart < accelDistance) {
-            followPoint.speed *= (m * (distanceFromStart - accelDistance)) + 1;
+            followPoint.speed *= m * distanceFromStart;
         }
 
         return followPoint;
