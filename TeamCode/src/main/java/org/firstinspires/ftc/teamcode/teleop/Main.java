@@ -39,6 +39,9 @@ public class Main extends OpModePipeline {
         subsystems.carousel.run(gamepad2.left_bumper, gamepad2.right_bumper);
 
         subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y, gamepad1.x);
+        subsystems.lift.test(-gamepad2.left_stick_y);
+
+//        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y);
 
         subsystems.cap.run(gamepad2.dpad_up);
 
