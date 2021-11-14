@@ -14,7 +14,7 @@ public class Intake extends Subsystem {
 
     private boolean indexer = false;
     private boolean filterButton = false;
-    private double filterOn = -1;
+    private double filterOn = -1.0;
 
     private double intakePower;
     private double transferPower;
@@ -81,7 +81,7 @@ public class Intake extends Subsystem {
             this.filterButton = false;
         }
         if(filterOn > 0){
-            filter.setPosition(.5);
+            filter.setPosition(0.5);
         }
         if(filterOn < 0){
             filter.setPosition(0.05);
