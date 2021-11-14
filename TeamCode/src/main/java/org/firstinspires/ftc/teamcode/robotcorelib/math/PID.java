@@ -46,7 +46,6 @@ public class PID {
     }
 
     public void clampOutput() {
-        //
         if(controllerOutput > outputMaxLimit){
             controllerOutput = outputMaxLimit;
         } else if(controllerOutput < outputMinLimit){

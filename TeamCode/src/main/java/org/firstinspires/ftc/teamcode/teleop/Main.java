@@ -34,7 +34,7 @@ public class Main extends OpModePipeline {
 
         subsystems.drivetrain.mechanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-        subsystems.intake.run(gamepad2.a, gamepad2.b);
+        subsystems.intake.run(gamepad2.a, gamepad2.b, gamepad2.x);
 
 //        telemetry.addData("imu angle", subsystems.drivetrain.getIMU().getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
 //        telemetry.addData("left", Robot.getConfiguration().localizer.getWheelPositions().get(0));

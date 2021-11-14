@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 public class PIDTest extends OpModePipeline {
     private DcMotor motor;
     PID pid = new PID(0.005, 0.001, 0, 0.95, -0.95);
-    public   void init(){
+    public void init(){
         runMode = RobotRunMode.TELEOP;
         super.init();
         motor = hardwareMap.dcMotor.get("lift");
