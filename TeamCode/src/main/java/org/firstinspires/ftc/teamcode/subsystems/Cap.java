@@ -8,7 +8,7 @@ public class Cap extends Subsystem {
     private double down = 0.7;
     private double up = 0.1;
     private boolean open = false;
-    boolean currentButton= false;
+    boolean currentButton = false;
 
     @Override
     public void init() {
@@ -18,7 +18,8 @@ public class Cap extends Subsystem {
 
     public void run(boolean changeOpen) {
 
-       if(currentButton==changeOpen) return;
+       if(currentButton==changeOpen)
+           return;
         if (changeOpen && !open) {
             arm.setPosition(up);
             open = true;
