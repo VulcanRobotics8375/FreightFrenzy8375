@@ -40,7 +40,6 @@ public class AutoPaths extends OpModePipeline {
             @Override
             public boolean conditional() {
                 return true;
-
             }
             @Override
             public void run() {

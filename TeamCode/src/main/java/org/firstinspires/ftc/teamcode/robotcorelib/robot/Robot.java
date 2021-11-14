@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.localization.Localizer;
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.localization.StandardTrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.robotcorelib.opmode.OpModePipeline;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.ErrorHandler;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
@@ -40,6 +41,7 @@ public class Robot {
         telemetry = opMode.telemetry;
         config = opMode.subsystems;
         config.init();
+        config.localizer = new StandardTrackingWheelLocalizer(opMode.hardwareMap);
         localizer = config.localizer;
 
         errorHandler = new ErrorHandler(telemetry);
