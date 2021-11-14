@@ -11,8 +11,8 @@ public class Carousel extends Subsystem {
 
     private boolean opened;
     private boolean changeOpenButton = false;
-    private double close = 0.3;
-    private double open = 0.6;
+    private double close = 0.01;
+    private double open = 1.0;
 
     @Override
     public void init() {

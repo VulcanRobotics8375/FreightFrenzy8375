@@ -87,10 +87,10 @@ public class Lift extends Subsystem {
             this.linkageButton = false;
         }
         if(linkageOn > 0){
-            linkage.setPosition(0.5);
+            linkage.setPosition(1.0);
         }
         if(linkageOn < 0){
-            linkage.setPosition(0.1);
+            linkage.setPosition(0.5);
         }
 
         telemetry.addData("lift pos", pos);
