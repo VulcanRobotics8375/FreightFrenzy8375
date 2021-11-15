@@ -23,7 +23,7 @@ public class Lift extends Subsystem {
     private double linkageOn = -1;
 
     private final int LIMIT_RANGE = 300;
-    private final int MAX_HEIGHT = 600;
+    private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
     private final double CLOSED_POS = 0.05;
     private final double OPENED_POS = 0.65;
