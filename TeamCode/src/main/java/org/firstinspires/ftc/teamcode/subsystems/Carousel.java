@@ -8,11 +8,9 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 public class Carousel extends Subsystem {
     private CRServo carousel;
     private Servo opener;
-
-    private boolean opened;
-    private boolean changeOpenButton = false;
-    private double close = 0.01;
-    private double open = 1.0;
+    
+    private boolean openButton = false;
+    private double openOn = -1;
 
     @Override
     public void init() {
@@ -20,20 +18,25 @@ public class Carousel extends Subsystem {
         opener = hardwareMap.servo.get("carousel_opener");
     }
 
-    public void run(boolean spin, boolean changeOpen) {
-        if(spin)
+    public void run(boolean spin, boolean openButton) {
+        if(spin) {
             carousel.setPower(1);
+        }else{
+            carousel.setPower(0);
+        }
 
-        if(changeOpen == changeOpenButton)
-            return;
-        changeOpenButton = changeOpen;
-
-        if (changeOpen && !opened) {
-            opener.setPosition(open);
-            opened = true;
-        } else if (changeOpen && opened) {
-            opener.setPosition(close);
-            opened = false;
+        if (openButton && !this.openButton) {
+            openOn *= -1;
+            this.openButton = true;
+        }
+        if (!openButton && this.openButton) {
+            this.openButton = false;
+        }
+        if(openOn > 0){
+            opener.setPosition(1.0);
+        }
+        if(openOn < 0){
+            opener.setPosition(0.01);
         }
     }
 }
