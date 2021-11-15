@@ -33,10 +33,10 @@ public class Carousel extends Subsystem {
             this.openButton = false;
         }
         if(openOn > 0){
-            opener.setPosition(1.0);
+            opener.setPosition(0.01);
         }
         if(openOn < 0){
-            opener.setPosition(0.01);
+            opener.setPosition(1.0);
         }
     }
 }
