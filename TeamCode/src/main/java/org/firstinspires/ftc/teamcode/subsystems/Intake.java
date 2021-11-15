@@ -83,7 +83,7 @@ public class Intake extends Subsystem {
             this.filterButton = false;
         }
         if(filterOn > 0){
-            filter.setPosition(0.9);
+            filter.setPosition(0.95);
         }
         if(filterOn < 0){
             filter.setPosition(0.3);

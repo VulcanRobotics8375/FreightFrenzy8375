@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 public class Carousel extends Subsystem {
     private CRServo carousel;
     private Servo opener;
-    
+
     private boolean openButton = false;
     private double openOn = -1;
 

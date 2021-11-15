@@ -16,7 +16,7 @@ public class Lift extends Subsystem {
     private int holdPosition;
     PID pid = new PID(0.0005, 0, 0, 1, -1);
 
-    private boolean open = false;
+    private double buttonOn = -1;
     private boolean buttonPress = false;
 
     private boolean linkageButton = false;
@@ -65,15 +65,17 @@ public class Lift extends Subsystem {
 
         if(buttonPress && !this.buttonPress) {
             this.buttonPress = true;
-            open = !open;
+            buttonOn *= -1;
         }
         if(!buttonPress && this.buttonPress) {
             this.buttonPress = false;
         }
-        if(open)
+        if(buttonOn > 0) {
             release.setPosition(OPENED_POS);
-        else
+        }
+        if(buttonOn < 0) {
             release.setPosition(CLOSED_POS);
+        }
 
         if(pos < 150 && release.getPosition() != CLOSED_POS){
             release.setPosition(CLOSED_POS);
@@ -90,7 +92,7 @@ public class Lift extends Subsystem {
             linkage.setPosition(1.0);
         }
         if(linkageOn < 0){
-            linkage.setPosition(0.5);
+            linkage.setPosition(0.45);
         }
 
         telemetry.addData("lift pos", pos);
