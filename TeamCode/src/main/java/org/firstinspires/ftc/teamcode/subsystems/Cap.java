@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
 public class Cap extends Subsystem {
     private Servo arm;
-    private double down = 0.5;
+    private double down = 0.65;
     private double up = 0.1;
     private boolean open = false;
     boolean currentButton = false;
@@ -18,7 +18,7 @@ public class Cap extends Subsystem {
 
     public void run(boolean changeOpen) {
 
-       if(currentButton==changeOpen)
+       if(currentButton == changeOpen)
            return;
         if (changeOpen && !open) {
             arm.setPosition(up);
