@@ -39,6 +39,7 @@ Java_org_firstinspires_ftc_teamcode_vision_aruco_ArucoPipeline_detectArucoMarker
                 env->SetObjectArrayElement(double2dArray, i, doubleArray);
                 env->DeleteLocalRef(doubleArray);
             }
+            //create marker object and add it to marker array
             int id = markerIds[i];
             jobject jmarkerObj = env->NewObject(markerClass, markerConstructor, double2dArray, id);
             env->SetObjectArrayElement(markerArray, i, jmarkerObj);
@@ -46,8 +47,6 @@ Java_org_firstinspires_ftc_teamcode_vision_aruco_ArucoPipeline_detectArucoMarker
         }
 
         return markerArray;
-
-
 }
 
 extern "C"
