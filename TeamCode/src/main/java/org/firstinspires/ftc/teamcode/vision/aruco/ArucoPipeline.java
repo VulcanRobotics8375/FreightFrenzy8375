@@ -10,13 +10,11 @@ public class ArucoPipeline extends OpenCvPipeline {
 
     @Override
     public Mat processFrame(Mat input) {
-        detectArucoMarker(input.nativeObj);
+//        detectArucoMarker(input.nativeObj);
         return input;
     }
 
-    native void detectArucoMarker(long frame_ptr);
-
-    native void detectMarkersNative(long frame_ptr, double[] cornersX, double[] cornersY, int[] ids);
+    native ArucoMarker[] detectArucoMarker(long frame_ptr);
 
     static
     {
