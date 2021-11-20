@@ -48,7 +48,7 @@ public class PurePursuit extends Follower {
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose);
 
             moveToPoint(followPoint, robotPose, robotVel);
-            Objects.requireNonNull(path.getRunnableTasks().get(pathPoints.get(pathPointIdx))).run();
+//            Objects.requireNonNull(path.getRunnableTasks().get(pathPoints.get(pathPointIdx))).run();
 
         }
 

@@ -42,7 +42,7 @@ public class Lift extends Subsystem {
         int pos = lift.getCurrentPosition();
         double outputPower;
         if(stickPower < 0) {
-            stickPower *= 0.2;
+            stickPower *= 0.5;
         }
 
         // Sigmoid
@@ -77,9 +77,9 @@ public class Lift extends Subsystem {
             release.setPosition(CLOSED_POS);
         }
 
-        if(pos < 150 && release.getPosition() != CLOSED_POS){
-            release.setPosition(CLOSED_POS);
-        }
+//        if(pos < 150 && release.getPosition() != CLOSED_POS){
+//            release.setPosition(CLOSED_POS);
+//        }
 
         if(linkageButton && !this.linkageButton){
             linkageOn *= -1;
