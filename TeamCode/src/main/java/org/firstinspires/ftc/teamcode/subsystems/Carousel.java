@@ -18,9 +18,15 @@ public class Carousel extends Subsystem {
         opener = hardwareMap.servo.get("carousel_opener");
     }
 
-    public void run(boolean spin, boolean openButton) {
+    public void run(boolean spin, boolean openButton, double oppositeSpin) {
         if(spin) {
             carousel.setPower(-1);
+        }else{
+            carousel.setPower(0);
+        }
+
+        if(oppositeSpin > 0){
+            carousel.setPower(1);
         }else{
             carousel.setPower(0);
         }
