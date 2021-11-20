@@ -18,7 +18,7 @@ public class Cap extends Subsystem {
 
     public void run(boolean changeOpen) {
 
-       if(currentButton==changeOpen)
+       if(currentButton == changeOpen)
            return;
         if (changeOpen && !open) {
             arm.setPosition(up);
