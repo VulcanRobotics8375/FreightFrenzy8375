@@ -15,7 +15,7 @@ public class ArucoPipeline extends OpenCvPipeline {
     public Mat processFrame(Mat input) {
         ArucoMarker[] markers = detectArucoMarker(input.nativeObj);
         ArucoMarker detectedMarker = ArucoMarker.getMarkerById(markers, 50);
-        
+
         Rect boundingRect = new Rect(detectedMarker.getCorners().get(0), detectedMarker.getCorners().get(2));
         Imgproc.rectangle(input, boundingRect, new Scalar(0, 255, 0));
 
