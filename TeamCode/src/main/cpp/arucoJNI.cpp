@@ -20,31 +20,44 @@ Java_org_firstinspires_ftc_teamcode_vision_aruco_ArucoPipeline_detectArucoMarker
         cv::aruco::detectMarkers(mat, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
 
         jclass markerClass = env->FindClass("org/firstinspires/ftc/teamcode/vision/aruco/ArucoMarker");
+
+        if(markerClass == nullptr) {
+            return nullptr;
+        }
+
         jmethodID markerConstructor = env->GetMethodID(markerClass, "<init>", "([[DI)V");
 
-        jobjectArray markerArray = env->NewObjectArray(markerCorners.size(), markerClass, NULL);
+        jobjectArray markerArray = env->NewObjectArray(markerCorners.size(), markerClass, nullptr);
 
         jclass doubleArrayClass = env->FindClass("[D");
 
-        //loop through detected markers
-        for(int i = 0; i < markerCorners.size(); i++) {
-            //add all 4 corners to 2d double array
-            std::vector<cv::Point2f> marker = markerCorners[i];
-            jobjectArray double2dArray = env->NewObjectArray(4, doubleArrayClass, NULL);
-            for(int j = 0; j < 4; j++) {
-                cv::Point2f corner = marker[j];
-                double cornerArray[] = {corner.x, corner.y};
-                jdoubleArray doubleArray = env->NewDoubleArray(2);
-                env->SetDoubleArrayRegion(doubleArray, 0, 2, cornerArray);
-                env->SetObjectArrayElement(double2dArray, i, doubleArray);
-                env->DeleteLocalRef(doubleArray);
-            }
-            //create marker object and add it to marker array
-            int id = markerIds[i];
-            jobject jmarkerObj = env->NewObject(markerClass, markerConstructor, double2dArray, id);
-            env->SetObjectArrayElement(markerArray, i, jmarkerObj);
-            env->DeleteLocalRef(jmarkerObj);
+        if(doubleArrayClass == nullptr) {
+            return nullptr;
         }
+
+        //loop through detected markers
+
+//        for(int i = 0; i < markerCorners.size(); i++) {
+//            //add all 4 corners to 2d double array
+//            std::vector<cv::Point2f> marker = markerCorners[i];
+//            jobjectArray double2dArray = env->NewObjectArray(4, doubleArrayClass, nullptr);
+//            for(int j = 0; j < 4; j++) {
+//                cv::Point2f corner = marker[j];
+//                double cornerArray[] = {corner.x, corner.y};
+//                jdoubleArray doubleArray = env->NewDoubleArray(2);
+//                env->SetDoubleArrayRegion(doubleArray, 0, 2, cornerArray);
+//                env->SetObjectArrayElement(double2dArray, i, doubleArray);
+//                env->DeleteLocalRef(doubleArray);
+//            }
+//            //create marker object and add it to marker array
+//            int id = markerIds[i];
+//            jobject jmarkerObj = env->NewObject(markerClass, markerConstructor, double2dArray, id);
+//            env->SetObjectArrayElement(markerArray, i, jmarkerObj);
+//            env->DeleteLocalRef(jmarkerObj);
+//        }
+//
+//        env->DeleteLocalRef(markerClass);
+//        env->DeleteLocalRef(doubleArrayClass);
 
         return markerArray;
 }
