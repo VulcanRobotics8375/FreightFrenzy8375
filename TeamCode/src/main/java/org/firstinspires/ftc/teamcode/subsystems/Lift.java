@@ -22,7 +22,7 @@ public class Lift extends Subsystem {
     private boolean linkageButton = false;
     private double linkageOn = -1;
 
-    private final int LIMIT_RANGE = 300;
+    private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
     private final double CLOSED_POS = 0.05;
@@ -41,9 +41,9 @@ public class Lift extends Subsystem {
     public void run(double stickPower, boolean buttonPress, boolean linkageButton) {
         int pos = lift.getCurrentPosition();
         double outputPower;
-        if(stickPower < 0) {
-            stickPower *= 0.5;
-        }
+//        if(stickPower < 0) {
+//            stickPower *= 0.5;
+//        }
 
         // Sigmoid
         //value to tune here is the numerator-- higher number == faster acceleration curve
