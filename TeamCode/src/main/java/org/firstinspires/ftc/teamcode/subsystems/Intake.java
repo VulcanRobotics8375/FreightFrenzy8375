@@ -96,4 +96,8 @@ public class Intake extends Subsystem {
         this.transferPower = transferPower;
     }
 
+    public boolean indexerOn() {
+        return indexer;
+    }
+
 }
