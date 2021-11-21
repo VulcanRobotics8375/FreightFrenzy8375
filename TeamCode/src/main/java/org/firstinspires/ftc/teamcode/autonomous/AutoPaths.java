@@ -33,6 +33,17 @@ public class AutoPaths extends OpModePipeline {
                 .build();
         follower.followPath(path);
 
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return !subsystems.intake.indexerOn();
+            }
+            @Override
+            public void run() {
+                subsystems.intake.run(true, false, false);
+            }
+        });
+
 //        runTask(new AutoTask() {
 //            @Override
 //            public boolean conditional() {
@@ -40,7 +51,6 @@ public class AutoPaths extends OpModePipeline {
 //            }
 //            @Override
 //            public void run() {
-//
 //            }
 //        });
 
