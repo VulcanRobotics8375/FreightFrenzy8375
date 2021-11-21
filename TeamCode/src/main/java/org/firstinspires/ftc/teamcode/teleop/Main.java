@@ -34,15 +34,25 @@ public class Main extends OpModePipeline {
 
         subsystems.drivetrain.mechanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-        subsystems.intake.run(gamepad2.a, gamepad2.b);
+        subsystems.intake.run(gamepad2.a, gamepad2.b, gamepad2.x);
+
+        subsystems.carousel.run(gamepad2.left_bumper, gamepad2.right_bumper, gamepad2.right_trigger);
+
+        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y, gamepad1.x);
+//        subsystems.lift.test(-gamepad2.left_stick_y);
+
+//        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y);
+
+        subsystems.cap.run(gamepad2.dpad_up);
 
 //        telemetry.addData("imu angle", subsystems.drivetrain.getIMU().getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
-//        telemetry.addData("left", Robot.getConfiguration().localizer.getWheelPositions().get(0));
-//        telemetry.addData("right", Robot.getConfiguration().localizer.getWheelPositions().get(1));
-//        telemetry.addData("strafe", Robot.getConfiguration().localizer.getWheelPositions().get(2));
-//        telemetry.addData("x", robotPose.getX());
-//        telemetry.addData("y", robotPose.getY());
-//        telemetry.addData("heading", robotPose.getHeading());
+//        telemetry.addData("left", Robot.getConfiguration().localizer.getRawWheelPositions().get(0));
+//        telemetry.addData("right", Robot.getConfiguration().localizer.getRawWheelPositions().get(1));
+//        telemetry.addData("strafe", Robot.getConfiguration().localizer.getRawWheelPositions().get(2));
+        telemetry.addData("x", robotPose.getX());
+        telemetry.addData("y", robotPose.getY());
+        telemetry.addData("heading", robotPose.getHeading());
+        telemetry.update();
 
         double endTimeMs = getRuntime()*1000.0;
         maintainConstantLoopTime(60, endTimeMs - startTimeMs);

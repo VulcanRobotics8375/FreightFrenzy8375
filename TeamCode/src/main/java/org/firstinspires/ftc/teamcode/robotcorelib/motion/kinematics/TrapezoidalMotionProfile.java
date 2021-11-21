@@ -16,9 +16,10 @@ public class TrapezoidalMotionProfile extends BasicMotionProfile {
      * https://www.desmos.com/calculator/wfnk0qbd87
      */
     @Override
-    public void build() {
+    public TrapezoidalMotionProfile build() {
         double distance = Math.hypot(end.getX() - start.getX(), end.getY() - start.getY());
         t = (maxVel / maxAccel) + (distance / maxVel);
+        return this;
     }
 
     @Override

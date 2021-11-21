@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
+import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainVelocityMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
@@ -18,7 +19,7 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
     private DcMotor fl, fr, bl, br;
     private BNO055IMU imu;
     public static final DriveMode driveMode = DriveMode.MECANUM;
-
+    public static final DrivetrainVelocityMode velocityMode = DrivetrainVelocityMode.DRIVE_MOTOR_ENCODERS;
 
     BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
@@ -144,6 +145,10 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
     @Override
     public DriveMode getDriveMode() {
         return driveMode;
+    }
+
+    public DrivetrainVelocityMode getVelocityControlMode() {
+        return velocityMode;
     }
 
     public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) {

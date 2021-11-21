@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotcorelib.robot;
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.localization.StandardTrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
@@ -49,6 +51,7 @@ public abstract class RobotConfig {
 
     public ArrayList<Subsystem> subsystems = new ArrayList<>();
 
+    public HardwareMap hardwareMap;
     //localization
     public StandardTrackingWheelLocalizer localizer;
 
