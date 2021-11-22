@@ -26,7 +26,7 @@ public class Lift extends Subsystem {
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
     private final double CLOSED_POS = 0.01;
-    private final double OPENED_POS = 0.65;
+    private final double OPENED_POS = 0.45;
 
 
     public void init(){
@@ -92,7 +92,7 @@ public class Lift extends Subsystem {
             linkage.setPosition(1.0);
         }
         if(linkageOn < 0){
-            linkage.setPosition(0.45);
+            linkage.setPosition(0.49);
         }
 
         telemetry.addData("lift pos", pos);
