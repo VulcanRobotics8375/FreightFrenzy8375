@@ -66,8 +66,8 @@ public class Intake extends Subsystem {
         }
 
         if(currentIndex != indexer && indexer) {
-         //   gamepad1.rumble(1.0, 1.0, 500);
-          //  gamepad2.rumble(1.0, 1.0, 500);
+            gamepad1.rumble(1.0, 1.0, 500);
+            gamepad2.rumble(1.0, 1.0, 500);
         }
 
         if(MathUtils.shouldHardwareUpdate(intakePower, this.intakePower, HardwarePrecision.LOW)) {
@@ -85,10 +85,10 @@ public class Intake extends Subsystem {
             this.filterButton = false;
         }
         if(filterOn > 0){
-            filter.setPosition(0.95);
+            filter.setPosition(1.0);
         }
         if(filterOn < 0){
-            filter.setPosition(0.3);
+            filter.setPosition(0.2);
         }
         telemetry.addData("indexer pos", indexerPos);
 

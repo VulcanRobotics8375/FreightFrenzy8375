@@ -34,11 +34,11 @@ public class Main extends OpModePipeline {
 
         subsystems.drivetrain.mechanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-        subsystems.intake.run(gamepad2.a, gamepad2.b, gamepad2.x);
+        subsystems.intake.run(gamepad2.a, gamepad2.b, gamepad2.dpad_down);
 
         subsystems.carousel.run(gamepad2.left_bumper, gamepad2.right_bumper, gamepad2.right_trigger);
 
-        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y, gamepad1.x);
+        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y, gamepad2.x);
 //        subsystems.lift.test(-gamepad2.left_stick_y);
 
 //        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y);
