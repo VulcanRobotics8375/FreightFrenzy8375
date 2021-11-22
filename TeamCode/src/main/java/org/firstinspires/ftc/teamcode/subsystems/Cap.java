@@ -14,6 +14,7 @@ public class Cap extends Subsystem {
 
     private double position = up;
     private double increment = 0.005;
+    long lastTime = System.nanoTime();
 
     @Override
     public void init() {
@@ -31,12 +32,16 @@ public class Cap extends Subsystem {
        }
        if(open > 0){
            // updated to slow down so cap doesn't fly out
-           if(position + increment <= 0.6) {
+           if(position + increment <= 0.6 && System.nanoTime() - lastTime
+                > 10000000) {
                arm.setPosition(position+increment);
                position += increment;
-           } else if(position + increment > 0.6) {
+               lastTime = System.nanoTime();
+           } else if(position + increment > 0.6 && System.nanoTime() - lastTime
+                   > 10000000) {
                arm.setPosition(down);
                position = 0.6;
+               lastTime = System.nanoTime();
            }
 
        }
