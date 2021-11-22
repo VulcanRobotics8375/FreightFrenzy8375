@@ -15,6 +15,8 @@ public class ArucoPipeline extends OpenCvPipeline {
 
     private Telemetry telemetry;
 
+    volatile Point markerPos = new Point();
+
     public ArucoPipeline(Telemetry telemetry) {
         this.telemetry = telemetry;
     }
@@ -22,19 +24,26 @@ public class ArucoPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         ArucoMarker[] markers = detectArucoMarker(input.nativeObj);
-//        telemetry.addLine("ran native method");
-//        telemetry.update();
-//        ArucoMarker detectedMarker = ArucoMarker.getMarkerById(markers, 50);
-//
-//        if(detectedMarker != null) {
-//            ArrayList<Point> corners = detectedMarker.getCorners();
-//            for(int i = 0; i < corners.size() - 1; i++) {
-//                Point start = corners.get(i);
-//                Point end = corners.get(i + 1);
-//                Imgproc.line(input, start, end, new Scalar(0, 255, 0), 2, 8, 0);
-//            }
-//            Imgproc.line(input, corners.get(0), corners.get(3), new Scalar(0, 255, 0), 2, 8, 0);
-//        }
+//        ArucoMarker detectedMarker = null;
+        if(markers != null && markers.length > 0) {
+            ArucoMarker marker = ArucoMarker.getMarkerById(markers, 50);
+
+
+            if (marker != null) {
+                markerPos = marker.getPosition();
+                telemetry.addData("pos", markerPos.x + ", " + markerPos.y);
+                telemetry.update();
+
+                ArrayList<Point> corners = marker.getCorners();
+                for (int i = 0; i < corners.size() - 1; i++) {
+                    Point start = corners.get(i);
+                    Point end = corners.get(i + 1);
+                    Imgproc.line(input, start, end, new Scalar(0, 255, 0), 2, 8, 0);
+                }
+                Imgproc.putText(input, "id:" + marker.id, markerPos, Imgproc.FONT_HERSHEY_COMPLEX, 1, new Scalar(0, 255, 0));
+                Imgproc.line(input, corners.get(0), corners.get(3), new Scalar(0, 255, 0), 2, 8, 0);
+            }
+        }
 
         return input;
     }

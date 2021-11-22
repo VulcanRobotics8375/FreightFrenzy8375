@@ -23,6 +23,7 @@ add_library( # Specifies the name of the library.
         src/main/cpp/zmaxheap.cpp
         src/main/cpp/arucoJNI.cpp
         src/main/cpp/ArucoMarker.cpp
+        src/main/cpp/charuco.cpp
             )
 
 ############################################################

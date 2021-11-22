@@ -26,6 +26,10 @@ public class ArucoMarker {
         return points;
     }
 
+    public double[][] getCornersRaw() {
+        return corners;
+    }
+
     public Point getPosition() {
         ArrayList<Point> corners = getCorners();
         //get opposite corners
@@ -36,9 +40,11 @@ public class ArucoMarker {
     }
 
     public static ArucoMarker getMarkerById(ArucoMarker[] markers, int id) {
-        for(ArucoMarker marker : markers) {
-            if(marker.id == id) {
-                return marker;
+        if(markers.length > 0 && markers != null) {
+            for (ArucoMarker marker : markers) {
+                if (marker.id == id) {
+                    return marker;
+                }
             }
         }
         return null;
