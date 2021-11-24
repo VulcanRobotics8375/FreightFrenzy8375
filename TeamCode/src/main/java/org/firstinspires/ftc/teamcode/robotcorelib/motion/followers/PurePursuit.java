@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.motion.followers;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
@@ -21,9 +22,11 @@ import static org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants.*
 
 public class PurePursuit extends Follower {
 
-    boolean following;
+    public volatile boolean following;
     private SimplePID velocityPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
-    private SimplePID turnPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
+    private SimplePID turnPid = new SimplePID(-1.0, 0.0, 0.0, -1.0, 1.0);
+
+    private LinearOpMode opMode;
 
     private int pathPointIdx;
 
@@ -35,28 +38,35 @@ public class PurePursuit extends Follower {
 
     public PurePursuit() {}
 
+    public PurePursuit(LinearOpMode opMode) {
+        this.opMode = opMode;
+    }
+
     public void followPath(Path path) {
         following = true;
 
         // base follower
         ArrayList<PathPoint> pathPoints = path.asList();
-        while(following) {
+        while(following && !opMode.isStopRequested()) {
             Robot.update();
             Pose2d robotPose = Robot.getRobotPose();
             Pose2d robotVel = Robot.getRobotVelocity();
 
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose);
 
-            moveToPoint(followPoint, robotPose, robotVel);
+            moveToPoint(path.getEnd(), robotPose, robotVel);
+            if(Math.hypot(robotPose.getX() - path.getEnd().x, robotPose.getY() - path.getEnd().y) < ALLOWED_POSE_ERROR + 2.0) {
+                following = false;
+            }
 //            Objects.requireNonNull(path.getRunnableTasks().get(pathPoints.get(pathPointIdx))).run();
 
         }
 
         //mitigate pose error
-        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
-            PathPoint endPoint = pathPoints.get(pathPoints.size() - 1);
-            mitigatePoseError(endPoint);
-        }
+//        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
+//            PathPoint endPoint = pathPoints.get(pathPoints.size() - 1);
+//            mitigatePoseError(endPoint);
+//        }
 
     }
 
@@ -102,17 +112,17 @@ public class PurePursuit extends Follower {
         //Motion Profile Generation
         // convert continuous, time-variant motion profile to discrete, time-invariant motion profile
         //transfer function-- https://www.desmos.com/calculator/rlv4hdqutl
-        double targetVel = MAX_VELOCITY * followPoint.speed;
-        double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
-        double m = 1 / accelDistance;
-
-        double distanceFromStart = Math.hypot(startPoint.x - robotPose.getX(), startPoint.y - robotPose.getY());
-        double distanceFromEnd = Math.hypot(endPoint.x - robotPose.getX(), endPoint.y - robotPose.getY());
-        if(distanceFromEnd < accelDistance) {
-            followPoint.speed *= m * distanceFromEnd;
-        } else if(distanceFromStart < accelDistance) {
-            followPoint.speed *= m * distanceFromStart;
-        }
+//        double targetVel = MAX_VELOCITY * followPoint.speed;
+//        double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
+//        double m = 1 / accelDistance;
+//
+//        double distanceFromStart = Math.hypot(startPoint.x - robotPose.getX(), startPoint.y - robotPose.getY());
+//        double distanceFromEnd = Math.hypot(endPoint.x - robotPose.getX(), endPoint.y - robotPose.getY());
+//        if(distanceFromEnd < accelDistance) {
+//            followPoint.speed *= m * distanceFromEnd;
+//        } else if(distanceFromStart < accelDistance) {
+//            followPoint.speed *= m * distanceFromStart;
+//        }
 
         return followPoint;
     }
@@ -121,9 +131,9 @@ public class PurePursuit extends Follower {
     private void moveToPoint(PathPoint point, Pose2d robotPose, Pose2d robotVelocity) {
         switch (Robot.drivetrain.getDriveMode()) {
             case MECANUM:
-                double absoluteAngleToPoint = Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x);
+                double absoluteAngleToPoint = MathUtils.fullAngleWrap(Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x));
 
-                Vector2d poseVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(point.speed);
+                Vector2d poseVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(-point.speed);
 
                 double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
                 double headingOutput = turnPid.run(headingError);
@@ -147,7 +157,8 @@ public class PurePursuit extends Follower {
                         outputVelocity = new Pose2d();
                         break;
                 }
-
+                opMode.telemetry.addData("x velocity", outputVelocity.getX());
+                opMode.telemetry.addData("y velocity", outputVelocity.getY());
                 double[] powers = DriveKinematics.mecanumFieldVelocityToWheelVelocities(robotPose, outputVelocity);
                 Robot.drivetrain.setPowers(powers);
                 break;

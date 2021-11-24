@@ -28,7 +28,7 @@ public class DriveKinematics {
 
     public static double[] mecanumVelocityToWheelVelocities(Pose2d robotVelocity) {
         double multiplier = 2.0 / Math.sqrt(2.0);
-        double theta = Math.atan2(robotVelocity.getY(), robotVelocity.getX());
+        double theta = Math.atan2(robotVelocity.getX(), robotVelocity.getY()) - (Math.PI / 4.0);
         double xVel = robotVelocity.getX();
         double yVel = robotVelocity.getY();
         double headingVel = robotVelocity.getHeading();
@@ -40,13 +40,13 @@ public class DriveKinematics {
             headingVel *= 1.0 / magnitude;
         }
 
-        double speed = multiplier * Math.hypot(xVel, yVel);
+        double speed = multiplier * Math.hypot(yVel, xVel);
 
         return new double[] {
-                (speed * Math.sin(theta)) + headingVel,
-                (speed * Math.cos(theta)) - headingVel,
                 (speed * Math.cos(theta)) + headingVel,
-                (speed * Math.sin(theta)) - headingVel
+                (speed * Math.sin(theta)) - headingVel,
+                (speed * Math.sin(theta)) + headingVel,
+                (speed * Math.cos(theta)) - headingVel
         };
 
     }
@@ -70,13 +70,13 @@ public class DriveKinematics {
         }
 
         double speed = multiplier * Math.hypot(vx, vy);
-        double theta = robotFieldPose.getHeading() - MathUtils.fullAngleWrap(Math.atan2(vy, vx));
+        double theta = -robotFieldPose.getHeading() - (Math.atan2(vy, vx) - (Math.PI / 4.0));
 
         return new double[] {
-                (speed * Math.sin(theta)) + vHeading,
-                (speed * Math.cos(theta)) - vHeading,
                 (speed * Math.cos(theta)) + vHeading,
-                (speed * Math.sin(theta)) - vHeading
+                (speed * Math.sin(theta)) - vHeading,
+                (speed * Math.sin(theta)) + vHeading,
+                (speed * Math.cos(theta)) - vHeading
         };
     }
 

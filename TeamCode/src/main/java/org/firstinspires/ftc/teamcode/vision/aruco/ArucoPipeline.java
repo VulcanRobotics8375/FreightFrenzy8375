@@ -14,6 +14,7 @@ import java.util.List;
 public class ArucoPipeline extends OpenCvPipeline {
 
     private Telemetry telemetry;
+    public boolean debug = true;
 
     volatile Point markerPos = new Point();
 
@@ -34,14 +35,19 @@ public class ArucoPipeline extends OpenCvPipeline {
                 telemetry.addData("pos", markerPos.x + ", " + markerPos.y);
                 telemetry.update();
 
-                ArrayList<Point> corners = marker.getCorners();
-                for (int i = 0; i < corners.size() - 1; i++) {
-                    Point start = corners.get(i);
-                    Point end = corners.get(i + 1);
-                    Imgproc.line(input, start, end, new Scalar(0, 255, 0), 2, 8, 0);
+                //draw box
+                if (debug) {
+                    ArrayList<Point> corners = marker.getCorners();
+                    for (int i = 0; i < corners.size() - 1; i++) {
+                        Point start = corners.get(i);
+                        Point end = corners.get(i + 1);
+                        Imgproc.line(input, start, end, new Scalar(0, 255, 0), 2, 8, 0);
+                    }
+                    Imgproc.line(input, corners.get(0), corners.get(3), new Scalar(0, 255, 0), 2, 8, 0);
+
+                    //label with id
+                    Imgproc.putText(input, "id:" + marker.id, markerPos, Imgproc.FONT_HERSHEY_COMPLEX, 1, new Scalar(0, 255, 0));
                 }
-                Imgproc.putText(input, "id:" + marker.id, markerPos, Imgproc.FONT_HERSHEY_COMPLEX, 1, new Scalar(0, 255, 0));
-                Imgproc.line(input, corners.get(0), corners.get(3), new Scalar(0, 255, 0), 2, 8, 0);
             }
         }
 
