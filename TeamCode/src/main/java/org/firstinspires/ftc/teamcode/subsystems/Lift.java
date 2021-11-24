@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.math.PID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
@@ -29,9 +30,13 @@ public class Lift extends Subsystem {
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
-    private final double CLOSED_POS = 0.01;
-    private final double OPENED_POS = 0.45;
+    private final double LINKAGE_STICK_COEF = 0.05;
+    private final double LINKAGE_OPENED = 1.0;
+    private final double LINKAGE_CLOSED = 0.49;
+    private final double RELEASE_CLOSED = 0.01;
+    private final double RELEASE_OPENED = 0.45;
 
+    private ElapsedTime linkageTimer = new ElapsedTime();
 
     public void init(){
         release = hardwareMap.servo.get("release");
@@ -43,7 +48,7 @@ public class Lift extends Subsystem {
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void run(double stickPower, boolean releaseButton, boolean linkageButton, boolean firstLevel, boolean secondLevel, boolean thirdLevel) {
+    public void run(double liftStick, boolean releaseButton, boolean linkageButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel) {
         if(runningToPosition) {
             assert true;
         } else if(firstLevel) {
@@ -62,17 +67,17 @@ public class Lift extends Subsystem {
 
         int pos = lift.getCurrentPosition();
 
-        if(Math.abs(stickPower) > 0.05 || !runningToPosition) {
+        if(Math.abs(liftStick) > 0.05 || !runningToPosition) {
             runningToPosition = false;
             double outputPower;
             // Sigmoid
             //value to tune here is the numerator-- higher number == faster acceleration curve
-            if (stickPower > 0) {
+            if (liftStick > 0) {
                 hold = false;
-                outputPower = stickPower / (1 + Math.exp(CONVERGENCE_SPEED * (pos - (MAX_HEIGHT - (LIMIT_RANGE / 2.0)))));
-            } else if (stickPower < 0) {
+                outputPower = liftStick / (1 + Math.exp(CONVERGENCE_SPEED * (pos - (MAX_HEIGHT - (LIMIT_RANGE / 2.0)))));
+            } else if (liftStick < 0) {
                 hold = false;
-                outputPower = stickPower / (1 + Math.exp(CONVERGENCE_SPEED * (LIMIT_RANGE / 2.0 - pos)));
+                outputPower = liftStick / (1 + Math.exp(CONVERGENCE_SPEED * (LIMIT_RANGE / 2.0 - pos)));
             } else {
                 if (!hold) {
                     holdPosition = pos;
@@ -92,14 +97,14 @@ public class Lift extends Subsystem {
             this.releaseButton = false;
         }
         if(buttonOn > 0) {
-            release.setPosition(OPENED_POS);
+            release.setPosition(RELEASE_OPENED);
         }
         if(buttonOn < 0) {
-            release.setPosition(CLOSED_POS);
+            release.setPosition(RELEASE_CLOSED);
         }
 
-//        if(pos < 150 && release.getPosition() != CLOSED_POS){
-//            release.setPosition(CLOSED_POS);
+//        if(pos < 150 && release.getPosition() != RELEASE_CLOSED){
+//            release.setPosition(RELEASE_CLOSED);
 //        }
 
         if(linkageButton && !this.linkageButton){
@@ -110,20 +115,31 @@ public class Lift extends Subsystem {
             this.linkageButton = false;
         }
         if(linkageOn > 0){
-            linkage.setPosition(1.0);
+            linkage.setPosition(LINKAGE_OPENED);
         }
         if(linkageOn < 0){
-            linkage.setPosition(0.49);
+            linkage.setPosition(LINKAGE_CLOSED);
         }
 
+        double linkagePos = linkage.getPosition();
+        boolean nearOpened = !(linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageStick);
+        boolean nearClosed = !(linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageStick);
+        if(linkageStick > 0.05 && !nearOpened) {
+            linkage.setPosition(linkagePos + LINKAGE_STICK_COEF * linkageTimer.milliseconds() * linkageStick);
+        } else if(linkageStick < 0.05 && !nearClosed) {
+            linkage.setPosition(linkagePos + LINKAGE_STICK_COEF * linkageTimer.milliseconds() * linkageStick);
+        }
+        linkageTimer.reset();
+
         telemetry.addData("lift pos", pos);
+        telemetry.addData("linkage set pos", linkagePos);
 //        telemetry.addData("hold", hold);
 
     }
 
 
-    public void test(double stickPower) {
-        lift.setPower(stickPower);
+    public void test(double liftStick) {
+        lift.setPower(liftStick);
         telemetry.addData("lift pos", lift.getCurrentPosition());
     }
 
