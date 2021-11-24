@@ -61,7 +61,6 @@ public class PurePursuit extends Follower {
 //            Objects.requireNonNull(path.getRunnableTasks().get(pathPoints.get(pathPointIdx))).run();
 
         }
-        drivetrain.setPowers(new double[] {0, 0, 0, 0});
 
         //mitigate pose error
 //        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
@@ -134,7 +133,7 @@ public class PurePursuit extends Follower {
             case MECANUM:
                 double absoluteAngleToPoint = MathUtils.fullAngleWrap(Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x));
 
-                Vector2d poseVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(point.speed);
+                Vector2d poseVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(-point.speed);
 
                 double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
                 double headingOutput = turnPid.run(headingError);

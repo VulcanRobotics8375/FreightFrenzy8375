@@ -27,7 +27,7 @@ public class FieldCentricTest extends OpModePipeline {
     public void loop() {
         Robot.update();
         Pose2d robotPose = Robot.getRobotPose();
-        subsystems.drivetrain.setPowers(DriveKinematics.mecanumVelocityToWheelVelocities(new Pose2d(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x)));
+        subsystems.drivetrain.setPowers(DriveKinematics.mecanumFieldVelocityToWheelVelocities(robotPose, new Pose2d(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x)));
 //        subsystems.drivetrain.mechanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 //        subsystems.drivetrain.setPowers(-gamepad1.left_stick_y, -gamepad1.right_stick_y, -gamepad2.left_stick_y, -gamepad2.right_stick_y);
 
