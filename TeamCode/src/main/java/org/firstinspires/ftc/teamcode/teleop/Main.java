@@ -38,7 +38,7 @@ public class Main extends OpModePipeline {
 
         subsystems.carousel.run(gamepad2.left_bumper, gamepad2.right_bumper, gamepad2.right_trigger);
 
-        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y, gamepad2.x);
+//        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y, gamepad2.x);
 //        subsystems.lift.test(-gamepad2.left_stick_y);
 
 //        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y);

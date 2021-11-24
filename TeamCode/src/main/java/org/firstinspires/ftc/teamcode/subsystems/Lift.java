@@ -38,7 +38,6 @@ public class Lift extends Subsystem {
         lift = hardwareMap.dcMotor.get("lift");
         linkage = hardwareMap.servo.get("linkage");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
     }

@@ -89,10 +89,10 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         // Godly Math Trick: sin(x+pi/4) = cos(x-pi/4)
         double speed = multiplier * Math.hypot(strafe, forward);
 
-        double flSpeed = speed * Math.sin(theta) + turn;
-        double frSpeed = speed * Math.cos(theta) - turn;
-        double blSpeed = speed * Math.cos(theta) + turn;
-        double brSpeed = speed * Math.sin(theta) - turn;
+        double flSpeed = speed * Math.cos(theta) + turn;
+        double frSpeed = speed * Math.sin(theta) - turn;
+        double blSpeed = speed * Math.sin(theta) + turn;
+        double brSpeed = speed * Math.cos(theta) - turn;
 
 
         setPowers(flSpeed, frSpeed, blSpeed, brSpeed);
