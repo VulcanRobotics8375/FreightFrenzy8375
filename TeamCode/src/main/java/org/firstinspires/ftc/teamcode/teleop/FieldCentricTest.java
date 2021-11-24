@@ -1,16 +1,31 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.kinematics.Kinematics;
+
+import org.firstinspires.ftc.teamcode.robot.FreightFrenzyConfig;
+import org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics.DriveKinematics;
 import org.firstinspires.ftc.teamcode.robotcorelib.opmode.OpModePipeline;
+import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 
 public class FieldCentricTest extends OpModePipeline {
 
+    private FreightFrenzyConfig subsystems;
+
     public void init() {
+        super.subsystems = subsystems;
+        runMode = RobotRunMode.TELEOP;
+        super.init();
 
     }
 
 
     @Override
     public void loop() {
+        Robot.update();
+        Pose2d robotPose = Robot.getRobotPose();
+        subsystems.drivetrain.setPowers(DriveKinematics.mecanumFieldVelocityToWheelVelocities(robotPose, new Pose2d(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x)));
 
     }
 }
