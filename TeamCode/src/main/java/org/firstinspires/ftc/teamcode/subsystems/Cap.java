@@ -29,21 +29,31 @@ public class Cap extends Subsystem {
        if(!changeOpen && this.changeOpen){
            this.changeOpen = false;
        }
+
        if(open > 0){
            // updated to slow down so cap doesn't fly out
-           if(position + increment <= 0.6 && System.nanoTime() - lastTime
-                > 10000000) {
-               arm.setPosition(position+increment);
-               position += increment;
-               lastTime = System.nanoTime();
-           } else if(position + increment > 0.6 && System.nanoTime() - lastTime
-                   > 10000000) {
-               arm.setPosition(down);
-               position = 0.6;
+           if(position - increment > down && System.nanoTime() - lastTime
+                   > 15000000) {
+               arm.setPosition(position-increment);
+               position -= increment;
                lastTime = System.nanoTime();
            }
-
        }
+//       if(open > 0){
+//           // updated to slow down so cap doesn't fly out
+//           if(position + increment <= 0.6 && System.nanoTime() - lastTime
+//                > 10000000) {
+//               arm.setPosition(position+increment);
+//               position += increment;
+//               lastTime = System.nanoTime();
+//           } else if(position + increment > 0.6 && System.nanoTime() - lastTime
+//                   > 10000000) {
+//               arm.setPosition(down);
+//               position = 0.6;
+//               lastTime = System.nanoTime();
+//           }
+//
+//       }
        if(open < 0){
            arm.setPosition(up);
            position = up;
