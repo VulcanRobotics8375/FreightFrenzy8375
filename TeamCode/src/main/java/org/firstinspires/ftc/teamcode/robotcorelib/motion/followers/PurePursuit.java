@@ -54,7 +54,7 @@ public class PurePursuit extends Follower {
 
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose);
 
-            moveToPoint(path.getEnd(), robotPose, robotVel);
+            moveToPoint(followPoint, robotPose, robotVel);
             if(Math.hypot(robotPose.getX() - path.getEnd().x, robotPose.getY() - path.getEnd().y) < ALLOWED_POSE_ERROR + 2.0) {
                 following = false;
             }
