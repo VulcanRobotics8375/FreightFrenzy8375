@@ -28,8 +28,10 @@ public class AutoPaths extends AutoPipeline {
 
         Path path = new PathBuilder()
                 .speed(0.5)
-                .lookahead(1)
-                .lineToConstantHeading(new Pose2d(0, 0, 0), new Pose2d(10, 10, 0))
+                .lookahead(5)
+                .setStartPoint(new Pose2d(0, 0, 0))
+                .addGuidePoint(new Pose2d(20, 20, 0))
+                .setEndPoint(new Pose2d(40, 0, 0))
                 .build();
         follower.followPath(path);
 
@@ -57,5 +59,16 @@ public class AutoPaths extends AutoPipeline {
 
         follower.following = false;
         Robot.drivetrain.setPowers(new double[] {0, 0, 0, 0});
+
+        while(opModeIsActive()) {
+            Robot.update();
+            Pose2d robotPose = Robot.getRobotPose();
+            telemetry.addData("robot x", robotPose.getX());
+            telemetry.addData("robot y", robotPose.getY());
+            telemetry.addData("robot theta", robotPose.getHeading());
+            telemetry.update();
+
+        }
+
     }
 }
