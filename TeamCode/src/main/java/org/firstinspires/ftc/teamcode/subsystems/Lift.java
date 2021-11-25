@@ -21,20 +21,21 @@ public class Lift extends Subsystem {
     private double buttonOn = -1;
     private boolean releaseButton = false;
 
-    private boolean linkageButton = false;
-    private double linkageOn = -1;
-
     private final int FIRST_LEVEL = 300;
     private final int SECOND_LEVEL = 600;
     private final int THIRD_LEVEL = 900;
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
-    private final double LINKAGE_STICK_COEF = 0.05;
+    private final double LINKAGE_STICK_COEF = 0.01;
     private final double LINKAGE_OPENED = 1.0;
     private final double LINKAGE_CLOSED = 0.49;
     private final double RELEASE_CLOSED = 0.01;
     private final double RELEASE_OPENED = 0.45;
+
+    private boolean linkageButton = false;
+    private double linkageOn = -1;
+    private double linkagePos = LINKAGE_CLOSED;
 
     private ElapsedTime linkageTimer = new ElapsedTime();
 
@@ -48,26 +49,29 @@ public class Lift extends Subsystem {
     }
 
     public void run(double liftStick, boolean releaseButton, boolean linkageButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel) {
-        if(runningToPosition) {
-            assert true;
-        } else if(firstLevel) {
-            lift.setTargetPosition(FIRST_LEVEL);
-            lift.setPower(1);
-            runningToPosition = true;
-        } else if(secondLevel) {
-            lift.setTargetPosition(SECOND_LEVEL);
-            lift.setPower(1);
-            runningToPosition = true;
-        } else if(thirdLevel) {
-            lift.setTargetPosition(THIRD_LEVEL);
-            lift.setPower(1);
-            runningToPosition = true;
+        if(runningToPosition) { }
+        else if(firstLevel) { runToPosition(FIRST_LEVEL); }
+        else if(secondLevel) { runToPosition(SECOND_LEVEL); }
+        else if(thirdLevel) { runToPosition(THIRD_LEVEL); }
+
+        if(runningToPosition && (firstLevel || secondLevel || thirdLevel)) {
+            if(firstLevel && lift.getTargetPosition() != FIRST_LEVEL) {
+                lift.setTargetPosition(FIRST_LEVEL);
+            } else if(secondLevel && lift.getTargetPosition() != SECOND_LEVEL) {
+                lift.setTargetPosition(SECOND_LEVEL);
+            } else if(thirdLevel && lift.getTargetPosition() != THIRD_LEVEL) {
+                lift.setTargetPosition(THIRD_LEVEL);
+            }
+        }
+
+        if(Math.abs(liftStick) > 0.05 && runningToPosition) {
+            runningToPosition = false;
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
 
         int pos = lift.getCurrentPosition();
 
         if(Math.abs(liftStick) > 0.05 || !runningToPosition) {
-            runningToPosition = false;
             double outputPower;
             // Sigmoid
             //value to tune here is the numerator-- higher number == faster acceleration curve
@@ -113,25 +117,28 @@ public class Lift extends Subsystem {
         if(!linkageButton && this.linkageButton){
             this.linkageButton = false;
         }
+
+        double linkagePos = this.linkagePos;
         if(linkageOn > 0){
-            linkage.setPosition(LINKAGE_OPENED);
+            linkagePos = LINKAGE_OPENED;
         }
         if(linkageOn < 0){
-            linkage.setPosition(LINKAGE_CLOSED);
+            linkagePos = LINKAGE_CLOSED;
         }
 
-        double linkagePos = linkage.getPosition();
-        boolean nearOpened = !(linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageStick);
-        boolean nearClosed = !(linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageStick);
+        boolean nearOpened = !(this.linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageTimer.milliseconds() * linkageStick);
+        boolean nearClosed = !(this.linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageTimer.milliseconds() * linkageStick);
         if(linkageStick > 0.05 && !nearOpened) {
-            linkage.setPosition(linkagePos + LINKAGE_STICK_COEF * linkageTimer.milliseconds() * linkageStick);
+            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageTimer.milliseconds() * linkageStick;
         } else if(linkageStick < 0.05 && !nearClosed) {
-            linkage.setPosition(linkagePos + LINKAGE_STICK_COEF * linkageTimer.milliseconds() * linkageStick);
+            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageTimer.milliseconds() * linkageStick;
         }
         linkageTimer.reset();
 
-        telemetry.addData("lift pos", pos);
-        telemetry.addData("linkage set pos", linkagePos);
+        linkage.setPosition(linkagePos);
+        this.linkagePos = linkagePos;
+
+//        telemetry.addData("lift pos", pos);
 //        telemetry.addData("hold", hold);
 
     }
@@ -140,6 +147,13 @@ public class Lift extends Subsystem {
     public void test(double liftStick) {
         lift.setPower(liftStick);
         telemetry.addData("lift pos", lift.getCurrentPosition());
+    }
+
+    public void runToPosition(int position) {
+        lift.setTargetPosition(position);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setPower(1);
+        runningToPosition = true;
     }
 
 
