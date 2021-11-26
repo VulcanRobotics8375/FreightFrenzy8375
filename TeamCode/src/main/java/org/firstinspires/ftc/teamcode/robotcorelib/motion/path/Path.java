@@ -5,6 +5,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.PathPoint;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Path {
@@ -28,6 +29,18 @@ public class Path {
 
     public ArrayList<PathPoint> getGuidePoints() {
         return guidePoints;
+    }
+
+    public PathPoint get(int index) {
+        if(index == 0) {
+            return start;
+        } else if(index < guidePoints.size() + 1) {
+           return guidePoints.get(index - 1);
+        } else if(index == guidePoints.size() + 1) {
+            return end;
+        } else {
+            return null;
+        }
     }
 
     public PathPoint getEnd() {

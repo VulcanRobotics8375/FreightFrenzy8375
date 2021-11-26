@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.motion.path;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
+import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.PathPoint;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
 
@@ -19,7 +20,8 @@ public class PathBuilder {
 
     private double speed = 1;
     private double turnSpeed = 1;
-    private double lookahead = 15;
+    private double lookahead = 5;
+    private boolean maintainHeadng = false;
 
     public PathBuilder() {}
 
@@ -43,7 +45,7 @@ public class PathBuilder {
     }
 
     public PathBuilder lineTo(Pose2d start, Pose2d end) {
-        double theta = Math.atan2(end.getY() - start.getY(), end.getX() - start.getX());
+        double theta = MathUtils.fullAngleWrap(Math.atan2(end.getY() - start.getY(), end.getX() - start.getX()));
         startPoint = new PathPoint(start.getX(), start.getY(), theta, speed, turnSpeed, lookahead);
         endPoint = new PathPoint(end.getX(), end.getY(), theta, speed, turnSpeed, lookahead);
         lastPoint = endPoint;
@@ -51,15 +53,24 @@ public class PathBuilder {
         return this;
     }
 
-    public PathBuilder setStartPoint(Pose2d start) {
+    public PathBuilder start(Pose2d start) {
         startPoint = new PathPoint(start.getX(), start.getY(), start.getHeading(), speed, turnSpeed, lookahead);
+        lastPoint = startPoint;
         return this;
     }
 
     public PathBuilder addGuidePoint(Pose2d point) {
-        PathPoint pathPoint = new PathPoint(point.getX(), point.getY(), point.getHeading(), speed, turnSpeed, lookahead);
-        guidePoints.add(pathPoint);
-        lastPoint = pathPoint;
+        if(maintainHeadng) {
+            PathPoint pathPoint = new PathPoint(point.getX(), point.getY(), point.getHeading(), speed, turnSpeed, lookahead);
+            guidePoints.add(pathPoint);
+            lastPoint = pathPoint;
+        }
+        else {
+            double theta = MathUtils.fullAngleWrap(Math.atan2(point.getY() - lastPoint.y, point.getX() - lastPoint.x));
+            PathPoint pathPoint = new PathPoint(point.getX(), point.getY(), theta, speed, turnSpeed, lookahead);
+            guidePoints.add(pathPoint);
+            lastPoint = pathPoint;
+        }
         return this;
     }
 
@@ -68,8 +79,14 @@ public class PathBuilder {
         return this;
     }
 
-    public PathBuilder setEndPoint(Pose2d end) {
-        endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
+    public PathBuilder end(Pose2d end) {
+        if(maintainHeadng) {
+            endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
+        } else {
+            double theta = MathUtils.fullAngleWrap(Math.atan2(end.getY() - lastPoint.y, end.getX() - lastPoint.x));
+            endPoint = new PathPoint(end.getX(), end.getY(), theta, speed, turnSpeed, lookahead);
+        }
+        lastPoint = endPoint;
         return this;
     }
 
@@ -85,6 +102,11 @@ public class PathBuilder {
 
     public PathBuilder lookahead(double lookahead) {
         this.lookahead = lookahead;
+        return this;
+    }
+
+    public PathBuilder maintainHeading(boolean maintainHeadng) {
+        this.maintainHeadng = maintainHeadng;
         return this;
     }
 

@@ -8,7 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainVelocityMode;
+import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
 
@@ -37,7 +39,11 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         setDrivetrainMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setDrivetrainMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        if(Robot.runMode == RobotRunMode.AUTONOMOUS) {
+            setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        } else {
+            setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
 
         //set up IMU
         parameters.mode = BNO055IMU.SensorMode.IMU;

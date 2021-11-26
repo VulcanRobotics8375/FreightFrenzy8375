@@ -34,6 +34,7 @@ public class PathPoint {
     public void setPathPoint(PathPoint point) {
         this.x = point.x;
         this.y = point.y;
+        this.theta = point.theta;
         this.speed = point.speed;
         this.turnSpeed = point.turnSpeed;
         this.lookahead = point.lookahead;

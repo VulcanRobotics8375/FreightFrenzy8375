@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.motion.followers;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
@@ -31,7 +32,7 @@ public class PurePursuit extends Follower {
     private int pathPointIdx;
 
     //TODO make these something accessible by the user
-    public static final double ALLOWED_POSE_ERROR = 2.0;
+    public static final double ALLOWED_POSE_ERROR = 0.5;
     public static final double ALLOWED_HEADING_ERROR = 5.0;
     public static final double POSE_ERROR_GAIN = 0.1;
     public static final double HEADING_ERROR_GAIN = 2.0;
@@ -47,51 +48,61 @@ public class PurePursuit extends Follower {
 
         // base follower
         ArrayList<PathPoint> pathPoints = path.asList();
+        PathPoint startPoint = new PathPoint();
+        startPoint.setPathPoint(path.getStart());
+        PathPoint endPoint = new PathPoint();
+        endPoint.setPathPoint(path.getEnd());
         while(following && !opMode.isStopRequested()) {
             Robot.update();
             Pose2d robotPose = Robot.getRobotPose();
             Pose2d robotVel = Robot.getRobotVelocity();
 
-            PathPoint followPoint = findFollowPoint(pathPoints, robotPose);
+            PathPoint followPoint = findFollowPoint(pathPoints, robotPose, startPoint, endPoint);
+            opMode.telemetry.addData("point", followPoint.x);
 
-            moveToPoint(path.getEnd(), robotPose, robotVel);
+            moveToPoint(followPoint, robotPose, robotVel);
             if(Math.hypot(robotPose.getX() - path.getEnd().x, robotPose.getY() - path.getEnd().y) < ALLOWED_POSE_ERROR + 2.0) {
                 following = false;
             }
-//            Objects.requireNonNull(path.getRunnableTasks().get(pathPoints.get(pathPointIdx))).run();
+
+            Runnable task = path.getRunnableTasks().get(path.get(pathPointIdx));
+            if(task != null) {
+                task.run();
+            }
 
         }
 
         //mitigate pose error
-//        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
-//            PathPoint endPoint = pathPoints.get(pathPoints.size() - 1);
-//            mitigatePoseError(endPoint);
-//        }
+        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
+            endPoint = pathPoints.get(pathPoints.size() - 1);
+            mitigatePoseError(endPoint);
+        }
 
     }
 
-    private PathPoint findFollowPoint(ArrayList<PathPoint> path, Pose2d robotPose) {
+    private PathPoint findFollowPoint(ArrayList<PathPoint> path, Pose2d robotPose, PathPoint startPoint, PathPoint endPoint) {
         PathPoint followPoint = path.get(0);
-        PathPoint startPoint = path.get(0);
-        PathPoint endPoint = path.get(path.size() - 1);
 
         ArrayList<Point> circleIntersections;
-
         for (int i = 0; i < path.size() - 1; i++) {
             PathPoint start = path.get(i);
             PathPoint end = path.get(i + 1);
 
-            if(i + 1 == path.size() - 1 && start.x > end.x) {
-                circleIntersections = MathUtils.lineCircleIntersect(start.toPoint(), end.toPoint(), end.lookahead, new Point(robotPose.getX(), robotPose.getY()), true, false);
+            if(i + 1 == path.size() - 1) {
+                if(end.x < start.x) {
+                    circleIntersections = MathUtils.lineCircleIntersect(start.toPoint(), end.toPoint(), end.lookahead, new Point(robotPose.getX(), robotPose.getY()), false, true);
+                } else {
+                    circleIntersections = MathUtils.lineCircleIntersect(start.toPoint(), end.toPoint(), end.lookahead, new Point(robotPose.getX(), robotPose.getY()), true, false);
+                }
             } else {
                 circleIntersections = MathUtils.lineCircleIntersect(start.toPoint(), end.toPoint(), end.lookahead, new Point(robotPose.getX(), robotPose.getY()), false, true);
             }
 
             double closestAngle = Double.MAX_VALUE;
             for (Point intersection : circleIntersections) {
-                double angle = Math.atan2(intersection.y - robotPose.getY(), intersection.x - robotPose.getX());
-                double relativePointAngle = Math.atan2(end.y - start.y, end.x - start.x);
-                double deltaAngle = MathUtils.angleWrap(angle - relativePointAngle);
+                double angle = MathUtils.fullAngleWrap(Math.atan2(intersection.y - robotPose.getY(), intersection.x - robotPose.getX()));
+                double relativePointAngle = MathUtils.fullAngleWrap(Math.atan2(end.y - start.y, end.x - start.x));
+                double deltaAngle = Math.abs(MathUtils.calcAngularError(relativePointAngle, angle));
 
                 if(deltaAngle < closestAngle) {
                     closestAngle = deltaAngle;
@@ -112,18 +123,31 @@ public class PurePursuit extends Follower {
         //Motion Profile Generation
         // convert continuous, time-variant motion profile to discrete, time-invariant motion profile
         //transfer function-- https://www.desmos.com/calculator/rlv4hdqutl
-//        double targetVel = MAX_VELOCITY * followPoint.speed;
-//        double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
-//        double m = 1 / accelDistance;
-//
-//        double distanceFromStart = Math.hypot(startPoint.x - robotPose.getX(), startPoint.y - robotPose.getY());
-//        double distanceFromEnd = Math.hypot(endPoint.x - robotPose.getX(), endPoint.y - robotPose.getY());
-//        if(distanceFromEnd < accelDistance) {
-//            followPoint.speed *= m * distanceFromEnd;
-//        } else if(distanceFromStart < accelDistance) {
+        double targetVel = MAX_VELOCITY * followPoint.speed;
+        double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
+        double minSpeed = 0.1;
+        double m = (1 - minSpeed) / accelDistance;
+
+        double originalSpeed = followPoint.speed;
+        double distanceFromStart = Math.hypot(robotPose.getX() - startPoint.x, robotPose.getY() - startPoint.y);
+        double distanceFromEnd = Math.hypot(robotPose.getX() - endPoint.x, robotPose.getY() - endPoint.y);
+        opMode.telemetry.addData("distance from end", distanceFromEnd);
+        if(distanceFromEnd < accelDistance) {
+            followPoint.speed *= m * distanceFromEnd;
+            opMode.telemetry.addLine("changing speed end");
+            opMode.telemetry.addData("distance from end", endPoint.x);
+        }
+//        else if(distanceFromStart < accelDistance) {
+//            opMode.telemetry.addLine("changing speed start");
+//            opMode.telemetry.addData("distnace from start", startPoint.x);
 //            followPoint.speed *= m * distanceFromStart;
 //        }
+        if(Math.abs(followPoint.speed) < minSpeed) {
+            followPoint.speed = minSpeed * Math.signum(originalSpeed);
+            opMode.telemetry.addLine("wrapping speed to minSpeed");
+        }
 
+        opMode.telemetry.addData("speed", followPoint.speed);
         return followPoint;
     }
 
@@ -133,7 +157,7 @@ public class PurePursuit extends Follower {
             case MECANUM:
                 double absoluteAngleToPoint = MathUtils.fullAngleWrap(Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x));
 
-                Vector2d poseVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(-point.speed);
+                Vector2d poseVelocity = new Vector2d(-Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(point.speed);
 
                 double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
                 double headingOutput = turnPid.run(headingError);
@@ -157,8 +181,6 @@ public class PurePursuit extends Follower {
                         outputVelocity = new Pose2d();
                         break;
                 }
-                opMode.telemetry.addData("x velocity", outputVelocity.getX());
-                opMode.telemetry.addData("y velocity", outputVelocity.getY());
                 double[] powers = DriveKinematics.mecanumFieldVelocityToWheelVelocities(robotPose, outputVelocity);
                 Robot.drivetrain.setPowers(powers);
                 break;
@@ -173,7 +195,7 @@ public class PurePursuit extends Follower {
         Pose2d robotVelocity;
         double poseError = Math.hypot(pose.x - robotPose.getX(), pose.y - robotPose.getY());
         double headingError = MathUtils.calcAngularError(pose.theta, robotPose.getHeading());
-        while(poseError > ALLOWED_POSE_ERROR || headingError > Math.toRadians(ALLOWED_HEADING_ERROR)) {
+        while((poseError > ALLOWED_POSE_ERROR || headingError > Math.toRadians(ALLOWED_HEADING_ERROR)) && opMode.opModeIsActive()) {
             Robot.update();
             robotPose = Robot.getRobotPose();
             robotVelocity = Robot.getRobotVelocity();
