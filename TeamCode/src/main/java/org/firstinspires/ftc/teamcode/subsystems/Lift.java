@@ -126,19 +126,20 @@ public class Lift extends Subsystem {
             linkagePos = LINKAGE_CLOSED;
         }
 
-        double elapsed = linkageTimer.milliseconds();
-        boolean nearOpened = !(this.linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * elapsed * linkageStick);
-        boolean nearClosed = !(this.linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * elapsed * linkageStick);
+//        double elapsed = linkageTimer.milliseconds();
+        boolean nearOpened = !(this.linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageStick);
+        boolean nearClosed = !(this.linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageStick);
         if(linkageStick > 0.05 && !nearOpened) {
-            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * elapsed * linkageStick;
-        } else if(linkageStick < 0.05 && !nearClosed) {
-            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * elapsed * linkageStick;
+            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick;
+        } else if(linkageStick < -0.05 && !nearClosed) {
+            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick;
         }
-        linkageTimer.reset();
+//        linkageTimer.reset();
 
         linkage.setPosition(linkagePos);
         this.linkagePos = linkagePos;
 
+        telemetry.addData("linkage stick", linkageStick);
 //        telemetry.addData("lift pos", pos);
 //        telemetry.addData("hold", hold);
 
