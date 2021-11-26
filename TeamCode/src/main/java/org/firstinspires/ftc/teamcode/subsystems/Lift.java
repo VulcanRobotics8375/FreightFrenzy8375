@@ -27,7 +27,7 @@ public class Lift extends Subsystem {
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
-    private final double LINKAGE_STICK_COEF = 0.01;
+    private final double LINKAGE_STICK_COEF = 0.0005;
     private final double LINKAGE_OPENED = 1.0;
     private final double LINKAGE_CLOSED = 0.49;
     private final double RELEASE_CLOSED = 0.01;
@@ -119,22 +119,19 @@ public class Lift extends Subsystem {
         }
 
         double linkagePos = this.linkagePos;
-        if(linkageOn > 0){
+        if(linkageOn > 0 && this.linkageButton){
             linkagePos = LINKAGE_OPENED;
         }
-        if(linkageOn < 0){
+        if(linkageOn < 0 && this.linkageButton){
             linkagePos = LINKAGE_CLOSED;
         }
 
-//        double elapsed = linkageTimer.milliseconds();
-        boolean nearOpened = !(this.linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageStick);
-        boolean nearClosed = !(this.linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageStick);
-        if(linkageStick > 0.05 && !nearOpened) {
-            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick;
-        } else if(linkageStick < -0.05 && !nearClosed) {
-            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick;
+        double elapsed = linkageTimer.milliseconds();
+
+        if(linkageStick != 0 && !this.linkageButton) {
+            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick * elapsed;
         }
-//        linkageTimer.reset();
+        linkageTimer.reset();
 
         linkage.setPosition(linkagePos);
         this.linkagePos = linkagePos;
