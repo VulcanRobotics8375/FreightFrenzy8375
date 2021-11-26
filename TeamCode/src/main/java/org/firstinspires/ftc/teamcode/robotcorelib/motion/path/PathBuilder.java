@@ -69,6 +69,7 @@ public class PathBuilder {
             double theta = MathUtils.fullAngleWrap(Math.atan2(point.getY() - lastPoint.y, point.getX() - lastPoint.x));
             PathPoint pathPoint = new PathPoint(point.getX(), point.getY(), theta, speed, turnSpeed, lookahead);
             guidePoints.add(pathPoint);
+            lastPoint = pathPoint;
         }
         return this;
     }

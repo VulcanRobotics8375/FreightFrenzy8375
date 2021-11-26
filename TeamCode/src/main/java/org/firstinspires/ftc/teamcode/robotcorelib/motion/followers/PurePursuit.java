@@ -64,7 +64,11 @@ public class PurePursuit extends Follower {
             if(Math.hypot(robotPose.getX() - path.getEnd().x, robotPose.getY() - path.getEnd().y) < ALLOWED_POSE_ERROR + 2.0) {
                 following = false;
             }
-//            Objects.requireNonNull(path.getRunnableTasks().get(pathPoints.get(pathPointIdx))).run();
+
+            Runnable task = path.getRunnableTasks().get(path.get(pathPointIdx));
+            if(task != null) {
+                task.run();
+            }
 
         }
 
@@ -119,26 +123,29 @@ public class PurePursuit extends Follower {
         //Motion Profile Generation
         // convert continuous, time-variant motion profile to discrete, time-invariant motion profile
         //transfer function-- https://www.desmos.com/calculator/rlv4hdqutl
-//        double targetVel = MAX_VELOCITY * followPoint.speed;
-//        double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
-//        double minSpeed = 0.1;
-//        double m = (1 - minSpeed) / accelDistance;
-//
-//        double distanceFromStart = Math.hypot(robotPose.getX() - startPoint.x, robotPose.getY() - startPoint.y);
-//        double distanceFromEnd = Math.hypot(robotPose.getX() - endPoint.x, robotPose.getY() - endPoint.y);
-//        opMode.telemetry.addData("distance from end", distanceFromEnd);
-//        if(distanceFromEnd < accelDistance) {
-//            followPoint.speed *= m * distanceFromEnd;
-//            opMode.telemetry.addLine("changing speed end");
-//            opMode.telemetry.addData("distance from end", endPoint.x);
-//        } else if(distanceFromStart < accelDistance) {
+        double targetVel = MAX_VELOCITY * followPoint.speed;
+        double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
+        double minSpeed = 0.1;
+        double m = (1 - minSpeed) / accelDistance;
+
+        double originalSpeed = followPoint.speed;
+        double distanceFromStart = Math.hypot(robotPose.getX() - startPoint.x, robotPose.getY() - startPoint.y);
+        double distanceFromEnd = Math.hypot(robotPose.getX() - endPoint.x, robotPose.getY() - endPoint.y);
+        opMode.telemetry.addData("distance from end", distanceFromEnd);
+        if(distanceFromEnd < accelDistance) {
+            followPoint.speed *= m * distanceFromEnd;
+            opMode.telemetry.addLine("changing speed end");
+            opMode.telemetry.addData("distance from end", endPoint.x);
+        }
+//        else if(distanceFromStart < accelDistance) {
 //            opMode.telemetry.addLine("changing speed start");
 //            opMode.telemetry.addData("distnace from start", startPoint.x);
 //            followPoint.speed *= m * distanceFromStart;
 //        }
-//        if(Math.abs(followPoint.speed) < minSpeed) {
-//            followPoint.speed = minSpeed * Math.signum(followPoint.speed);
-//        }
+        if(Math.abs(followPoint.speed) < minSpeed) {
+            followPoint.speed = minSpeed * Math.signum(originalSpeed);
+            opMode.telemetry.addLine("wrapping speed to minSpeed");
+        }
 
         opMode.telemetry.addData("speed", followPoint.speed);
         return followPoint;
@@ -150,7 +157,7 @@ public class PurePursuit extends Follower {
             case MECANUM:
                 double absoluteAngleToPoint = MathUtils.fullAngleWrap(Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x));
 
-                Vector2d poseVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(-point.speed);
+                Vector2d poseVelocity = new Vector2d(-Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(point.speed);
 
                 double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
                 double headingOutput = turnPid.run(headingError);

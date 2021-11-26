@@ -31,6 +31,18 @@ public class Path {
         return guidePoints;
     }
 
+    public PathPoint get(int index) {
+        if(index == 0) {
+            return start;
+        } else if(index < guidePoints.size() + 1) {
+           return guidePoints.get(index - 1);
+        } else if(index == guidePoints.size() + 1) {
+            return end;
+        } else {
+            return null;
+        }
+    }
+
     public PathPoint getEnd() {
         return end;
     }
