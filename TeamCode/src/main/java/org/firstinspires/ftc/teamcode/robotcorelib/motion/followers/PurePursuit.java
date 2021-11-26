@@ -140,6 +140,7 @@ public class PurePursuit extends Follower {
 //            followPoint.speed = minSpeed * Math.signum(followPoint.speed);
 //        }
 
+        opMode.telemetry.addData("speed", followPoint.speed);
         return followPoint;
     }
 

@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.robotcorelib.motion.followers.PurePursuit;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.Path;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.PathBuilder;
 import org.firstinspires.ftc.teamcode.robotcorelib.opmode.AutoPipeline;
-import org.firstinspires.ftc.teamcode.robotcorelib.opmode.OpModePipeline;
 import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.AutoTask;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
@@ -29,22 +28,24 @@ public class AutoPaths extends AutoPipeline {
         Path path = new PathBuilder()
                 .speed(0.5)
                 .lookahead(5)
-                .setStartPoint(new Pose2d(0, 0, 0))
-                .addGuidePoint(new Pose2d(20, 20, 0))
-                .setEndPoint(new Pose2d(40, 0, 0))
+                .maintainHeading(true)
+                .start(new Pose2d(0, 0, 6.0))
+                .addGuidePoint(new Pose2d(20, 20, 6.0))
+                .addTask(() -> subsystems.intake.run(true, false, false))
+                .end(new Pose2d(40, 0, 6.0))
                 .build();
         follower.followPath(path);
 
-//        runTask(new AutoTask() {
-//            @Override
-//            public boolean conditional() {
-//                return !subsystems.intake.indexerOn();
-//            }
-//            @Override
-//            public void run() {
-//                subsystems.intake.run(true, false, false);
-//            }
-//        });
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return !subsystems.intake.indexerOn();
+            }
+            @Override
+            public void run() {
+                subsystems.intake.run(true, false, false);
+            }
+        });
 //        while(!isStopRequested()) {}
 
 //        runTask(new AutoTask() {
