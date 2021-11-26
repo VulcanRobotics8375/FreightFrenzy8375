@@ -25,7 +25,7 @@ public class PurePursuit extends Follower {
 
     public volatile boolean following;
     private SimplePID velocityPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
-    private SimplePID turnPid = new SimplePID(-1.0, 0.0, 0.0, -1.0, 1.0);
+    private SimplePID turnPid = new SimplePID(-1.8, 0.0, 0.0, -1.0, 1.0);
 
     private LinearOpMode opMode;
 
@@ -34,8 +34,8 @@ public class PurePursuit extends Follower {
     //TODO make these something accessible by the user
     public static final double ALLOWED_POSE_ERROR = 0.5;
     public static final double ALLOWED_HEADING_ERROR = 5.0;
-    public static final double POSE_ERROR_GAIN = 0.1;
-    public static final double HEADING_ERROR_GAIN = 2.0;
+    public static final double POSE_ERROR_GAIN = 0.3;
+    public static final double HEADING_ERROR_GAIN = 3.0;
 
     public PurePursuit() {}
 
@@ -77,6 +77,8 @@ public class PurePursuit extends Follower {
             endPoint = pathPoints.get(pathPoints.size() - 1);
             mitigatePoseError(endPoint);
         }
+
+        Robot.drivetrain.setPowers(new double[] {0, 0, 0, 0});
 
     }
 

@@ -25,18 +25,29 @@ public class AutoPaths extends AutoPipeline {
 
         waitForStart();
 
-        Path path = new PathBuilder()
+        Path start = new PathBuilder()
                 .speed(1.0)
                 .lookahead(5)
                 .maintainHeading(true)
-                .start(new Pose2d(0, 0, 0.0))
-                .addGuidePoint(new Pose2d(20, -20, 0.0))
-                .addTask(() -> {
-                    subsystems.intake.run(true, false, false);
-                })
-                .end(new Pose2d(40, 0, 0.0))
+                .lineToConstantHeading(
+                        new Pose2d(0, 0, 5.67),
+                        new Pose2d(-21.0, 4.0, 5.67))
                 .build();
-        follower.followPath(path);
+        follower.followPath(start);
+
+        Path toDepot = toDepot();
+        follower.followPath(toDepot);
+
+        Path deposit = toDeposit();
+        follower.followPath(deposit);
+
+        while(opModeIsActive()) {
+            toDepot = toDepot();
+            follower.followPath(toDepot);
+            deposit = toDeposit();
+            follower.followPath(deposit);
+        }
+
 
 //        runTask(new AutoTask() {
 //            @Override
@@ -74,4 +85,39 @@ public class AutoPaths extends AutoPipeline {
         }
 
     }
+
+    private Path toDepot() {
+        return new PathBuilder()
+                .speed(1.0)
+                .lookahead(5.0)
+                .maintainHeading(true)
+                .start(new Pose2d(-21.0, 4.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.5, -2.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addTask(() -> {
+                    subsystems.intake.run(true, false, false);
+                })
+                .speed(0.5)
+                .addGuidePoint(new Pose2d(0.6, -25.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .speed(0.8)
+                .end(new Pose2d(0.5, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .build();
+    }
+
+    private Path toDeposit() {
+        return  new PathBuilder()
+                .speed(1.0)
+                .lookahead(5.0)
+                .maintainHeading(true)
+                .start(new Pose2d(0.1, -41.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.5, -25.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addTask(() -> {
+                    subsystems.intake.run(false, false, false);
+                })
+                .speed(0.5)
+                .addGuidePoint(new Pose2d(0.6, -8.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .speed(1.0)
+                .end(new Pose2d(-21.0, 4.0, 5.67))
+                .build();
+    }
+
 }
