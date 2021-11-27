@@ -41,11 +41,13 @@ public class AutoPaths extends AutoPipeline {
         Path deposit = toDeposit();
         follower.followPath(deposit);
 
-        while(opModeIsActive()) {
+        int i = 0;
+        while(i < 5) {
             toDepot = toDepot();
             follower.followPath(toDepot);
             deposit = toDeposit();
             follower.followPath(deposit);
+            i++;
         }
 
 
@@ -98,23 +100,22 @@ public class AutoPaths extends AutoPipeline {
                 })
                 .speed(0.5)
                 .addGuidePoint(new Pose2d(0.6, -25.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.8)
                 .end(new Pose2d(0.5, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .build();
     }
 
     private Path toDeposit() {
         return  new PathBuilder()
-                .speed(1.0)
+                .speed(0.5)
                 .lookahead(5.0)
                 .maintainHeading(true)
-                .start(new Pose2d(0.1, -41.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.5, -25.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .start(new Pose2d(0.0, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.8, -30.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .speed(0.5)
+                .addGuidePoint(new Pose2d(0.7, -8.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .addTask(() -> {
                     subsystems.intake.run(false, false, false);
                 })
-                .speed(0.5)
-                .addGuidePoint(new Pose2d(0.6, -8.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .speed(1.0)
                 .end(new Pose2d(-21.0, 4.0, 5.67))
                 .build();
