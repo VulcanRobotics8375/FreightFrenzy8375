@@ -53,11 +53,6 @@ public class AutoPaths extends AutoPipeline {
         robotInit();
 
         waitForStart();
-        new Thread(() -> {
-            while(opModeIsActive()) {
-                Robot.update();
-            }
-        }).start();
 
         Path start = new PathBuilder()
                 .speed(1.0)
