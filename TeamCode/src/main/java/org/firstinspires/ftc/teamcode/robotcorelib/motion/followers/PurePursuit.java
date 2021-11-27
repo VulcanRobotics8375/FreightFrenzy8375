@@ -25,7 +25,7 @@ public class PurePursuit extends Follower {
 
     public volatile boolean following;
     private SimplePID velocityPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
-    private SimplePID turnPid = new SimplePID(-1.8, 0.0, 0.0, -1.0, 1.0);
+    private SimplePID turnPid = new SimplePID(-2.0, -0.01, 0.0, -1.0, 1.0);
 
     private LinearOpMode opMode;
 
@@ -58,7 +58,6 @@ public class PurePursuit extends Follower {
             Pose2d robotVel = Robot.getRobotVelocity();
 
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose, startPoint, endPoint);
-            opMode.telemetry.addData("point", followPoint.x);
 
             moveToPoint(followPoint, robotPose, robotVel);
             if(Math.hypot(robotPose.getX() - path.getEnd().x, robotPose.getY() - path.getEnd().y) < ALLOWED_POSE_ERROR + 2.0) {
@@ -133,11 +132,8 @@ public class PurePursuit extends Follower {
         double originalSpeed = followPoint.speed;
         double distanceFromStart = Math.hypot(robotPose.getX() - startPoint.x, robotPose.getY() - startPoint.y);
         double distanceFromEnd = Math.hypot(robotPose.getX() - endPoint.x, robotPose.getY() - endPoint.y);
-        opMode.telemetry.addData("distance from end", distanceFromEnd);
         if(distanceFromEnd < accelDistance) {
             followPoint.speed *= m * distanceFromEnd;
-            opMode.telemetry.addLine("changing speed end");
-            opMode.telemetry.addData("distance from end", endPoint.x);
         }
 //        else if(distanceFromStart < accelDistance) {
 //            opMode.telemetry.addLine("changing speed start");
@@ -146,10 +142,8 @@ public class PurePursuit extends Follower {
 //        }
         if(Math.abs(followPoint.speed) < minSpeed) {
             followPoint.speed = minSpeed * Math.signum(originalSpeed);
-            opMode.telemetry.addLine("wrapping speed to minSpeed");
         }
 
-        opMode.telemetry.addData("speed", followPoint.speed);
         return followPoint;
     }
 
