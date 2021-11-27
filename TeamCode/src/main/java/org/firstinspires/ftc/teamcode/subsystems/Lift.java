@@ -18,23 +18,22 @@ public class Lift extends Subsystem {
     private int holdPosition;
     PID pid = new PID(0.0005, 0, 0, 1, -1);
 
-    private double buttonOn = -1;
+    private double releaseOn = -1;
     private boolean releaseButton = false;
 
-    private final int FIRST_LEVEL = 300;
-    private final int SECOND_LEVEL = 600;
-    private final int THIRD_LEVEL = 900;
+    private final int BOTTOM_LEVEL = 0;
+    private final int FIRST_LEVEL = 0;
+    private final int SECOND_LEVEL = 300;
+    private final int THIRD_LEVEL = 600;
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
-    private final double LINKAGE_STICK_COEF = 0.0005;
+    private final double LINKAGE_STICK_COEF = 0.005;
     private final double LINKAGE_OPENED = 1.0;
     private final double LINKAGE_CLOSED = 0.49;
     private final double RELEASE_CLOSED = 0.01;
     private final double RELEASE_OPENED = 0.45;
 
-    private boolean linkageButton = false;
-    private double linkageOn = -1;
     private double linkagePos = LINKAGE_CLOSED;
 
     private ElapsedTime linkageTimer = new ElapsedTime();
@@ -48,19 +47,33 @@ public class Lift extends Subsystem {
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void run(double liftStick, boolean releaseButton, boolean linkageButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel) {
-        if(runningToPosition) { }
-        else if(firstLevel) { runToPosition(FIRST_LEVEL); }
-        else if(secondLevel) { runToPosition(SECOND_LEVEL); }
-        else if(thirdLevel) { runToPosition(THIRD_LEVEL); }
+    public void run(double liftStick, boolean releaseButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel, boolean reset) {
+        double linkagePos = this.linkagePos;
+        if(runningToPosition) {
+        } else if(reset) {
+            liftToPosition(BOTTOM_LEVEL);
+            linkagePos = LINKAGE_CLOSED;
+        } else if(firstLevel) {
+            liftToPosition(FIRST_LEVEL);
+            linkagePos = LINKAGE_OPENED;
+        } else if(secondLevel) {
+            liftToPosition(SECOND_LEVEL);
+            linkagePos = LINKAGE_OPENED;
+        } else if(thirdLevel) {
+            liftToPosition(THIRD_LEVEL);
+            linkagePos = LINKAGE_OPENED;
+        }
 
         if(runningToPosition && (firstLevel || secondLevel || thirdLevel)) {
             if(firstLevel && lift.getTargetPosition() != FIRST_LEVEL) {
                 lift.setTargetPosition(FIRST_LEVEL);
+                linkagePos = LINKAGE_OPENED;
             } else if(secondLevel && lift.getTargetPosition() != SECOND_LEVEL) {
                 lift.setTargetPosition(SECOND_LEVEL);
+                linkagePos = LINKAGE_OPENED;
             } else if(thirdLevel && lift.getTargetPosition() != THIRD_LEVEL) {
                 lift.setTargetPosition(THIRD_LEVEL);
+                linkagePos = LINKAGE_OPENED;
             }
         }
 
@@ -94,46 +107,38 @@ public class Lift extends Subsystem {
 
         if(releaseButton && !this.releaseButton) {
             this.releaseButton = true;
-            buttonOn *= -1;
+            releaseOn *= -1;
         }
         if(!releaseButton && this.releaseButton) {
             this.releaseButton = false;
         }
-        if(buttonOn > 0) {
+        if(releaseOn > 0) {
             release.setPosition(RELEASE_OPENED);
         }
-        if(buttonOn < 0) {
+        if(releaseOn < 0) {
             release.setPosition(RELEASE_CLOSED);
         }
 
 //        if(pos < 150 && release.getPosition() != RELEASE_CLOSED){
 //            release.setPosition(RELEASE_CLOSED);
 //        }
-
-        if(linkageButton && !this.linkageButton){
-            linkageOn *= -1;
-            this.linkageButton = true;
-        }
-        if(!linkageButton && this.linkageButton){
-            this.linkageButton = false;
-        }
-
-        double linkagePos = this.linkagePos;
-        if(linkageOn > 0 && this.linkageButton){
-            linkagePos = LINKAGE_OPENED;
-        }
-        if(linkageOn < 0 && this.linkageButton){
-            linkagePos = LINKAGE_CLOSED;
-        }
+        
 
         double elapsed = linkageTimer.milliseconds();
 
-        if(linkageStick != 0 && !this.linkageButton) {
+        boolean nearOpened = !(linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageStick);
+        boolean nearClosed = !(linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageStick);
+        if(linkageStick > 0 && !nearOpened) {
+            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick * elapsed;
+        } else if(linkageStick < 0 && !nearClosed) {
             linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick * elapsed;
         }
         linkageTimer.reset();
 
         linkage.setPosition(linkagePos);
+
+        telemetry.addData("linkage set position", this.linkagePos + LINKAGE_STICK_COEF * linkageStick * elapsed);
+
         this.linkagePos = linkagePos;
 
         telemetry.addData("linkage stick", linkageStick);
@@ -148,7 +153,7 @@ public class Lift extends Subsystem {
         telemetry.addData("lift pos", lift.getCurrentPosition());
     }
 
-    public void runToPosition(int position) {
+    public void liftToPosition(int position) {
         lift.setTargetPosition(position);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(1);
