@@ -37,7 +37,7 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         odometryLift = hardwareMap.crservo.get("odometry_lift");
 
         setDrivetrainMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        setDrivetrainMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setDrivetrainMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         if(Robot.runMode == RobotRunMode.AUTONOMOUS) {
             setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
