@@ -45,13 +45,14 @@ public class PurePursuit extends Follower {
 
     public void followPath(Path path) {
         following = true;
+        Path localPath = new Path(path);
 
         // base follower
-        ArrayList<PathPoint> pathPoints = path.asList();
+        ArrayList<PathPoint> pathPoints = localPath.asList();
         PathPoint startPoint = new PathPoint();
-        startPoint.setPathPoint(path.getStart());
+        startPoint.setPathPoint(localPath.getStart());
         PathPoint endPoint = new PathPoint();
-        endPoint.setPathPoint(path.getEnd());
+        endPoint.setPathPoint(localPath.getEnd());
         while(following && !opMode.isStopRequested()) {
             Robot.update();
             Pose2d robotPose = Robot.getRobotPose();
@@ -59,14 +60,12 @@ public class PurePursuit extends Follower {
 
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose, startPoint, endPoint);
 
-            opMode.telemetry.addData("follow point", followPoint.x + ", " + followPoint.y);
-
             moveToPoint(followPoint, robotPose, robotVel);
-            if(Math.hypot(robotPose.getX() - path.getEnd().x, robotPose.getY() - path.getEnd().y) < ALLOWED_POSE_ERROR + 2.0) {
+            if(Math.hypot(robotPose.getX() - localPath.getEnd().x, robotPose.getY() - localPath.getEnd().y) < ALLOWED_POSE_ERROR + 2.0) {
                 following = false;
             }
 
-            Runnable task = path.getRunnableTasks().get(path.get(pathPointIdx));
+            Runnable task = localPath.getRunnableTasks().get(localPath.get(pathPointIdx));
             if(task != null) {
                 task.run();
             }
@@ -138,7 +137,12 @@ public class PurePursuit extends Follower {
             followPoint.speed *= m * distanceFromEnd;
         }
         else if(distanceFromStart < accelDistance) {
+            double minSpeedStart = 0.5*followPoint.speed;
             followPoint.speed *= m * distanceFromStart;
+            if(Math.abs(followPoint.speed) < minSpeedStart) {
+                followPoint.speed = minSpeedStart * Math.signum(originalSpeed);
+            }
+
         }
         if(Math.abs(followPoint.speed) < minSpeed) {
             followPoint.speed = minSpeed * Math.signum(originalSpeed);
@@ -156,7 +160,6 @@ public class PurePursuit extends Follower {
                 Vector2d poseVelocity = new Vector2d(-Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(point.speed);
 
                 double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
-                opMode.telemetry.addData("heading error", headingError);
                 double headingOutput = turnPid.run(headingError);
                 Pose2d outputVelocity;
                 switch(Robot.drivetrain.getVelocityControlMode()) {

@@ -17,10 +17,23 @@ public class Path {
     private final HashMap<PathPoint, Runnable> runnableTasks;
 
     public Path(PathBuilder builder) {
-        start = builder.getStartPoint();
-        end = builder.getEndPoint();
-        guidePoints = builder.getGuidePoints();
-        runnableTasks = builder.getTasks();
+        start = new PathPoint();
+        start.setPathPoint(builder.getStartPoint());
+        end = new PathPoint();
+        end.setPathPoint(builder.getEndPoint());
+        guidePoints = new ArrayList<>(builder.getGuidePoints());
+        runnableTasks = new HashMap<>(builder.getTasks());
+    }
+
+
+    public Path(Path path) {
+        this.start = new PathPoint();
+        this.start.setPathPoint(path.start);
+        this.guidePoints = new ArrayList<>(path.guidePoints);
+        this.end = new PathPoint();
+        end.setPathPoint(path.end);
+
+        this.runnableTasks = path.runnableTasks;
     }
 
     public PathPoint getStart() {

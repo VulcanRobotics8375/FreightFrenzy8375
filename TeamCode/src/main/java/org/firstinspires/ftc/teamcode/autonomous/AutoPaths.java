@@ -18,6 +18,35 @@ public class AutoPaths extends AutoPipeline {
     PurePursuit follower = new PurePursuit(this);
     FreightFrenzyConfig subsystems = new FreightFrenzyConfig();
 
+    PathBuilder toDepot = new PathBuilder()
+            .speed(1.0)
+            .turnSpeed(0.5)
+            .lookahead(5.0)
+            .maintainHeading(true)
+            .start(new Pose2d(-21.0, 4.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .addGuidePoint(new Pose2d(0.9, -2.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .addTask(() -> {
+                subsystems.intake.run(true, false, false);
+            })
+            .speed(0.5)
+            .addGuidePoint(new Pose2d(0.8, -25.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .end(new Pose2d(0.9, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)));
+
+    PathBuilder toDeposit = new PathBuilder()
+            .speed(1.0)
+            .turnSpeed(0.5)
+            .lookahead(5.0)
+            .maintainHeading(true)
+            .start(new Pose2d(0.9, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .addGuidePoint(new Pose2d(0.8, -30.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .speed(0.5)
+            .addGuidePoint(new Pose2d(0.9, -8.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .addTask(() -> {
+                subsystems.intake.run(false, false, false);
+            })
+            .speed(1.0)
+            .end(new Pose2d(-21.0, 4.0, 5.67));
+
     public void runOpMode() {
         super.subsystems = subsystems;
         runMode = RobotRunMode.AUTONOMOUS;
@@ -27,6 +56,7 @@ public class AutoPaths extends AutoPipeline {
 
         Path start = new PathBuilder()
                 .speed(1.0)
+                .turnSpeed(0.5)
                 .lookahead(5)
                 .maintainHeading(true)
                 .lineToConstantHeading(
@@ -36,18 +66,20 @@ public class AutoPaths extends AutoPipeline {
         follower.followPath(start);
 
         Path toDepot = toDepot();
-        follower.followPath(toDepot);
+        follower.followPath(new Path(toDepot));
 
         Path deposit = toDeposit();
-        follower.followPath(deposit);
+        follower.followPath(new Path(deposit));
 
+        Robot.update();
         int i = 0;
         while(i < 5) {
             toDepot = toDepot();
-            follower.followPath(toDepot);
             deposit = toDeposit();
-            follower.followPath(deposit);
+           follower.followPath(new Path(toDepot));
+           follower.followPath(new Path(deposit));
             i++;
+            Robot.update();
         }
 
 
@@ -89,36 +121,11 @@ public class AutoPaths extends AutoPipeline {
     }
 
     private Path toDepot() {
-        return new PathBuilder()
-                .speed(1.0)
-                .lookahead(5.0)
-                .maintainHeading(true)
-                .start(new Pose2d(-21.0, 4.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.8, -2.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addTask(() -> {
-                    subsystems.intake.run(true, false, false);
-                })
-                .speed(0.5)
-                .addGuidePoint(new Pose2d(0.9, -25.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .end(new Pose2d(0.8, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .build();
+        return toDepot.build();
     }
 
     private Path toDeposit() {
-        return  new PathBuilder()
-                .speed(1.0)
-                .lookahead(5.0)
-                .maintainHeading(true)
-                .start(new Pose2d(0.8, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.9, -30.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.5)
-                .addGuidePoint(new Pose2d(0.8, -8.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addTask(() -> {
-                    subsystems.intake.run(false, false, false);
-                })
-                .speed(1.0)
-                .end(new Pose2d(-21.0, 4.0, 5.67))
-                .build();
+        return  toDeposit.build();
     }
 
 }
