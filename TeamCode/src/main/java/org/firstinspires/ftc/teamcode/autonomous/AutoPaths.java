@@ -23,29 +23,29 @@ public class AutoPaths extends AutoPipeline {
             .turnSpeed(0.5)
             .lookahead(5.0)
             .maintainHeading(true)
-            .start(new Pose2d(-21.0, 4.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-            .addGuidePoint(new Pose2d(0.9, -2.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .start(new Pose2d(-21.0, 4.0, 0))
+            .addGuidePoint(new Pose2d(0.9, -2.0, 0))
             .addTask(() -> {
                 subsystems.intake.run(true, false, false);
             })
             .speed(0.5)
-            .addGuidePoint(new Pose2d(0.8, -25.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-            .end(new Pose2d(0.9, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)));
+            .addGuidePoint(new Pose2d(0.8, -25.0, 0))
+            .end(new Pose2d(0.9, -40.0, 0));
 
     PathBuilder toDeposit = new PathBuilder()
             .speed(1.0)
             .turnSpeed(0.5)
             .lookahead(5.0)
             .maintainHeading(true)
-            .start(new Pose2d(0.9, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-            .addGuidePoint(new Pose2d(0.8, -30.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .start(new Pose2d(0.9, -40.0, 0))
+            .addGuidePoint(new Pose2d(0.8, -30.0, 0))
             .speed(0.5)
-            .addGuidePoint(new Pose2d(0.9, -8.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+            .addGuidePoint(new Pose2d(0.9, -8.0, 0))
             .addTask(() -> {
                 subsystems.intake.run(false, false, false);
             })
             .speed(1.0)
-            .end(new Pose2d(-21.0, 4.0, 5.67));
+            .end(new Pose2d(-21.0, 4.0, 0));
 
     public void runOpMode() {
         super.subsystems = subsystems;
@@ -53,6 +53,11 @@ public class AutoPaths extends AutoPipeline {
         robotInit();
 
         waitForStart();
+        new Thread(() -> {
+            while(opModeIsActive()) {
+                Robot.update();
+            }
+        }).start();
 
         Path start = new PathBuilder()
                 .speed(1.0)
@@ -60,8 +65,8 @@ public class AutoPaths extends AutoPipeline {
                 .lookahead(5)
                 .maintainHeading(true)
                 .lineToConstantHeading(
-                        new Pose2d(0, 0, 5.67),
-                        new Pose2d(-21.0, 4.0, 5.67))
+                        new Pose2d(0, 0, 0),
+                        new Pose2d(-21.0, 4.0, 0))
                 .build();
         follower.followPath(start);
 
@@ -71,7 +76,6 @@ public class AutoPaths extends AutoPipeline {
         Path deposit = toDeposit();
         follower.followPath(new Path(deposit));
 
-        Robot.update();
         int i = 0;
         while(i < 5) {
             toDepot = toDepot();
@@ -79,7 +83,6 @@ public class AutoPaths extends AutoPipeline {
            follower.followPath(new Path(toDepot));
            follower.followPath(new Path(deposit));
             i++;
-            Robot.update();
         }
 
 

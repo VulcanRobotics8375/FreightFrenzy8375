@@ -54,7 +54,6 @@ public class PurePursuit extends Follower {
         PathPoint endPoint = new PathPoint();
         endPoint.setPathPoint(localPath.getEnd());
         while(following && !opMode.isStopRequested()) {
-            Robot.update();
             Pose2d robotPose = Robot.getRobotPose();
             Pose2d robotVel = Robot.getRobotVelocity();
 

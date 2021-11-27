@@ -32,8 +32,8 @@ public class FieldCentricTest extends OpModePipeline {
 //        subsystems.drivetrain.setPowers(-gamepad1.left_stick_y, -gamepad1.right_stick_y, -gamepad2.left_stick_y, -gamepad2.right_stick_y);
 
 
-//        telemetry.addData("left", Robot.getConfiguration().localizer.getRawWheelPositions().get(0));
-//        telemetry.addData("right", Robot.getConfiguration().localizer.getRawWheelPositions().get(1));
+        telemetry.addData("left", Robot.getConfiguration().localizer.getWheelPositions().get(0));
+        telemetry.addData("right", Robot.getConfiguration().localizer.getWheelPositions().get(1));
         telemetry.addData("strafe", Robot.getConfiguration().localizer.getWheelPositions().get(2));
         telemetry.addData("x", robotPose.getX());
         telemetry.addData("y", robotPose.getY());
