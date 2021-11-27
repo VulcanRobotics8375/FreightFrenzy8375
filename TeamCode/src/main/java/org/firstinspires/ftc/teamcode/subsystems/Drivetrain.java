@@ -39,11 +39,11 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         setDrivetrainMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setDrivetrainMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        if(Robot.runMode == RobotRunMode.AUTONOMOUS) {
-            setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        } else {
-            setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        }
+//        if(Robot.runMode == RobotRunMode.AUTONOMOUS) {
+//            setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        } else {
+//            setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//        }
 
         //set up IMU
         parameters.mode = BNO055IMU.SensorMode.IMU;
