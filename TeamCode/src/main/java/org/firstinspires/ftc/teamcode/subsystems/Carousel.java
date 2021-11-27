@@ -45,4 +45,13 @@ public class Carousel extends Subsystem {
             opener.setPosition(1.0);
         }
     }
+
+    public void setOpenerPosition(double pos) {
+        opener.setPosition(pos);
+    }
+
+    public void setCarouselPower(double power) {
+        carousel.setPower(power);
+    }
+
 }

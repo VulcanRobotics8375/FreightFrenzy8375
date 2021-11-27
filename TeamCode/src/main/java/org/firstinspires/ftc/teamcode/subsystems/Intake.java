@@ -96,6 +96,10 @@ public class Intake extends Subsystem {
         this.transferPower = transferPower;
     }
 
+    public void setFilterPosition(double pos) {
+        filter.setPosition(pos);
+    }
+
     public boolean indexerOn() {
         return indexer;
     }

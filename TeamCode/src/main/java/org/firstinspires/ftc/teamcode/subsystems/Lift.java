@@ -148,6 +148,10 @@ public class Lift extends Subsystem {
         telemetry.addData("lift pos", lift.getCurrentPosition());
     }
 
+    public void setLinkagePosition(double pos) {
+        linkage.setPosition(pos);
+    }
+
     public void runToPosition(int position) {
         lift.setTargetPosition(position);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
