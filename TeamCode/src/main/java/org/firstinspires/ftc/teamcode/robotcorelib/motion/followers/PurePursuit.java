@@ -32,9 +32,9 @@ public class PurePursuit extends Follower {
     private int pathPointIdx;
 
     //TODO make these something accessible by the user
-    public static final double ALLOWED_POSE_ERROR = 0.5;
+    public static final double ALLOWED_POSE_ERROR = 0.6;
     public static final double ALLOWED_HEADING_ERROR = 5.0;
-    public static final double POSE_ERROR_GAIN = 0.3;
+    public static final double POSE_ERROR_GAIN = 0.2;
     public static final double HEADING_ERROR_GAIN = 3.0;
 
     public PurePursuit() {}
@@ -59,6 +59,8 @@ public class PurePursuit extends Follower {
 
             PathPoint followPoint = findFollowPoint(pathPoints, robotPose, startPoint, endPoint);
 
+            opMode.telemetry.addData("follow point", followPoint.x + ", " + followPoint.y);
+
             moveToPoint(followPoint, robotPose, robotVel);
             if(Math.hypot(robotPose.getX() - path.getEnd().x, robotPose.getY() - path.getEnd().y) < ALLOWED_POSE_ERROR + 2.0) {
                 following = false;
@@ -72,10 +74,10 @@ public class PurePursuit extends Follower {
         }
 
         //mitigate pose error
-        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
-            endPoint = pathPoints.get(pathPoints.size() - 1);
-            mitigatePoseError(endPoint);
-        }
+//        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
+//            endPoint = pathPoints.get(pathPoints.size() - 1);
+//            mitigatePoseError(endPoint);
+//        }
 
         Robot.drivetrain.setPowers(new double[] {0, 0, 0, 0});
 
@@ -126,7 +128,7 @@ public class PurePursuit extends Follower {
         //transfer function-- https://www.desmos.com/calculator/rlv4hdqutl
         double targetVel = MAX_VELOCITY * followPoint.speed;
         double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
-        double minSpeed = 0.1;
+        double minSpeed = 0.15;
         double m = (1 - minSpeed) / accelDistance;
 
         double originalSpeed = followPoint.speed;
@@ -135,11 +137,9 @@ public class PurePursuit extends Follower {
         if(distanceFromEnd < accelDistance) {
             followPoint.speed *= m * distanceFromEnd;
         }
-//        else if(distanceFromStart < accelDistance) {
-//            opMode.telemetry.addLine("changing speed start");
-//            opMode.telemetry.addData("distnace from start", startPoint.x);
-//            followPoint.speed *= m * distanceFromStart;
-//        }
+        else if(distanceFromStart < accelDistance) {
+            followPoint.speed *= m * distanceFromStart;
+        }
         if(Math.abs(followPoint.speed) < minSpeed) {
             followPoint.speed = minSpeed * Math.signum(originalSpeed);
         }
@@ -156,6 +156,7 @@ public class PurePursuit extends Follower {
                 Vector2d poseVelocity = new Vector2d(-Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(point.speed);
 
                 double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
+                opMode.telemetry.addData("heading error", headingError);
                 double headingOutput = turnPid.run(headingError);
                 Pose2d outputVelocity;
                 switch(Robot.drivetrain.getVelocityControlMode()) {
