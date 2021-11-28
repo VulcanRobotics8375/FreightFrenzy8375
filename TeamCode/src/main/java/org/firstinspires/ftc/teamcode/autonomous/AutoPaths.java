@@ -185,7 +185,9 @@ public class AutoPaths extends AutoPipeline {
                 })
                 .speed(0.8)
                 .addGuidePoint(new Pose2d(0.8, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.2)
+                .speed(0.4)
+                .addGuidePoint(new Pose2d(0.7, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+//                .speed(0.2)
                 .end(new Pose2d(depotPosX, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .build();
     }
