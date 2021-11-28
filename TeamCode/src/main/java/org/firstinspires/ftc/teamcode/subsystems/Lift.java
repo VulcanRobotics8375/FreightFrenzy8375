@@ -64,7 +64,11 @@ public class Lift extends Subsystem {
             linkagePos = LINKAGE_OPENED;
         }
 
-        if(runningToPosition && (firstLevel || secondLevel || thirdLevel)) {
+        if(runningToPosition && (reset || firstLevel || secondLevel || thirdLevel)) {
+            if(reset && lift.getTargetPosition() != BOTTOM_LEVEL && linkage.getPosition() != LINKAGE_CLOSED) {
+                lift.setTargetPosition(BOTTOM_LEVEL);
+                linkagePos = LINKAGE_CLOSED;
+            }
             if(firstLevel && lift.getTargetPosition() != FIRST_LEVEL) {
                 lift.setTargetPosition(FIRST_LEVEL);
                 linkagePos = LINKAGE_OPENED;
