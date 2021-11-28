@@ -28,7 +28,7 @@ public class Lift extends Subsystem {
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
-    private final double LINKAGE_STICK_COEF = 0.005;
+    private final double LINKAGE_STICK_COEF = 0.001;
     private final double LINKAGE_OPENED = 1.0;
     private final double LINKAGE_CLOSED = 0.49;
     private final double RELEASE_CLOSED = 0.01;
@@ -65,18 +65,17 @@ public class Lift extends Subsystem {
         }
 
         if(runningToPosition && (reset || firstLevel || secondLevel || thirdLevel)) {
-            if(reset && lift.getTargetPosition() != BOTTOM_LEVEL && linkage.getPosition() != LINKAGE_CLOSED) {
-                lift.setTargetPosition(BOTTOM_LEVEL);
+            if(reset) {
+                if(lift.getTargetPosition() != BOTTOM_LEVEL) { lift.setTargetPosition(BOTTOM_LEVEL); }
                 linkagePos = LINKAGE_CLOSED;
-            }
-            if(firstLevel && lift.getTargetPosition() != FIRST_LEVEL) {
-                lift.setTargetPosition(FIRST_LEVEL);
+            }else if(firstLevel) {
+                if(lift.getTargetPosition() != FIRST_LEVEL) { lift.setTargetPosition(FIRST_LEVEL); }
                 linkagePos = LINKAGE_OPENED;
-            } else if(secondLevel && lift.getTargetPosition() != SECOND_LEVEL) {
-                lift.setTargetPosition(SECOND_LEVEL);
+            } else if(secondLevel) {
+                if(lift.getTargetPosition() != SECOND_LEVEL) { lift.setTargetPosition(SECOND_LEVEL); }
                 linkagePos = LINKAGE_OPENED;
-            } else if(thirdLevel && lift.getTargetPosition() != THIRD_LEVEL) {
-                lift.setTargetPosition(THIRD_LEVEL);
+            } else if(thirdLevel) {
+                if(lift.getTargetPosition() != THIRD_LEVEL) { lift.setTargetPosition(THIRD_LEVEL); }
                 linkagePos = LINKAGE_OPENED;
             }
         }
@@ -130,8 +129,8 @@ public class Lift extends Subsystem {
 
         double elapsed = linkageTimer.milliseconds();
 
-        boolean nearOpened = !(linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageStick);
-        boolean nearClosed = !(linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageStick);
+        boolean nearOpened = !(linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageStick * elapsed);
+        boolean nearClosed = !(linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageStick * elapsed);
         if(linkageStick > 0 && !nearOpened) {
             linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick * elapsed;
         } else if(linkageStick < 0 && !nearClosed) {
