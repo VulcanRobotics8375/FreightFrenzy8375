@@ -34,16 +34,13 @@ public class Main extends OpModePipeline {
 
         subsystems.drivetrain.mechanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-        subsystems.intake.run(gamepad2.a, gamepad2.b, gamepad2.dpad_down);
+        subsystems.intake.run(gamepad2.left_bumper, gamepad2.right_bumper, gamepad2.dpad_up);
 
-        subsystems.carousel.run(gamepad2.left_bumper, gamepad2.right_bumper, gamepad2.right_trigger);
+        subsystems.carousel.run(gamepad2.left_trigger>0, gamepad2.dpad_right, gamepad2.right_trigger>0);
 
-        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y, gamepad2.x, gamepad2.right_stick_y, gamepad2.dpad_left, gamepad2.dpad_up, gamepad2.dpad_right);
-//        subsystems.lift.test(-gamepad2.left_stick_y);
+        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.dpad_down, gamepad2.right_stick_y, gamepad2.x, gamepad2.y, gamepad2.b, gamepad2.a);
 
-//        subsystems.lift.run(-gamepad2.left_stick_y, gamepad2.y);
-
-//        subsystems.cap.run(gamepad2.dpad_up);
+        subsystems.cap.run(gamepad2.dpad_left);
 
 //        telemetry.addData("imu angle", subsystems.drivetrain.getIMU().getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
 //        telemetry.addData("left", Robot.getConfiguration().localizer.getRawWheelPositions().get(0));
