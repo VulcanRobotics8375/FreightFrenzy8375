@@ -13,6 +13,7 @@ public class Path {
     private final PathPoint start;
     private final ArrayList<PathPoint> guidePoints;
     private final PathPoint end;
+    private boolean precise = true;
 
     private final HashMap<PathPoint, Runnable> runnableTasks;
 
@@ -32,6 +33,7 @@ public class Path {
         this.guidePoints = new ArrayList<>(path.guidePoints);
         this.end = new PathPoint();
         end.setPathPoint(path.end);
+        this.precise = path.precise;
 
         this.runnableTasks = path.runnableTasks;
     }
@@ -70,6 +72,14 @@ public class Path {
         pathPoints.add(end);
 
         return pathPoints;
+    }
+
+    public void setPrecise(boolean precise) {
+        this.precise = precise;
+    }
+
+    public boolean isPrecise() {
+        return precise;
     }
 
 

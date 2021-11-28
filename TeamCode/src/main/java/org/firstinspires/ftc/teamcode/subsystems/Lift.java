@@ -151,6 +151,9 @@ public class Lift extends Subsystem {
     public void setLinkagePosition(double pos) {
         linkage.setPosition(pos);
     }
+    public void setReleasePosition(double pos) {
+        release.setPosition(pos);
+    }
 
     public void runToPosition(int position) {
         lift.setTargetPosition(position);

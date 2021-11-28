@@ -23,7 +23,7 @@ public class Robot {
     private static Telemetry telemetry;
     private static ErrorHandler errorHandler;
 
-    private static Localizer localizer;
+    private static StandardTrackingWheelLocalizer localizer;
 
     private static Pose2d robotPose = new Pose2d();
     private static Pose2d robotVelocity = new Pose2d();
@@ -32,7 +32,7 @@ public class Robot {
 
     private static List<LynxModule> hubs;
     //default is manual since robotcorelib is set up to do so
-    private static LynxModule.BulkCachingMode bulkCachingMode = LynxModule.BulkCachingMode.MANUAL;
+    private static LynxModule.BulkCachingMode bulkCachingMode = LynxModule.BulkCachingMode.OFF;
 
     private static RobotConfig config;
 

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robotcorelib.motion.followers;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveConstants;
@@ -25,16 +26,16 @@ public class PurePursuit extends Follower {
 
     public volatile boolean following;
     private SimplePID velocityPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
-    private SimplePID turnPid = new SimplePID(-2.0, -0.01, 0.0, -1.0, 1.0);
+    private SimplePID turnPid = new SimplePID(-1.2, -0.01, 0.0, -1.0, 1.0);
 
     private LinearOpMode opMode;
 
     private int pathPointIdx;
 
     //TODO make these something accessible by the user
-    public static final double ALLOWED_POSE_ERROR = 0.6;
+    public static final double ALLOWED_POSE_ERROR = 0.9;
     public static final double ALLOWED_HEADING_ERROR = 5.0;
-    public static final double POSE_ERROR_GAIN = 0.2;
+    public static final double POSE_ERROR_GAIN = 0.3;
     public static final double HEADING_ERROR_GAIN = 3.0;
 
     public PurePursuit() {}
@@ -54,6 +55,7 @@ public class PurePursuit extends Follower {
         PathPoint endPoint = new PathPoint();
         endPoint.setPathPoint(localPath.getEnd());
         while(following && !opMode.isStopRequested()) {
+            Robot.update();
             Pose2d robotPose = Robot.getRobotPose();
             Pose2d robotVel = Robot.getRobotVelocity();
 
@@ -72,10 +74,10 @@ public class PurePursuit extends Follower {
         }
 
         //mitigate pose error
-//        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM) {
-//            endPoint = pathPoints.get(pathPoints.size() - 1);
-//            mitigatePoseError(endPoint);
-//        }
+        if(Robot.drivetrain.getDriveMode() == DriveMode.MECANUM && path.isPrecise()) {
+            endPoint = pathPoints.get(pathPoints.size() - 1);
+            mitigatePoseError(endPoint);
+        }
 
         Robot.drivetrain.setPowers(new double[] {0, 0, 0, 0});
 
@@ -135,14 +137,14 @@ public class PurePursuit extends Follower {
         if(distanceFromEnd < accelDistance) {
             followPoint.speed *= m * distanceFromEnd;
         }
-        else if(distanceFromStart < accelDistance) {
-            double minSpeedStart = 0.5*followPoint.speed;
-            followPoint.speed *= m * distanceFromStart;
-            if(Math.abs(followPoint.speed) < minSpeedStart) {
-                followPoint.speed = minSpeedStart * Math.signum(originalSpeed);
-            }
+//        else if(distanceFromStart < accelDistance) {
+//            double minSpeedStart = 0.5*followPoint.speed;
+//            followPoint.speed *= m * distanceFromStart;
+//            if(Math.abs(followPoint.speed) < minSpeedStart) {
+//                followPoint.speed = minSpeedStart * Math.signum(originalSpeed);
+//            }
+//        }
 
-        }
         if(Math.abs(followPoint.speed) < minSpeed) {
             followPoint.speed = minSpeed * Math.signum(originalSpeed);
         }
@@ -194,7 +196,9 @@ public class PurePursuit extends Follower {
         Pose2d robotVelocity;
         double poseError = Math.hypot(pose.x - robotPose.getX(), pose.y - robotPose.getY());
         double headingError = MathUtils.calcAngularError(pose.theta, robotPose.getHeading());
-        while((poseError > ALLOWED_POSE_ERROR || headingError > Math.toRadians(ALLOWED_HEADING_ERROR)) && opMode.opModeIsActive()) {
+        ElapsedTime timer = new ElapsedTime();
+        timer.reset();
+        while((poseError > ALLOWED_POSE_ERROR || headingError > Math.toRadians(ALLOWED_HEADING_ERROR)) && opMode.opModeIsActive() && timer.milliseconds() < 1500) {
             Robot.update();
             robotPose = Robot.getRobotPose();
             robotVelocity = Robot.getRobotVelocity();

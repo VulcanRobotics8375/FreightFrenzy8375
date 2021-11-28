@@ -90,10 +90,14 @@ public class Intake extends Subsystem {
         if(filterOn < 0){
             filter.setPosition(0.2);
         }
-        telemetry.addData("indexer pos", indexerPos);
+//        telemetry.addData("indexer pos", indexerPos);
 
         this.intakePower = intakePower;
         this.transferPower = transferPower;
+    }
+
+    public void setIntakePower(double power) {
+        intake.setPower(power);
     }
 
     public void setFilterPosition(double pos) {
