@@ -100,6 +100,10 @@ public class Intake extends Subsystem {
         intake.setPower(power);
     }
 
+    public void setTransferPower(double power) {
+        transfer.setPower(power);
+    }
+
     public void setFilterPosition(double pos) {
         filter.setPosition(pos);
     }

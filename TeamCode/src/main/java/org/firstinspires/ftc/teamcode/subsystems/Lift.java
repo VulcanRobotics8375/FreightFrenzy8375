@@ -24,7 +24,7 @@ public class Lift extends Subsystem {
     private final int BOTTOM_LEVEL = 0;
     private final int FIRST_LEVEL = 0;
     private final int SECOND_LEVEL = 300;
-    private final int THIRD_LEVEL = 600;
+    private final int THIRD_LEVEL = 700;
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
@@ -45,6 +45,7 @@ public class Lift extends Subsystem {
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        runningToPosition = false;
     }
 
     public void run(double liftStick, boolean releaseButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel, boolean reset) {
@@ -154,6 +155,14 @@ public class Lift extends Subsystem {
     public void test(double liftStick) {
         lift.setPower(liftStick);
         telemetry.addData("lift pos", lift.getCurrentPosition());
+    }
+
+    public void setLinkagePosition(double pos) {
+        linkage.setPosition(pos);
+    }
+
+    public void setReleasePosition(double pos) {
+        release.setPosition(pos);
     }
 
     public void liftToPosition(int position) {

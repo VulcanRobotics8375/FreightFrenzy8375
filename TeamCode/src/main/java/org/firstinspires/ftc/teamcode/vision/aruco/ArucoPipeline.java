@@ -16,7 +16,7 @@ public class ArucoPipeline extends OpenCvPipeline {
     private Telemetry telemetry;
     public boolean debug = true;
 
-    volatile Point markerPos = new Point();
+    public volatile Point markerPos = new Point();
 
     public ArucoPipeline(Telemetry telemetry) {
         this.telemetry = telemetry;
@@ -30,9 +30,9 @@ public class ArucoPipeline extends OpenCvPipeline {
             ArucoMarker marker = ArucoMarker.getMarkerById(markers, 50);
 
 
+            Point tempMarkerPose = new Point(0, 0);
             if (marker != null) {
-                markerPos = marker.getPosition();
-                telemetry.addData("pos", markerPos.x + ", " + markerPos.y);
+                tempMarkerPose = marker.getPosition();
                 telemetry.update();
 
                 //draw box
@@ -49,6 +49,9 @@ public class ArucoPipeline extends OpenCvPipeline {
                     Imgproc.putText(input, "id:" + marker.id, markerPos, Imgproc.FONT_HERSHEY_COMPLEX, 1, new Scalar(0, 255, 0));
                 }
             }
+            markerPos = tempMarkerPose;
+
+            telemetry.addData("pos", markerPos.x + ", " + markerPos.y);
         }
 
         return input;
