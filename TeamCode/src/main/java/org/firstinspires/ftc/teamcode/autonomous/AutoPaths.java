@@ -5,6 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.robot.FreightFrenzyConfig;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.followers.PurePursuit;
@@ -76,6 +79,8 @@ public class AutoPaths extends AutoPipeline {
         switch (autoCase) {
             case 1:
                 liftPos = 0;
+                capPos = new Pose2d(-13.5, -7.0, 0.4);
+                linkagePos = 0.9;
                 break;
             case 2:
                 liftPos = 325;
@@ -92,6 +97,7 @@ public class AutoPaths extends AutoPipeline {
 
         Path toCap = new PathBuilder()
                 .speed(0.2)
+                .turnSpeed(0.5)
                 .maintainHeading(true)
                 .start(new Pose2d(0.0, 0.0, 0.0))
                 .addGuidePoint(new Pose2d(0.0, 0.0, 0.0))
@@ -109,7 +115,7 @@ public class AutoPaths extends AutoPipeline {
 
             @Override
             public void run() {
-                double pos = 0.2 + (timer.milliseconds() / 1000);
+                double pos = 0.2 + (timer.milliseconds() / 1000.0);
                 subsystems.cap.setArmPosition(pos);
             }
         });
@@ -119,7 +125,7 @@ public class AutoPaths extends AutoPipeline {
 
 
         Path start = new PathBuilder()
-                .speed(0.2)
+                .speed(0.3)
                 .turnSpeed(0.5)
                 .lookahead(5)
                 .maintainHeading(true)
@@ -129,6 +135,7 @@ public class AutoPaths extends AutoPipeline {
                 .build();
         follower.followPath(start);
         timer.reset();
+        double finalLinkagePos = linkagePos;
         runTask(new AutoTask() {
             @Override
             public boolean conditional() {
@@ -137,7 +144,7 @@ public class AutoPaths extends AutoPipeline {
 
             @Override
             public void run() {
-                subsystems.lift.setLinkagePosition(1.0);
+                subsystems.lift.setLinkagePosition(finalLinkagePos);
             }
         });
         timer.reset();
@@ -149,11 +156,21 @@ public class AutoPaths extends AutoPipeline {
 
             @Override
             public void run() {
-                subsystems.intake.run(false, false, false);
                 subsystems.lift.setReleasePosition(0.45);
             }
         });
-        subsystems.lift.setLinkagePosition(0.49);
+        timer.reset();
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return timer.milliseconds() < 200;
+            }
+
+            @Override
+            public void run() {
+                subsystems.lift.setLinkagePosition(0.49);
+            }
+        });
 
 //        Path toDepot = toDepot();
 //        follower.followPath(new Path(toDepot));
@@ -163,10 +180,11 @@ public class AutoPaths extends AutoPipeline {
 
         int i = 0;
         while(i < 3) {
+//            int correctedI = i > 2 ? 0 : i;
             double depotPosX;
             switch (i) {
                 case 1:
-                    depotPosX = -7.0;
+                    depotPosX = -8.5;
                     break;
                 case 2:
                     depotPosX = -14;
@@ -192,7 +210,13 @@ public class AutoPaths extends AutoPipeline {
                    double speed = 0.2;
                    double turn = 0.0;
                    subsystems.intake.run(true, false, false);
-                   subsystems.drivetrain.setPowers(speed + turn, speed - turn, speed + turn, speed - turn);
+                   double robotTip = subsystems.drivetrain.getIMU().getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).secondAngle;
+                   if(Math.abs(robotTip) < 5.0) {
+                       subsystems.drivetrain.setPowers(speed + turn, speed - turn, speed + turn, speed - turn);
+                   } else {
+                       subsystems.drivetrain.setPowers(-(speed + turn), -(speed - turn), -(speed + turn), -(speed - turn));
+                   }
+
                }
            });
            subsystems.intake.run(true, false, false);
@@ -203,7 +227,7 @@ public class AutoPaths extends AutoPipeline {
            runTask(new AutoTask() {
                @Override
                public boolean conditional() {
-                   return timer.milliseconds() < 400;
+                   return timer.milliseconds() < 250;
                }
 
                @Override
@@ -297,15 +321,14 @@ public class AutoPaths extends AutoPipeline {
                 .speed(0.8)
                 .addGuidePoint(new Pose2d(0.5, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(0.51, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.5)
-                .addGuidePoint(new Pose2d(0.5, -8.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.5, -13.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(-9.6, -2.0, 5.69))
                 .addTask(() -> {
                     subsystems.lift.liftToPosition(750);
                     subsystems.lift.setLinkagePosition(1.0);
                 })
                 .speed(0.3)
-                .end(new Pose2d(-20.0, 4.0, 5.69))
+                .end(new Pose2d(-20.0, 4.5, 5.69))
                 .build();
     }
 
