@@ -26,11 +26,11 @@ public class ArucoPipeline extends OpenCvPipeline {
     public Mat processFrame(Mat input) {
         ArucoMarker[] markers = detectArucoMarker(input.nativeObj);
 //        ArucoMarker detectedMarker = null;
+        Point tempMarkerPose = new Point(0, 0);
         if(markers != null && markers.length > 0) {
             ArucoMarker marker = ArucoMarker.getMarkerById(markers, 50);
 
 
-            Point tempMarkerPose = new Point(0, 0);
             if (marker != null) {
                 tempMarkerPose = marker.getPosition();
                 telemetry.update();
@@ -49,10 +49,9 @@ public class ArucoPipeline extends OpenCvPipeline {
                     Imgproc.putText(input, "id:" + marker.id, markerPos, Imgproc.FONT_HERSHEY_COMPLEX, 1, new Scalar(0, 255, 0));
                 }
             }
-            markerPos = tempMarkerPose;
 
-            telemetry.addData("pos", markerPos.x + ", " + markerPos.y);
         }
+        markerPos = tempMarkerPose;
 
         return input;
     }
