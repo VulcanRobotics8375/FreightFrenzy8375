@@ -5,16 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.robot.FreightFrenzyConfig;
-import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.followers.PurePursuit;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.Path;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.PathBuilder;
 import org.firstinspires.ftc.teamcode.robotcorelib.opmode.AutoPipeline;
-import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.AutoTask;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 import org.firstinspires.ftc.teamcode.vision.aruco.ArucoPipeline;
@@ -24,7 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class AutoPaths extends AutoPipeline {
+public class DuckAuto extends AutoPipeline {
 
     PurePursuit follower = new PurePursuit(this);
     FreightFrenzyConfig subsystems = new FreightFrenzyConfig();
@@ -68,9 +63,9 @@ public class AutoPaths extends AutoPipeline {
         Pose2d capPos = new Pose2d();
 
         double markerPos = pipeline.markerPos.y;
-        if(markerPos > 0 && markerPos < 150) {
+        if (markerPos > 0 && markerPos < 150) {
             autoCase = 3;
-        } else if(markerPos >= 150 && markerPos < 250) {
+        } else if (markerPos >= 150 && markerPos < 250) {
             autoCase = 2;
         } else {
             autoCase = 1;
@@ -82,7 +77,7 @@ public class AutoPaths extends AutoPipeline {
             case 1:
                 liftPos = 0;
                 capPos = new Pose2d(-13.5, -7.0, 0.4);
-                linkagePos = 0.9;
+                linkagePos = 0.85;
                 break;
             case 2:
                 liftPos = 325;
@@ -121,19 +116,17 @@ public class AutoPaths extends AutoPipeline {
                 subsystems.cap.setArmPosition(pos);
             }
         });
-
         subsystems.lift.liftToPosition(liftPos);
         timer.reset();
 
-
         Path start = new PathBuilder()
-                .speed(0.25)
+                .speed(0.6)
                 .turnSpeed(0.5)
                 .lookahead(5)
                 .maintainHeading(true)
                 .start(capPos)
                 .addGuidePoint(capPos)
-                .end(new Pose2d(-20.0, 3.0, 5.74))
+                .end(new Pose2d(-23.0, -16.0, 0.72))
                 .build();
         follower.followPath(start);
         timer.reset();
@@ -174,159 +167,128 @@ public class AutoPaths extends AutoPipeline {
             }
         });
 
-//        Path toDepot = toDepot();
-//        follower.followPath(new Path(toDepot));
-//
-//        Path deposit = toDeposit();
-//        follower.followPath(new Path(deposit));
+        Path toCarousel = new PathBuilder()
+                .speed(0.6)
+                .turnSpeed(0.5)
+                .maintainHeading(true)
+                .start(new Pose2d(-23.0, -16.0, 0.72))
+                .addGuidePoint(new Pose2d(-23.0, -16.0, 0.72))
+                .end(new Pose2d(-9.0, 9.0, Math.PI / 2.0))
+                .build();
 
-        int i = 0;
-        while(i < 3) {
-//            int correctedI = i > 2 ? 0 : i;
-            double depotPosX;
-            switch (i) {
-                case 1:
-                    depotPosX = -8.5;
-                    break;
-                case 2:
-                    depotPosX = -14;
-                    break;
-                default:
-                    depotPosX = 0.9;
-                    break;
+        follower.followPath(new Path(toCarousel));
+
+        subsystems.lift.setReleasePosition(0.01);
+        subsystems.lift.liftToPosition(0);
+        subsystems.carousel.setOpenerPosition(0.2);
+        subsystems.carousel.setCarouselPower(-1.0);
+
+        timer.reset();
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return timer.milliseconds() < 5000;
+            }
+
+            @Override
+            public void run() {
 
             }
-            Path toDepot = toDepot(depotPosX);
-            toDepot.setPrecise(false);
-            Path deposit = toDeposit(depotPosX);
-            subsystems.lift.setReleasePosition(0.01);
-           follower.followPath(new Path(toDepot));
-            runTask(new AutoTask() {
-               @Override
-               public boolean conditional() {
-                   return !subsystems.intake.indexerOn();
-               }
+        });
+        subsystems.carousel.setCarouselPower(0.0);
+        subsystems.carousel.setOpenerPosition(1.0);
 
-               @Override
-               public void run() {
-                   double speed = 0.2;
-                   double turn = 0.0;
-                   subsystems.intake.run(true, false, false);
-                       subsystems.drivetrain.setPowers(speed + turn, speed - turn, speed + turn, speed - turn);
-//                       subsystems.drivetrain.setPowers(-(speed + turn), -(speed - turn), -(speed + turn), -(speed - turn));
-               }
-           });
-           subsystems.intake.run(true, false, false);
-           subsystems.intake.setIntakePower(-0.4);
-           subsystems.intake.setTransferPower(1.0);
-           follower.followPath(new Path(deposit));
-           timer.reset();
-           runTask(new AutoTask() {
-               @Override
-               public boolean conditional() {
-                   return timer.milliseconds() < 250;
-               }
-
-               @Override
-               public void run() {
-                   subsystems.intake.run(false, false, false);
-                   subsystems.lift.setReleasePosition(0.45);
-               }
-           });
-            subsystems.lift.liftToPosition(800);
-            subsystems.lift.setLinkagePosition(0.49);
-            i++;
-        }
-        subsystems.lift.setReleasePosition(0.01);
-        follower.followPath(toDepot());
-
-
+//        Path intakeDuck = new PathBuilder()
+//                .speed(0.3)
+//                .turnSpeed(0.5)
+//                .maintainHeading(true)
+//                .start(new Pose2d(-9.0, 9.0, Math.PI / 2.0))
+//                .addGuidePoint(new Pose2d(-8.0, 8.1, 6.15))
+//                .addTask(() -> {
+//                    subsystems.intake.run(true, false, false);
+//                })
+//                .addGuidePoint(new Pose2d(-0.51, 8.0))
+//                .end(new Pose2d(-0.5, -10.0, 6.15))
+//                .build();
+//        follower.followPath(new Path(intakeDuck));
+//
+//        timer.reset();
 //        runTask(new AutoTask() {
 //            @Override
 //            public boolean conditional() {
-//                return !subsystems.intake.indexerOn();
+//                return timer.milliseconds() < 1000.0;
 //            }
+//
 //            @Override
 //            public void run() {
-//                subsystems.intake.run(true, false, false);
+//
 //            }
 //        });
-//        while(!isStopRequested()) {}
-
+//
+//        subsystems.lift.liftToPosition(750);
+//        subsystems.lift.setReleasePosition(1.0);
+//        start = new PathBuilder()
+//                .speed(0.6)
+//                .turnSpeed(0.5)
+//                .lookahead(5)
+//                .maintainHeading(true)
+//                .start(capPos)
+//                .addGuidePoint(capPos)
+//                .end(new Pose2d(-23.0, -16.0, 0.72))
+//                .build();
+//        follower.followPath(new Path(start));
+//
+//        timer.reset();
 //        runTask(new AutoTask() {
 //            @Override
 //            public boolean conditional() {
-//                return true;
+//                return timer.milliseconds() < 200;
 //            }
+//
 //            @Override
 //            public void run() {
+//                subsystems.lift.setLinkagePosition(finalLinkagePos);
+//            }
+//        });
+//        timer.reset();
+//        runTask(new AutoTask() {
+//            @Override
+//            public boolean conditional() {
+//                return timer.milliseconds() < 500;
+//            }
+//
+//            @Override
+//            public void run() {
+//                subsystems.lift.setReleasePosition(0.45);
+//            }
+//        });
+//        timer.reset();
+//        runTask(new AutoTask() {
+//            @Override
+//            public boolean conditional() {
+//                return timer.milliseconds() < 200;
+//            }
+//
+//            @Override
+//            public void run() {
+//                subsystems.lift.setLinkagePosition(0.49);
 //            }
 //        });
 
-        follower.following = false;
-        Robot.drivetrain.setPowers(new double[] {0, 0, 0, 0});
+        Path park = new PathBuilder()
+                .speed(0.3)
+                .turnSpeed(0.5)
+                .maintainHeading(true)
+                .start(new Pose2d(-10.0, 10.0, Math.PI / 2.0))
+                .addGuidePoint(new Pose2d(-10.0, 10.0, Math.PI / 2.0))
+                .end(new Pose2d(-28.0, 15.0, Math.PI / 2.0))
+                .build();
+
+        follower.followPath(new Path(park));
 
         while(opModeIsActive()) {
-            Robot.update();
-            Pose2d robotPose = Robot.getRobotPose();
-            telemetry.addData("robot x", robotPose.getX());
-            telemetry.addData("robot y", robotPose.getY());
-            telemetry.addData("robot theta", robotPose.getHeading());
-            telemetry.update();
 
         }
 
     }
-
-    private Path toDepot() {
-        return toDepot(0.9);
-    }
-
-    private Path toDepot(double depotPosX) {
-        return new PathBuilder()
-                .speed(0.25)
-                .turnSpeed(0.5)
-                .lookahead(5.0)
-                .maintainHeading(true)
-                .start(new Pose2d(-21.0, 4.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(-9.0, -0.4, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.6)
-                .addGuidePoint(new Pose2d(0.2, -2.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.75)
-                .addTask(() -> {
-                    subsystems.intake.run(true, false, false);
-                    subsystems.lift.liftToPosition(0);
-                })
-                .addGuidePoint(new Pose2d(0.51, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.4)
-                .addGuidePoint(new Pose2d(0.5, -30.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .end(new Pose2d(depotPosX, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .build();
-    }
-
-    private Path toDeposit() {
-        return  toDeposit(0.9);
-    }
-
-    private Path toDeposit(double depotPosX) {
-        return new PathBuilder()
-                .speed(0.25)
-                .turnSpeed(0.5)
-                .maintainHeading(true)
-                .start(new Pose2d(depotPosX, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.0, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.75)
-                .addGuidePoint(new Pose2d(0.5, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.51, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.5, -13.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(-9.6, -2.0, 5.69))
-                .addTask(() -> {
-                    subsystems.lift.liftToPosition(750);
-                    subsystems.lift.setLinkagePosition(1.0);
-                })
-                .speed(0.25)
-                .end(new Pose2d(-20.0, 4.5, 5.69))
-                .build();
-    }
-
 }

@@ -32,7 +32,7 @@ public class Robot {
 
     private static List<LynxModule> hubs;
     //default is manual since robotcorelib is set up to do so
-    private static LynxModule.BulkCachingMode bulkCachingMode = LynxModule.BulkCachingMode.OFF;
+    private static LynxModule.BulkCachingMode bulkCachingMode = LynxModule.BulkCachingMode.MANUAL;
 
     private static RobotConfig config;
 
