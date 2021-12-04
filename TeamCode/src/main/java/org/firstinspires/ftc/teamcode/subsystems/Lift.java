@@ -23,12 +23,12 @@ public class Lift extends Subsystem {
 
     private final int BOTTOM_LEVEL = 0;
     private final int FIRST_LEVEL = 0;
-    private final int SECOND_LEVEL = 300;
-    private final int THIRD_LEVEL = 700;
+    private final int SECOND_LEVEL = 325;
+    private final int THIRD_LEVEL = 725;
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
-    private final double LINKAGE_STICK_COEF = 0.001;
+    private final double LINKAGE_STICK_COEF = 0.00005;
     private final double LINKAGE_OPENED = 1.0;
     private final double LINKAGE_CLOSED = 0.49;
     private final double RELEASE_CLOSED = 0.01;
@@ -50,8 +50,23 @@ public class Lift extends Subsystem {
     }
 
     public void run(double liftStick, boolean releaseButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel, boolean reset) {
+        int pos = lift.getCurrentPosition();
         double linkagePos = this.linkagePos;
         double releasePos = this.releasePos;
+
+        if(releaseButton && !this.releaseButton) {
+            this.releaseButton = true;
+            releaseOn *= -1;
+        }
+        if(!releaseButton && this.releaseButton) {
+            this.releaseButton = false;
+        }
+        if(releaseOn > 0) {
+            releasePos = RELEASE_OPENED;
+        }
+        if(releaseOn < 0) {
+            releasePos = RELEASE_CLOSED;
+        }
 
         if(runningToPosition) {
         } else if(reset) {
@@ -86,12 +101,17 @@ public class Lift extends Subsystem {
             }
         }
 
+//        if(pos < 150 && release.getPosition() != RELEASE_CLOSED){
+//            releasePos = RELEASE_CLOSED;
+//        }
+
+        release.setPosition(releasePos);
+        this.releasePos = releasePos;
+
         if(Math.abs(liftStick) > 0.05 && runningToPosition) {
             runningToPosition = false;
             lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
-
-        int pos = lift.getCurrentPosition();
 
         if(Math.abs(liftStick) > 0.05 || !runningToPosition) {
             double outputPower;
@@ -113,28 +133,6 @@ public class Lift extends Subsystem {
 
             lift.setPower(outputPower);
         }
-
-        if(releaseButton && !this.releaseButton) {
-            this.releaseButton = true;
-            releaseOn *= -1;
-        }
-        if(!releaseButton && this.releaseButton) {
-            this.releaseButton = false;
-        }
-        if(releaseOn > 0) {
-            releasePos = RELEASE_OPENED;
-        }
-        if(releaseOn < 0) {
-            releasePos = RELEASE_CLOSED;
-        }
-
-        release.setPosition(releasePos);
-        this.releasePos = releasePos;
-
-//        if(pos < 150 && release.getPosition() != RELEASE_CLOSED){
-//            release.setPosition(RELEASE_CLOSED);
-//        }
-        
 
         double elapsed = linkageTimer.milliseconds();
 
