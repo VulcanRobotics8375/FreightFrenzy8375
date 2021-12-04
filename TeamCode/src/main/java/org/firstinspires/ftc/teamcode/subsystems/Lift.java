@@ -28,7 +28,7 @@ public class Lift extends Subsystem {
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
-    private final double LINKAGE_STICK_COEF = 0.00005;
+    private final double LINKAGE_STICK_COEF = 0.0007;
     private final double LINKAGE_OPENED = 1.0;
     private final double LINKAGE_CLOSED = 0.49;
     private final double RELEASE_CLOSED = 0.01;
@@ -90,6 +90,7 @@ public class Lift extends Subsystem {
             if(reset) {
                 if(lift.getTargetPosition() != BOTTOM_LEVEL) { lift.setTargetPosition(BOTTOM_LEVEL); }
                 linkagePos = LINKAGE_CLOSED;
+
                 releasePos = RELEASE_CLOSED;
                 releaseOn *= -1;
             }else if(firstLevel) {
