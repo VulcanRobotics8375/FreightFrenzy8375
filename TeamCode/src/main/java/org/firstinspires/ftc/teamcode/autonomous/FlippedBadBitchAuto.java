@@ -5,11 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.robot.FreightFrenzyConfig;
-import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.followers.PurePursuit;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.Path;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.PathBuilder;
@@ -24,7 +20,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class AutoPaths extends AutoPipeline {
+public class FlippedBadBitchAuto extends AutoPipeline {
 
     PurePursuit follower = new PurePursuit(this);
     FreightFrenzyConfig subsystems = new FreightFrenzyConfig();
@@ -81,16 +77,16 @@ public class AutoPaths extends AutoPipeline {
         switch (autoCase) {
             case 1:
                 liftPos = 0;
-                capPos = new Pose2d(-13.5, -7.0, 0.4);
+                capPos = new Pose2d(-13.5, 0.1, (Math.PI * 2.0) - 0.4);
                 linkagePos = 0.9;
                 break;
             case 2:
                 liftPos = 325;
-                capPos = new Pose2d(-12.0, -1.5, 0.2);
+                capPos = new Pose2d(-12.0, 0.1, (Math.PI * 2.0) - 0.2);
                 break;
             case 3:
                 liftPos = 750;
-                capPos = new Pose2d(-12.0, 6.0, 0.0);
+                capPos = new Pose2d(-12.0, -6.0, 0.0);
                 break;
         }
 
@@ -133,7 +129,7 @@ public class AutoPaths extends AutoPipeline {
                 .maintainHeading(true)
                 .start(capPos)
                 .addGuidePoint(capPos)
-                .end(new Pose2d(-20.0, 3.0, 5.74))
+                .end(new Pose2d(-20.0, -6.0, (Math.PI * 2.0) - 5.74))
                 .build();
         follower.followPath(start);
         timer.reset();
@@ -200,39 +196,39 @@ public class AutoPaths extends AutoPipeline {
             toDepot.setPrecise(false);
             Path deposit = toDeposit(depotPosX);
             subsystems.lift.setReleasePosition(0.01);
-           follower.followPath(new Path(toDepot));
+            follower.followPath(new Path(toDepot));
             runTask(new AutoTask() {
-               @Override
-               public boolean conditional() {
-                   return !subsystems.intake.indexerOn();
-               }
+                @Override
+                public boolean conditional() {
+                    return !subsystems.intake.indexerOn();
+                }
 
-               @Override
-               public void run() {
-                   double speed = 0.2;
-                   double turn = 0.0;
-                   subsystems.intake.run(true, false, false);
-                       subsystems.drivetrain.setPowers(speed + turn, speed - turn, speed + turn, speed - turn);
+                @Override
+                public void run() {
+                    double speed = 0.2;
+                    double turn = 0.0;
+                    subsystems.intake.run(true, false, false);
+                    subsystems.drivetrain.setPowers(speed + turn, speed - turn, speed + turn, speed - turn);
 //                       subsystems.drivetrain.setPowers(-(speed + turn), -(speed - turn), -(speed + turn), -(speed - turn));
-               }
-           });
-           subsystems.intake.run(true, false, false);
-           subsystems.intake.setIntakePower(-0.4);
-           subsystems.intake.setTransferPower(1.0);
-           follower.followPath(new Path(deposit));
-           timer.reset();
-           runTask(new AutoTask() {
-               @Override
-               public boolean conditional() {
-                   return timer.milliseconds() < 250;
-               }
+                }
+            });
+            subsystems.intake.run(true, false, false);
+            subsystems.intake.setIntakePower(-0.4);
+            subsystems.intake.setTransferPower(1.0);
+            follower.followPath(new Path(deposit));
+            timer.reset();
+            runTask(new AutoTask() {
+                @Override
+                public boolean conditional() {
+                    return timer.milliseconds() < 250;
+                }
 
-               @Override
-               public void run() {
-                   subsystems.intake.run(false, false, false);
-                   subsystems.lift.setReleasePosition(0.45);
-               }
-           });
+                @Override
+                public void run() {
+                    subsystems.intake.run(false, false, false);
+                    subsystems.lift.setReleasePosition(0.45);
+                }
+            });
             subsystems.lift.liftToPosition(800);
             subsystems.lift.setLinkagePosition(0.49);
             i++;
@@ -284,23 +280,23 @@ public class AutoPaths extends AutoPipeline {
 
     private Path toDepot(double depotPosX) {
         return new PathBuilder()
-                .speed(0.25)
+                .speed(0.2)
                 .turnSpeed(0.5)
                 .lookahead(5.0)
                 .maintainHeading(true)
-                .start(new Pose2d(-21.0, 4.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(-9.0, -0.4, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .start(new Pose2d(-21.0, -7.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-9.0, -2.6, (Math.PI / 2.0)))
                 .speed(0.6)
-                .addGuidePoint(new Pose2d(0.4, -2.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.7, -1.0, (Math.PI / 2.0)))
                 .speed(0.75)
                 .addTask(() -> {
                     subsystems.intake.run(true, false, false);
                     subsystems.lift.liftToPosition(0);
                 })
-                .addGuidePoint(new Pose2d(0.51, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .speed(0.4)
-                .addGuidePoint(new Pose2d(0.5, -30.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .end(new Pose2d(depotPosX, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.71, 17.0, (Math.PI / 2.0)))
+                .speed(0.3)
+                .addGuidePoint(new Pose2d(0.7, 27.0, (Math.PI / 2.0)))
+                .end(new Pose2d(depotPosX, 37.0, (Math.PI / 2.0)))
                 .build();
     }
 
@@ -310,22 +306,22 @@ public class AutoPaths extends AutoPipeline {
 
     private Path toDeposit(double depotPosX) {
         return new PathBuilder()
-                .speed(0.25)
+                .speed(0.2)
                 .turnSpeed(0.5)
                 .maintainHeading(true)
-                .start(new Pose2d(depotPosX, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.0, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .start(new Pose2d(depotPosX, 37.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.0, 32.0, (Math.PI / 2.0)))
                 .speed(0.75)
-                .addGuidePoint(new Pose2d(0.5, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.51, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.5, -13.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(-9.6, -2.0, 5.69))
+                .addGuidePoint(new Pose2d(0.7, 32.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.71, 23.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(0.7, 10.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-9.6, -1.0, (Math.PI * 2.0) - 5.69))
                 .addTask(() -> {
                     subsystems.lift.liftToPosition(750);
                     subsystems.lift.setLinkagePosition(1.0);
                 })
-                .speed(0.25)
-                .end(new Pose2d(-20.0, 4.5, 5.79))
+                .speed(0.2)
+                .end(new Pose2d(-20.0, -7.5, (Math.PI * 2.0) - 5.79))
                 .build();
     }
 
