@@ -72,7 +72,9 @@ public class Lift extends Subsystem {
         } else if(reset) {
             liftToPosition(BOTTOM_LEVEL);
             linkagePos = LINKAGE_CLOSED;
+
             releasePos = RELEASE_CLOSED;
+            releaseOn *= -1;
         } else if(firstLevel) {
             liftToPosition(FIRST_LEVEL);
             linkagePos = LINKAGE_OPENED;
@@ -89,6 +91,7 @@ public class Lift extends Subsystem {
                 if(lift.getTargetPosition() != BOTTOM_LEVEL) { lift.setTargetPosition(BOTTOM_LEVEL); }
                 linkagePos = LINKAGE_CLOSED;
                 releasePos = RELEASE_CLOSED;
+                releaseOn *= -1;
             }else if(firstLevel) {
                 if(lift.getTargetPosition() != FIRST_LEVEL) { lift.setTargetPosition(FIRST_LEVEL); }
                 linkagePos = LINKAGE_OPENED;
