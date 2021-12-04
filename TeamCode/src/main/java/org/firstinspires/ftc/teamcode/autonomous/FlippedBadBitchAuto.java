@@ -287,15 +287,15 @@ public class FlippedBadBitchAuto extends AutoPipeline {
                 .start(new Pose2d(-21.0, -7.0, (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(-9.0, -2.6, (Math.PI / 2.0)))
                 .speed(0.6)
-                .addGuidePoint(new Pose2d(0.7, -1.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.0, -1.0, (Math.PI / 2.0)))
                 .speed(0.75)
                 .addTask(() -> {
                     subsystems.intake.run(true, false, false);
                     subsystems.lift.liftToPosition(0);
                 })
-                .addGuidePoint(new Pose2d(0.71, 17.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.01, 17.0, (Math.PI / 2.0)))
                 .speed(0.3)
-                .addGuidePoint(new Pose2d(0.7, 27.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.0, 27.0, (Math.PI / 2.0)))
                 .end(new Pose2d(depotPosX, 37.0, (Math.PI / 2.0)))
                 .build();
     }
@@ -312,9 +312,9 @@ public class FlippedBadBitchAuto extends AutoPipeline {
                 .start(new Pose2d(depotPosX, 37.0, (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(0.0, 32.0, (Math.PI / 2.0)))
                 .speed(0.75)
-                .addGuidePoint(new Pose2d(0.7, 32.0, (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.71, 23.0, (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.7, 10.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.0, 32.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.01, 23.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.0, 10.0, (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(-9.6, -1.0, (Math.PI * 2.0) - 5.69))
                 .addTask(() -> {
                     subsystems.lift.liftToPosition(750);
