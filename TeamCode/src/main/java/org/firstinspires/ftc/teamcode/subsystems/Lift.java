@@ -35,6 +35,7 @@ public class Lift extends Subsystem {
     private final double RELEASE_OPENED = 0.45;
 
     private double linkagePos = LINKAGE_CLOSED;
+    private double releasePos = RELEASE_CLOSED;
 
     private ElapsedTime linkageTimer = new ElapsedTime();
 
@@ -50,10 +51,13 @@ public class Lift extends Subsystem {
 
     public void run(double liftStick, boolean releaseButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel, boolean reset) {
         double linkagePos = this.linkagePos;
+        double releasePos = this.releasePos;
+
         if(runningToPosition) {
         } else if(reset) {
             liftToPosition(BOTTOM_LEVEL);
             linkagePos = LINKAGE_CLOSED;
+            releasePos = RELEASE_CLOSED;
         } else if(firstLevel) {
             liftToPosition(FIRST_LEVEL);
             linkagePos = LINKAGE_OPENED;
@@ -69,6 +73,7 @@ public class Lift extends Subsystem {
             if(reset) {
                 if(lift.getTargetPosition() != BOTTOM_LEVEL) { lift.setTargetPosition(BOTTOM_LEVEL); }
                 linkagePos = LINKAGE_CLOSED;
+                releasePos = RELEASE_CLOSED;
             }else if(firstLevel) {
                 if(lift.getTargetPosition() != FIRST_LEVEL) { lift.setTargetPosition(FIRST_LEVEL); }
                 linkagePos = LINKAGE_OPENED;
@@ -117,11 +122,14 @@ public class Lift extends Subsystem {
             this.releaseButton = false;
         }
         if(releaseOn > 0) {
-            release.setPosition(RELEASE_OPENED);
+            releasePos = RELEASE_OPENED;
         }
         if(releaseOn < 0) {
-            release.setPosition(RELEASE_CLOSED);
+            releasePos = RELEASE_CLOSED;
         }
+
+        release.setPosition(RELEASE_CLOSED);
+        this.releasePos = releasePos;
 
 //        if(pos < 150 && release.getPosition() != RELEASE_CLOSED){
 //            release.setPosition(RELEASE_CLOSED);
@@ -140,9 +148,6 @@ public class Lift extends Subsystem {
         linkageTimer.reset();
 
         linkage.setPosition(linkagePos);
-
-        telemetry.addData("linkage set position", this.linkagePos + LINKAGE_STICK_COEF * linkageStick * elapsed);
-
         this.linkagePos = linkagePos;
 
         telemetry.addData("linkage stick", linkageStick);
