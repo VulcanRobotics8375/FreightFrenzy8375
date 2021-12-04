@@ -128,7 +128,7 @@ public class Lift extends Subsystem {
             releasePos = RELEASE_CLOSED;
         }
 
-        release.setPosition(RELEASE_CLOSED);
+        release.setPosition(releasePos);
         this.releasePos = releasePos;
 
 //        if(pos < 150 && release.getPosition() != RELEASE_CLOSED){
