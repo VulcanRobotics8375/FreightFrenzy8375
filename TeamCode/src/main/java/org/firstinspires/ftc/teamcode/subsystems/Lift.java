@@ -14,6 +14,7 @@ public class Lift extends Subsystem {
     private Servo linkage;
 
     private boolean runningToPosition = false;
+    private boolean linkageMoving = false;
     private boolean hold = false;
     private int holdPosition;
     PID pid = new PID(0.0005, 0, 0, 1, -1);
@@ -22,7 +23,7 @@ public class Lift extends Subsystem {
     private boolean releaseButton = false;
 
     private final int BOTTOM_LEVEL = 0;
-    private final int FIRST_LEVEL = 0;
+    private final int FIRST_LEVEL = 1;
     private final int SECOND_LEVEL = 325;
     private final int THIRD_LEVEL = 725;
     private final int LIMIT_RANGE = 200;
@@ -33,11 +34,15 @@ public class Lift extends Subsystem {
     private final double LINKAGE_CLOSED = 0.49;
     private final double RELEASE_CLOSED = 0.01;
     private final double RELEASE_OPENED = 0.45;
+    private final double DOWN_SPEED = 0.65;
 
     private double linkagePos = LINKAGE_CLOSED;
     private double releasePos = RELEASE_CLOSED;
 
+    private int liftPos = 0;
+
     private ElapsedTime linkageTimer = new ElapsedTime();
+    private ElapsedTime linkageResetTimer = new ElapsedTime();
 
     public void init(){
         release = hardwareMap.servo.get("release");
@@ -69,41 +74,64 @@ public class Lift extends Subsystem {
         }
 
         if(runningToPosition) {
-        } else if(reset) {
-            liftToPosition(BOTTOM_LEVEL);
+        } else if(reset && !linkageMoving) {
+            linkageMoving = true;
+            liftPos = BOTTOM_LEVEL;
             linkagePos = LINKAGE_CLOSED;
-
             releasePos = RELEASE_CLOSED;
             releaseOn = -1;
         } else if(firstLevel) {
-            liftToPosition(FIRST_LEVEL);
-            linkagePos = LINKAGE_OPENED;
+            liftToPosition(FIRST_LEVEL, DOWN_SPEED);
+//            linkagePos = LINKAGE_OPENED;
         } else if(secondLevel) {
             liftToPosition(SECOND_LEVEL);
-            linkagePos = LINKAGE_OPENED;
+//            linkagePos = LINKAGE_OPENED;
         } else if(thirdLevel) {
             liftToPosition(THIRD_LEVEL);
-            linkagePos = LINKAGE_OPENED;
+//            linkagePos = LINKAGE_OPENED;
+        }
+
+        if(!linkageMoving){
+           linkageResetTimer.reset();
+        }
+        telemetry.addData("linkage moving", linkageMoving);
+        telemetry.addData("running to pos", runningToPosition);
+
+        if(linkageMoving && linkageResetTimer.milliseconds() > 300) {
+           liftToPosition(liftPos, DOWN_SPEED);
+           linkageMoving = false;
         }
 
         if(runningToPosition && (reset || firstLevel || secondLevel || thirdLevel)) {
             if(reset) {
-                if(lift.getTargetPosition() != BOTTOM_LEVEL) { lift.setTargetPosition(BOTTOM_LEVEL); }
+                if(lift.getTargetPosition() != BOTTOM_LEVEL) {
+                    linkageMoving = true;
+                    liftPos = BOTTOM_LEVEL;
+                }
+
                 linkagePos = LINKAGE_CLOSED;
 
                 releasePos = RELEASE_CLOSED;
                 releaseOn = -1;
             }else if(firstLevel) {
                 if(lift.getTargetPosition() != FIRST_LEVEL) { lift.setTargetPosition(FIRST_LEVEL); }
-                linkagePos = LINKAGE_OPENED;
+                liftPos = FIRST_LEVEL;
+//                linkagePos = LINKAGE_OPENED;
             } else if(secondLevel) {
                 if(lift.getTargetPosition() != SECOND_LEVEL) { lift.setTargetPosition(SECOND_LEVEL); }
-                linkagePos = LINKAGE_OPENED;
+                liftPos = SECOND_LEVEL;
+//                linkagePos = LINKAGE_OPENED;
             } else if(thirdLevel) {
                 if(lift.getTargetPosition() != THIRD_LEVEL) { lift.setTargetPosition(THIRD_LEVEL); }
-                linkagePos = LINKAGE_OPENED;
+                liftPos = THIRD_LEVEL;
+//                linkagePos = LINKAGE_OPENED;
             }
         }
+
+        if(lift.getTargetPosition() != BOTTOM_LEVEL && this.linkagePos == LINKAGE_CLOSED && pos > liftPos - 25 && pos < liftPos + 25) {
+            linkagePos = LINKAGE_OPENED;
+        }
+
 
 //        if(pos < 150 && release.getPosition() != RELEASE_CLOSED){
 //            releasePos = RELEASE_CLOSED;
@@ -179,5 +207,11 @@ public class Lift extends Subsystem {
         runningToPosition = true;
     }
 
+    public void liftToPosition(int position, double speed) {
+        lift.setTargetPosition(position);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setPower(speed);
+        runningToPosition = true;
+    }
 
 }
