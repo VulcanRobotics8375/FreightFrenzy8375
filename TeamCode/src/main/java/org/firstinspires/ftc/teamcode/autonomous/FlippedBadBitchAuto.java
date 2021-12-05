@@ -77,16 +77,16 @@ public class FlippedBadBitchAuto extends AutoPipeline {
         switch (autoCase) {
             case 1:
                 liftPos = 0;
-                capPos = new Pose2d(-13.5, 0.1, (Math.PI * 2.0) - 0.4);
+                capPos = new Pose2d(-12.5, 3.0, (Math.PI * 2.0) - 0.6);
                 linkagePos = 0.9;
                 break;
             case 2:
                 liftPos = 325;
-                capPos = new Pose2d(-12.0, 0.1, (Math.PI * 2.0) - 0.2);
+                capPos = new Pose2d(-12.0, 3.0, (Math.PI * 2.0) - 0.2);
                 break;
             case 3:
                 liftPos = 750;
-                capPos = new Pose2d(-12.0, -6.0, 0.0);
+                capPos = new Pose2d(-12.0, -3.0, 0.0);
                 break;
         }
 
@@ -312,9 +312,9 @@ public class FlippedBadBitchAuto extends AutoPipeline {
                 .start(new Pose2d(depotPosX, 37.0, (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(0.0, 32.0, (Math.PI / 2.0)))
                 .speed(0.75)
-                .addGuidePoint(new Pose2d(1.0, 32.0, (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(1.01, 23.0, (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(1.0, 10.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.3, 32.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.31, 23.0, (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(1.3, 10.0, (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(-9.6, -1.0, (Math.PI * 2.0) - 5.69))
                 .addTask(() -> {
                     subsystems.lift.liftToPosition(750);

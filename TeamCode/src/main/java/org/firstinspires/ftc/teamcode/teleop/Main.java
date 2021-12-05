@@ -46,9 +46,9 @@ public class Main extends OpModePipeline {
 //        telemetry.addData("left", Robot.getConfiguration().localizer.getRawWheelPositions().get(0));
 //        telemetry.addData("right", Robot.getConfiguration().localizer.getRawWheelPositions().get(1));
 //        telemetry.addData("strafe", Robot.getConfiguration().localizer.getRawWheelPositions().get(2));
-        telemetry.addData("x", robotPose.getX());
-        telemetry.addData("y", robotPose.getY());
-        telemetry.addData("heading", robotPose.getHeading());
+//        telemetry.addData("x", robotPose.getX());
+//        telemetry.addData("y", robotPose.getY());
+//        telemetry.addData("heading", robotPose.getHeading());
         telemetry.update();
 
         double endTimeMs = getRuntime()*1000.0;
