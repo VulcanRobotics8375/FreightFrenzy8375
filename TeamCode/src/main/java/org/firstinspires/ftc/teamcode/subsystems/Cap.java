@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
 public class Cap extends Subsystem {
     private Servo arm;
-    private double down = 0.01;
+    private double down = 0.1;
     private double up = 0.65;
     private double open = -1;
     private boolean changeOpen = false;

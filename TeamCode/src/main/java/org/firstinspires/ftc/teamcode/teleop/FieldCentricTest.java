@@ -37,9 +37,9 @@ public class FieldCentricTest extends OpModePipeline {
 //        double robotTip = subsystems.drivetrain.getIMU().getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
 //        telemetry.addData("robot tip", robotTip);
 
-//        telemetry.addData("left", Robot.getConfiguration().localizer.getWheelPositions().get(0));
-//        telemetry.addData("right", Robot.getConfiguration().localizer.getWheelPositions().get(1));
-//        telemetry.addData("strafe", Robot.getConfiguration().localizer.getWheelPositions().get(2));
+        telemetry.addData("left", Robot.getConfiguration().localizer.getWheelPositions().get(0));
+        telemetry.addData("right", Robot.getConfiguration().localizer.getWheelPositions().get(1));
+        telemetry.addData("strafe", Robot.getConfiguration().localizer.getWheelPositions().get(2));
         telemetry.addData("x", robotPose.getX());
         telemetry.addData("y", robotPose.getY());
         telemetry.addData("heading", robotPose.getHeading());

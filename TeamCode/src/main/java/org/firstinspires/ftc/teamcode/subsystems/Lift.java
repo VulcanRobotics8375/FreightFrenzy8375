@@ -23,9 +23,9 @@ public class Lift extends Subsystem {
     private boolean releaseButton = false;
 
     private final int BOTTOM_LEVEL = 0;
-    private final int FIRST_LEVEL = 1;
+    private final int FIRST_LEVEL = 10;
     private final int SECOND_LEVEL = 325;
-    private final int THIRD_LEVEL = 725;
+    private final int THIRD_LEVEL = 820;
     private final int LIMIT_RANGE = 200;
     private final int MAX_HEIGHT = 1100;
     private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
@@ -35,6 +35,8 @@ public class Lift extends Subsystem {
     private final double RELEASE_CLOSED = 0.01;
     private final double RELEASE_OPENED = 0.45;
     private final double DOWN_SPEED = 0.65;
+
+    private int liftPosOffset = 0;
 
     private double linkagePos = LINKAGE_CLOSED;
     private double releasePos = RELEASE_CLOSED;
@@ -55,7 +57,7 @@ public class Lift extends Subsystem {
     }
 
     public void run(double liftStick, boolean releaseButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel, boolean reset) {
-        int pos = lift.getCurrentPosition();
+        int pos = lift.getCurrentPosition() + liftPosOffset;
         double linkagePos = this.linkagePos;
         double releasePos = this.releasePos;
 
@@ -76,18 +78,18 @@ public class Lift extends Subsystem {
         if(runningToPosition) {
         } else if(reset && !linkageMoving) {
             linkageMoving = true;
-            liftPos = BOTTOM_LEVEL;
+            liftPos = BOTTOM_LEVEL + liftPosOffset;
             linkagePos = LINKAGE_CLOSED;
             releasePos = RELEASE_CLOSED;
             releaseOn = -1;
         } else if(firstLevel) {
-            liftToPosition(FIRST_LEVEL, DOWN_SPEED);
+            liftToPosition(FIRST_LEVEL + liftPosOffset);
 //            linkagePos = LINKAGE_OPENED;
         } else if(secondLevel) {
-            liftToPosition(SECOND_LEVEL);
+            liftToPosition(SECOND_LEVEL + liftPosOffset);
 //            linkagePos = LINKAGE_OPENED;
         } else if(thirdLevel) {
-            liftToPosition(THIRD_LEVEL);
+            liftToPosition(THIRD_LEVEL + liftPosOffset);
 //            linkagePos = LINKAGE_OPENED;
         }
 
@@ -100,6 +102,7 @@ public class Lift extends Subsystem {
         if(linkageMoving && linkageResetTimer.milliseconds() > 300) {
            liftToPosition(liftPos, DOWN_SPEED);
            linkageMoving = false;
+//           liftPosOffset += 30;
         }
 
         if(runningToPosition && (reset || firstLevel || secondLevel || thirdLevel)) {
@@ -128,7 +131,7 @@ public class Lift extends Subsystem {
             }
         }
 
-        if(lift.getTargetPosition() != BOTTOM_LEVEL && this.linkagePos == LINKAGE_CLOSED && pos > liftPos - 25 && pos < liftPos + 25) {
+        if(lift.getTargetPosition() != BOTTOM_LEVEL && this.linkagePos == LINKAGE_CLOSED && pos > liftPos - 25 && !linkageMoving) {
             linkagePos = LINKAGE_OPENED;
         }
 
@@ -180,7 +183,7 @@ public class Lift extends Subsystem {
         linkage.setPosition(linkagePos);
         this.linkagePos = linkagePos;
 
-        telemetry.addData("linkage stick", linkageStick);
+        telemetry.addData("lift pos", pos);
 //        telemetry.addData("lift pos", pos);
 //        telemetry.addData("hold", hold);
 

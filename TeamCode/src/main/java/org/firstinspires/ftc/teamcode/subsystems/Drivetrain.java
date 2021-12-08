@@ -4,6 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DriveMode;
 import org.firstinspires.ftc.teamcode.robotcorelib.drive.DrivetrainImpl;
@@ -25,7 +26,7 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
     BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
-    private CRServo odometryLift;
+    private Servo odometryLift;
 
     @Override
     public void init() {
@@ -34,7 +35,7 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         bl = hardwareMap.dcMotor.get("back_left");
         br = hardwareMap.dcMotor.get("back_right");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
-        odometryLift = hardwareMap.crservo.get("odometry_lift");
+        odometryLift = hardwareMap.servo.get("odometry_lift");
 
         setDrivetrainMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setDrivetrainMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -126,11 +127,11 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
     }
 
     public void startOdometryLift() {
-        odometryLift.setPower(-1.0);
+        odometryLift.setPosition(1.0);
     }
 
     public void stopOdometryLift() {
-        odometryLift.setPower(0.0);
+        odometryLift.setPosition(0.0);
     }
 
     public void setDrivetrainMode(DcMotor.RunMode runMode) {

@@ -34,6 +34,10 @@ public class Main extends OpModePipeline {
 
         subsystems.drivetrain.mechanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
+        if(gamepad1.dpad_up) {
+            subsystems.drivetrain.startOdometryLift();
+        }
+
         subsystems.intake.run(gamepad2.left_bumper, gamepad2.right_bumper, gamepad2.dpad_up);
 
         subsystems.carousel.run(gamepad2.left_trigger>0, gamepad2.dpad_right, gamepad2.right_trigger>0);
