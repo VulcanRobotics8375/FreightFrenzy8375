@@ -32,6 +32,7 @@ public class Intake extends Subsystem {
         filter = hardwareMap.servo.get("filter");
         indexerPot = hardwareMap.analogInput.get("indexer");
 
+        indexer = false;
         transfer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         transfer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

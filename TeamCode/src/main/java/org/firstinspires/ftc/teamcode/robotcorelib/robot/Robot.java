@@ -152,7 +152,7 @@ public class Robot {
     public static void update() {
         clearBulkCache();
         updateGlobalPosition();
-        errorHandler.update(false);
+//        errorHandler.update(false);
         telemetry.update();
     }
 

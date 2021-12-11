@@ -19,7 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class DuckAuto extends AutoPipeline {
+public class FlippedDuckAuto extends AutoPipeline {
 
     PurePursuit follower = new PurePursuit(this);
     FreightFrenzyConfig subsystems = new FreightFrenzyConfig();
@@ -65,7 +65,7 @@ public class DuckAuto extends AutoPipeline {
         double markerPos = pipeline.markerPos.y;
         if (markerPos > 0 && markerPos < 150) {
             autoCase = 3;
-        } else if (markerPos >= 150 && markerPos < 250) {
+        } else if (markerPos >= 150 && markerPos < 300) {
             autoCase = 2;
         } else {
             autoCase = 1;
@@ -76,20 +76,19 @@ public class DuckAuto extends AutoPipeline {
         switch (autoCase) {
             case 1:
                 liftPos = 0;
-                capPos = new Pose2d(-13.5, -7.0, 0.4);
+                capPos = new Pose2d(-14.5, -9.0, 0.4);
                 linkagePos = 0.85;
                 break;
             case 2:
                 liftPos = 325;
-                capPos = new Pose2d(-12.0, -1.5, 0.2);
+                capPos = new Pose2d(-13.0, -2.5, 0.2);
                 break;
             case 3:
                 liftPos = 750;
-                capPos = new Pose2d(-12.0, 6.0, 0.0);
+                capPos = new Pose2d(-12.0, 5.5, 0.0);
                 break;
         }
 
-        int finalLiftPos = liftPos;
         subsystems.cap.setArmPosition(0.2);
 
         Path toCap = new PathBuilder()
@@ -126,7 +125,7 @@ public class DuckAuto extends AutoPipeline {
                 .maintainHeading(true)
                 .start(capPos)
                 .addGuidePoint(capPos)
-                .end(new Pose2d(-20.0, -21.0, 0.72))
+                .end(new Pose2d(-23.0, -2.0, (Math.PI * 2.0) - 0.72))
                 .build();
         follower.followPath(start);
         timer.reset();
@@ -171,9 +170,9 @@ public class DuckAuto extends AutoPipeline {
                 .speed(0.5)
                 .turnSpeed(0.5)
                 .maintainHeading(true)
-                .start(new Pose2d(-23.0, -16.0, 0.72))
-                .addGuidePoint(new Pose2d(-23.0, -16.0, 0.72))
-                .end(new Pose2d(-12.0, 10.0, Math.PI / 2.0))
+                .start(new Pose2d(-23.0, 6.0, 0.0))
+                .addGuidePoint(new Pose2d(-13.0, -16.0, 0.0))
+                .end(new Pose2d(-4.0, -25.0, 0.0))
                 .build();
 
         follower.followPath(new Path(toCarousel));
@@ -181,7 +180,7 @@ public class DuckAuto extends AutoPipeline {
         subsystems.lift.setReleasePosition(0.01);
         subsystems.lift.liftToPosition(0);
         subsystems.carousel.setOpenerPosition(0.2);
-        subsystems.carousel.setCarouselPower(-1.0);
+        subsystems.carousel.setCarouselPower(1.0);
 
         timer.reset();
         runTask(new AutoTask() {
@@ -279,9 +278,9 @@ public class DuckAuto extends AutoPipeline {
                 .speed(0.3)
                 .turnSpeed(0.5)
                 .maintainHeading(true)
-                .start(new Pose2d(-10.0, 10.0, Math.PI / 2.0))
-                .addGuidePoint(new Pose2d(-10.0, 10.0, Math.PI / 2.0))
-                .end(new Pose2d(-31.0, 15.0, Math.PI / 2.0))
+                .start(new Pose2d(-4.0, -25.0, (Math.PI * 2.0) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-4.0, -25.0, (Math.PI * 2.0) - (Math.PI / 2.0)))
+                .end(new Pose2d(-23.0, -36.0, (Math.PI * 2.0) - (Math.PI / 2.0)))
                 .build();
 
         follower.followPath(new Path(park));
