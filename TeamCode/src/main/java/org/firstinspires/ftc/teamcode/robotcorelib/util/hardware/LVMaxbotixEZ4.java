@@ -2,13 +2,18 @@ package org.firstinspires.ftc.teamcode.robotcorelib.util.hardware;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.AnalogInputController;
+import com.qualcomm.robotcore.hardware.configuration.annotations.AnalogSensorType;
+import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+@AnalogSensorType
+@DeviceProperties(name = "LVMaxbotixEZ4", xmlTag = "LVMaxbotixEZ4")
 public class LVMaxbotixEZ4 extends AnalogInput {
 
 
-    public static final double PRE_SCALAR_INCHES = 512.0;
+    public double PRE_SCALAR_INCHES = 12.0 / 0.5;
+    public double VOLTAGE_OFFSET = 0.0;
     public DistanceUnit distanceUnit = DistanceUnit.INCH;
 
     /**
@@ -22,7 +27,7 @@ public class LVMaxbotixEZ4 extends AnalogInput {
     }
 
     public double getDistance(DistanceUnit distanceUnit) {
-        double defaultOut = getVoltage() * (PRE_SCALAR_INCHES / getMaxVoltage());
+        double defaultOut = (getVoltage() - VOLTAGE_OFFSET) * (PRE_SCALAR_INCHES);
         switch(distanceUnit) {
             case CM:
                 return defaultOut * 2.54;
@@ -33,6 +38,10 @@ public class LVMaxbotixEZ4 extends AnalogInput {
             default:
                 return defaultOut;
         }
+    }
+
+    public double getRawVoltage() {
+        return getVoltage();
     }
 
     public double getDistance() {

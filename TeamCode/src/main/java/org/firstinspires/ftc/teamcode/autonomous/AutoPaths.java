@@ -186,19 +186,19 @@ public class AutoPaths extends AutoPipeline {
         int i = 0;
         while(i < 2) {
 //            int correctedI = i > 2 ? 0 : i;
-            double depotPosX;
-            switch (i) {
-                case 1:
-                    depotPosX = -8.5;
-                    break;
-                case 2:
-                    depotPosX = -14;
-                    break;
-                default:
-                    depotPosX = 0.9;
-                    break;
-
-            }
+            double depotPosX = -1.2;
+//            switch (i) {
+//                case 1:
+//                    depotPosX = -8.5;
+//                    break;
+//                case 2:
+//                    depotPosX = -14;
+//                    break;
+//                default:
+//                    depotPosX = -0.3;
+//                    break;
+//
+//            }
 
             Path toDepot = toDepot(depotPosX);
             toDepot.setPrecise(false);
@@ -240,8 +240,8 @@ public class AutoPaths extends AutoPipeline {
             subsystems.lift.liftToPosition(800);
             subsystems.lift.setLinkagePosition(0.49);
             i++;
-            Pose2d robotPose = Robot.getRobotPose();
-            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY(), MathUtils.fullAngleWrap(robotPose.getHeading() - 0.1)));
+//            Pose2d robotPose = Robot.getRobotPose();
+//            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY(), MathUtils.fullAngleWrap(robotPose.getHeading() - 0.1)));
         }
         subsystems.lift.setReleasePosition(0.01);
         timer.reset();
@@ -325,14 +325,14 @@ public class AutoPaths extends AutoPipeline {
                 .start(new Pose2d(-29.0, -4.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(-9.0, -0.4, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .speed(0.4)
-                .addGuidePoint(new Pose2d(0.6, -2.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-1.0, -2.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .addTask(() -> {
                     subsystems.intake.run(true, false, false);
                     subsystems.lift.liftToPosition(0);
                 })
-                .addGuidePoint(new Pose2d(0.61, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-1.01, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .speed(0.4)
-                .addGuidePoint(new Pose2d(0.6, -30.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-1.0, -30.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .end(new Pose2d(depotPosX, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .build();
     }
@@ -347,11 +347,11 @@ public class AutoPaths extends AutoPipeline {
                 .turnSpeed(0.25)
                 .maintainHeading(true)
                 .start(new Pose2d(depotPosX, -40.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.0, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-1.0, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .speed(0.4)
-                .addGuidePoint(new Pose2d(0.6, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.61, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
-                .addGuidePoint(new Pose2d(0.6, -13.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-1.01, -35.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-1.0, -20.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                .addGuidePoint(new Pose2d(-1.01, -13.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                 .addGuidePoint(new Pose2d(-12.6, -2.0, 5.69))
                 .addTask(() -> {
                     subsystems.lift.liftToPosition(750);

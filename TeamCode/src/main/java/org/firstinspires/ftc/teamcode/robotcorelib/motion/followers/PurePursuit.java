@@ -26,7 +26,7 @@ public class PurePursuit extends Follower {
 
     public volatile boolean following;
     private SimplePID velocityPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
-    private SimplePID turnPid = new SimplePID(-1.2, -0.01, 0.0, -0.3, 0.3);
+    private SimplePID turnPid = new SimplePID(-1.2, -0.01, 0.0, -0.8, 0.8);
 
     private LinearOpMode opMode;
 
@@ -162,7 +162,8 @@ public class PurePursuit extends Follower {
 
                 double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
                 //TODO remove this
-//                opMode.telemetry.addData("theta", robotPose.getHeading());
+//                opMode.telemetry.addData("theta error", headingError);
+                opMode.telemetry.addData("x pos", robotPose.getX());
                 double headingOutput = turnPid.run(headingError);
                 Pose2d outputVelocity;
                 switch(Robot.drivetrain.getVelocityControlMode()) {

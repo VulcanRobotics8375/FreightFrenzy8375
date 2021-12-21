@@ -23,7 +23,7 @@ public class Intake extends Subsystem {
 
     public final double INTAKE_POWER = 1;
     public final double TRANSFER_POWER = 1;
-    public final double INDEXER_POS = 1.1;
+    public final double INDEXER_POS = 0.98;
 
     @Override
     public void init() {
@@ -91,7 +91,7 @@ public class Intake extends Subsystem {
         if(filterOn < 0){
             filter.setPosition(0.2);
         }
-//        telemetry.addData("indexer pos", indexerPos);
+        telemetry.addData("indexer pos", indexerPos);
 
         this.intakePower = intakePower;
         this.transferPower = transferPower;
