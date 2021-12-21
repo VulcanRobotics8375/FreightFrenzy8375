@@ -95,7 +95,7 @@ public class NewBadBitchAuto extends AutoPipeline {
 
         subsystems.cap.setArmPosition(0.2);
         Path toCap = new PathBuilder()
-                .speed(0.5)
+                .speed(0.35)
                 .turnSpeed(0.5)
                 .maintainHeading(true)
                 .start(new Pose2d(0.0, 0.0, 0.0))
@@ -170,6 +170,8 @@ public class NewBadBitchAuto extends AutoPipeline {
             }
         });
 
+
+        //START OF LOOP
         int i = 0;
         while(i < 3) {
             subsystems.lift.setReleasePosition(0.0);
@@ -187,7 +189,7 @@ public class NewBadBitchAuto extends AutoPipeline {
                     })
                     .addGuidePoint(new Pose2d(1.01, -30, (2.0 * Math.PI) - (Math.PI / 2.0)))
                     .speed(0.35)
-                    .end(new Pose2d(1.0, -45.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                    .end(new Pose2d(-1.0, -45.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                     .build();
             toWarehouse.setPrecise(false);
             follower.followPath(toWarehouse);
@@ -214,15 +216,18 @@ public class NewBadBitchAuto extends AutoPipeline {
 
             //DEPOSIT CYCLE 1
             Path toDeposit = new PathBuilder()
-                    .speed(0.5)
+                    .speed(0.6)
                     .turnSpeed(0.5)
                     .maintainHeading(true)
                     .start(new Pose2d(1.0, -45.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
+                    .speed(0.5)
                     .addGuidePoint(new Pose2d(1.01, -7.0, (2.0 * Math.PI) - (Math.PI / 2.0)))
                     .addTask(() -> {
                         subsystems.lift.liftToPosition(750);
                         subsystems.lift.setLinkagePosition(1.0);
                     })
+//                    .addGuidePoint(new Pose2d(-12.0, -3.0, 5.74))
+//                    .speed(0.35)
                     .end(new Pose2d(-25.0, 1.0, 5.74))
                     .build();
             follower.followPath(toDeposit);
