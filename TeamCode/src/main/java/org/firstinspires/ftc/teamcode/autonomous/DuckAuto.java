@@ -18,7 +18,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous
+@Autonomous(name = "Blue - Depot Side", group = "blue")
 public class DuckAuto extends AutoPipeline {
 
     PurePursuit follower = new PurePursuit(this);

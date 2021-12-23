@@ -19,7 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous
+@Autonomous(name = "Red - Warehouse Side", group = "red")
 public class NewFlippedBadBitchAuto extends AutoPipeline {
 
     PurePursuit follower = new PurePursuit(this);
