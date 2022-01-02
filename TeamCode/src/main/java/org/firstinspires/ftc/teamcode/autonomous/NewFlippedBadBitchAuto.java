@@ -87,8 +87,8 @@ public class NewFlippedBadBitchAuto extends AutoPipeline {
                 break;
             case 3:
                 liftPos = 0;
-                capPos = new Pose2d(-12.0, -3.0, 0.0);
-                linkagePos = 0.9;
+                capPos = new Pose2d(-12.0, -4.0, 0.0);
+                linkagePos = 0.7;
                 break;
         }
 
@@ -140,9 +140,6 @@ public class NewFlippedBadBitchAuto extends AutoPipeline {
             @Override
             public boolean conditional() {
                 double millis = 200;
-                if(autoCase == 3) {
-                    millis = 600;
-                }
                 return timer.milliseconds() < millis;
             }
 
@@ -217,7 +214,8 @@ public class NewFlippedBadBitchAuto extends AutoPipeline {
     //                       subsystems.drivetrain.setPowers(-(speed + turn), -(speed - turn), -(speed + turn), -(speed - turn));
                 }
             });
-            subsystems.intake.run(true, false, false);
+//            subsystems.intake.run(true, false, false);
+//            subsystems.intake.run(false, false, false);
             subsystems.intake.setIntakePower(-0.4);
             subsystems.intake.setTransferPower(1.0);
 

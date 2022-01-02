@@ -173,7 +173,7 @@ public class DuckAuto extends AutoPipeline {
                 .maintainHeading(true)
                 .start(new Pose2d(-23.0, -16.0, 0.72))
                 .addGuidePoint(new Pose2d(-23.0, -16.0, 0.72))
-                .end(new Pose2d(-12.0, 10.0, Math.PI / 2.0))
+                .end(new Pose2d(-8.0, 8.0, Math.PI / 2.0))
                 .build();
 
         follower.followPath(new Path(toCarousel));
@@ -198,89 +198,99 @@ public class DuckAuto extends AutoPipeline {
         subsystems.carousel.setCarouselPower(0.0);
         subsystems.carousel.setOpenerPosition(1.0);
 
-//        Path intakeDuck = new PathBuilder()
-//                .speed(0.3)
-//                .turnSpeed(0.5)
-//                .maintainHeading(true)
-//                .start(new Pose2d(-9.0, 9.0, Math.PI / 2.0))
-//                .addGuidePoint(new Pose2d(-8.0, 8.1, 6.15))
-//                .addTask(() -> {
-//                    subsystems.intake.run(true, false, false);
-//                })
-//                .addGuidePoint(new Pose2d(-0.51, 8.0))
-//                .end(new Pose2d(-0.5, -10.0, 6.15))
-//                .build();
-//        follower.followPath(new Path(intakeDuck));
-//
-//        timer.reset();
-//        runTask(new AutoTask() {
-//            @Override
-//            public boolean conditional() {
-//                return timer.milliseconds() < 1000.0;
-//            }
-//
-//            @Override
-//            public void run() {
-//
-//            }
-//        });
-//
-//        subsystems.lift.liftToPosition(750);
-//        subsystems.lift.setReleasePosition(1.0);
-//        start = new PathBuilder()
-//                .speed(0.6)
-//                .turnSpeed(0.5)
-//                .lookahead(5)
-//                .maintainHeading(true)
-//                .start(capPos)
-//                .addGuidePoint(capPos)
-//                .end(new Pose2d(-23.0, -16.0, 0.72))
-//                .build();
-//        follower.followPath(new Path(start));
-//
-//        timer.reset();
-//        runTask(new AutoTask() {
-//            @Override
-//            public boolean conditional() {
-//                return timer.milliseconds() < 200;
-//            }
-//
-//            @Override
-//            public void run() {
-//                subsystems.lift.setLinkagePosition(finalLinkagePos);
-//            }
-//        });
-//        timer.reset();
-//        runTask(new AutoTask() {
-//            @Override
-//            public boolean conditional() {
-//                return timer.milliseconds() < 500;
-//            }
-//
-//            @Override
-//            public void run() {
-//                subsystems.lift.setReleasePosition(0.45);
-//            }
-//        });
-//        timer.reset();
-//        runTask(new AutoTask() {
-//            @Override
-//            public boolean conditional() {
-//                return timer.milliseconds() < 200;
-//            }
-//
-//            @Override
-//            public void run() {
-//                subsystems.lift.setLinkagePosition(0.49);
-//            }
-//        });
+        Path intakeDuckPhaseOne = new PathBuilder()
+                .speed(0.5)
+                .turnSpeed(0.5)
+                .maintainHeading(true)
+                .start(new Pose2d(-8.0, 8.0, Math.PI / 2.0))
+                .addGuidePoint(new Pose2d(-12.0, -4.0, Math.PI / 2.0))
+                .end(new Pose2d(-3.0, -12.0, Math.PI / 2.0))
+                .build();
+
+        subsystems.intake.run(true, false, false);
+        follower.followPath(intakeDuckPhaseOne);
+
+        Path intakeDuckPhaseTwo = new PathBuilder()
+                .speed(0.3)
+                .turnSpeed(0.5)
+                .maintainHeading(true)
+                .start(new Pose2d(-3.0, -12.0, 0.9))
+                .addGuidePoint(new Pose2d(-3.0, -12.0, 0.9))
+                .end(new Pose2d(-2.0, 8.0, 0.9))
+                .build();
+
+        follower.followPath(intakeDuckPhaseTwo);
+
+        Path fromIntakeToDeposit = new PathBuilder()
+                .speed(0.4)
+                .turnSpeed(0.5)
+                .maintainHeading(true)
+                .start(new Pose2d(-3.0, 8.0, 1.0))
+                .addGuidePoint(new Pose2d(-3.0, 8.0, 0.72))
+                .end(new Pose2d(-20.0, -21.0, 0.72))
+                .build();
+
+        follower.followPath(fromIntakeToDeposit);
+
+        timer.reset();
+
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return timer.milliseconds() < 1000;
+            }
+
+            @Override
+            public void run() {
+                subsystems.lift.liftToPosition(750);
+            }
+        });
+
+        timer.reset();
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return timer.milliseconds() < 200;
+            }
+
+            @Override
+            public void run() {
+                subsystems.lift.setLinkagePosition(1.0);
+            }
+        });
+        timer.reset();
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return timer.milliseconds() < 500;
+            }
+
+            @Override
+            public void run() {
+                subsystems.lift.setReleasePosition(0.45);
+            }
+        });
+        timer.reset();
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return timer.milliseconds() < 200;
+            }
+
+            @Override
+            public void run() {
+                subsystems.lift.setLinkagePosition(0.49);
+            }
+        });
+
+        subsystems.lift.liftToPosition(0);
 
         Path park = new PathBuilder()
                 .speed(0.3)
                 .turnSpeed(0.5)
                 .maintainHeading(true)
-                .start(new Pose2d(-10.0, 10.0, Math.PI / 2.0))
-                .addGuidePoint(new Pose2d(-10.0, 10.0, Math.PI / 2.0))
+                .start(new Pose2d(-20.0, 21.0, Math.PI / 2.0))
+                .addGuidePoint(new Pose2d(-20.0, 21.0, Math.PI / 2.0))
                 .end(new Pose2d(-31.0, 15.0, Math.PI / 2.0))
                 .build();
 
