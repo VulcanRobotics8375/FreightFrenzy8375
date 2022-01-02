@@ -191,13 +191,13 @@ public class NewFlippedBadBitchAuto extends AutoPipeline {
                     })
                     .addGuidePoint(new Pose2d(0.01, 30, (Math.PI / 2.0)))
                     .speed(0.35)
-                    .end(new Pose2d(-0.8, 40.0, (Math.PI / 2.0)))
+                    .end(new Pose2d(-4.0, 40.0, (Math.PI / 2.0)))
                     .build();
             toWarehouse.setPrecise(false);
             follower.followPath(toWarehouse);
 
             Pose2d robotPose = Robot.getRobotPose();
-            Robot.setRobotPose(new Pose2d(-0.5, robotPose.getY(), robotPose.getHeading()));
+            Robot.setRobotPose(new Pose2d(-1.5, robotPose.getY(), robotPose.getHeading()));
             //INTAKE SUBROUTINE
             runTask(new AutoTask() {
                 @Override
