@@ -214,9 +214,9 @@ public class DuckAuto extends AutoPipeline {
                 .speed(0.3)
                 .turnSpeed(0.5)
                 .maintainHeading(true)
-                .start(new Pose2d(-3.0, -12.0, 0.9))
-                .addGuidePoint(new Pose2d(-3.0, -12.0, 0.9))
-                .end(new Pose2d(-2.0, 8.0, 0.9))
+                .start(new Pose2d(-3.0, -12.0, 0.8))
+                .addGuidePoint(new Pose2d(-3.0, -12.0, 0.8))
+                .end(new Pose2d(-2.0, 8.0, 0.8))
                 .build();
 
         follower.followPath(intakeDuckPhaseTwo);
@@ -225,7 +225,7 @@ public class DuckAuto extends AutoPipeline {
                 .speed(0.4)
                 .turnSpeed(0.5)
                 .maintainHeading(true)
-                .start(new Pose2d(-3.0, 8.0, 1.0))
+                .start(new Pose2d(-3.0, 8.0, 0.8))
                 .addGuidePoint(new Pose2d(-3.0, 8.0, 0.72))
                 .end(new Pose2d(-20.0, -21.0, 0.72))
                 .build();
