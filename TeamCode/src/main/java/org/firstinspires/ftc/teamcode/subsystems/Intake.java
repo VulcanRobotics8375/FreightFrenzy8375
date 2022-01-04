@@ -49,7 +49,7 @@ public class Intake extends Subsystem {
         if(on) {
             transferPower = TRANSFER_POWER;
 //            intakePower = INTAKE_POWER;
-            intakePower = indexer ? 0 : INTAKE_POWER;
+            intakePower = indexer ? -INTAKE_POWER : INTAKE_POWER;
 
         } else if(outtake) {
             intakePower = -INTAKE_POWER;
