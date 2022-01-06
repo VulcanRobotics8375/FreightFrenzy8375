@@ -13,7 +13,7 @@ Java_org_firstinspires_ftc_teamcode_vision_aruco_ArucoPipeline_detectArucoMarker
 
         cv::cvtColor(mat, mat, cv::COLOR_RGB2GRAY);
 
-        cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_5X5_100);
+        cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_100);
         cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
 
         std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;

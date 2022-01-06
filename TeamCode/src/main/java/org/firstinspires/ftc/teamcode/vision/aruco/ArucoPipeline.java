@@ -28,7 +28,7 @@ public class ArucoPipeline extends OpenCvPipeline {
 //        ArucoMarker detectedMarker = null;
         Point tempMarkerPose = new Point(0, 0);
         if(markers != null && markers.length > 0) {
-            ArucoMarker marker = ArucoMarker.getMarkerById(markers, 50);
+            ArucoMarker marker = ArucoMarker.getMarkerById(markers, 42);
 
 
             if (marker != null) {
