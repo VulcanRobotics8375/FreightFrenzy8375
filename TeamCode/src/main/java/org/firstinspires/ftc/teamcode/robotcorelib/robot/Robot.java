@@ -68,6 +68,16 @@ public class Robot {
         }
 
     }
+
+    public static <subClass> Subsystem getSubsystemFromConfig(Class<? extends Subsystem> subClass) {
+        for (Subsystem subsystem : config.subsystems) {
+            if(subsystem.getClass().isInstance(subClass)) {
+
+            }
+        }
+        return null;
+    }
+
     public static void init(AutoPipeline opMode) {
         hardwareMap = opMode.hardwareMap;
         telemetry = opMode.telemetry;
