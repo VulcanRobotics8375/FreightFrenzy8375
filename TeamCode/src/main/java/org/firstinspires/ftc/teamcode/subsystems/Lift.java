@@ -10,207 +10,48 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
 public class Lift extends Subsystem {
     private DcMotor lift;
+    private DcMotor turret;
     private Servo release;
     private Servo linkage;
 
-    private boolean runningToPosition = false;
-    private boolean linkageMoving = false;
-    private boolean hold = false;
-    private int holdPosition;
     PID pid = new PID(0.0005, 0, 0, 1, -1);
 
-    private boolean releaseOpen = false;
+    private double releaseOpen = -1;
     private boolean releaseButton = false;
-
-    private final int BOTTOM_LEVEL = 0;
-    private final int FIRST_LEVEL = 10;
-    private final int SECOND_LEVEL = 325;
-    private final int THIRD_LEVEL = 820;
-    private final int LIMIT_RANGE = 200;
-    private final int MAX_HEIGHT = 1100;
-    private final double CONVERGENCE_SPEED = 8.0 / (double) LIMIT_RANGE;
-    private final double LINKAGE_STICK_COEF = 0.0007;
-    private final double LINKAGE_OPENED = 1.0;
-    private final double LINKAGE_CLOSED = 0.49;
-    private final double RELEASE_CLOSED = 0.01;
-    private final double RELEASE_OPENED = 0.45;
-    private final double DOWN_SPEED = 0.65;
-
-    private double linkagePos = LINKAGE_CLOSED;
-    private double releasePos = RELEASE_CLOSED;
-
-    private int liftPos = 0;
-
-    private ElapsedTime linkageTimer = new ElapsedTime();
-    private ElapsedTime linkageResetTimer = new ElapsedTime();
+    private double releasePosOpen = 0.5;
+    private double releasePosClosed = 0.05;
 
     public void init(){
         release = hardwareMap.servo.get("release");
         lift = hardwareMap.dcMotor.get("lift");
         linkage = hardwareMap.servo.get("linkage");
+        turret = hardwareMap.dcMotor.get("turret");;
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
-        runningToPosition = false;
     }
 
-    public void run(double liftStick, boolean releaseButton, double linkageStick, boolean firstLevel, boolean secondLevel, boolean thirdLevel, boolean reset) {
-        int pos = lift.getCurrentPosition();
-        double linkagePos = this.linkagePos;
-        double releasePos = this.releasePos;
+    public void run(double liftStick, double turretStick, boolean releaseButton) {
 
+        //Hopper Code
         if(releaseButton && !this.releaseButton) {
             this.releaseButton = true;
-            releaseOpen = !releaseOpen;
+            releaseOpen *= -1;
         }
         if(!releaseButton && this.releaseButton) {
             this.releaseButton = false;
         }
-        if(releaseOpen) {
-            releasePos = RELEASE_OPENED;
-        } else {
-            releasePos = RELEASE_CLOSED;
+        if(releaseOpen > 0){
+            release.setPosition(releasePosOpen);
         }
-
-        if(runningToPosition) {
-        } else if(reset && !linkageMoving) {
-            linkageMoving = true;
-            liftPos = BOTTOM_LEVEL;
-            linkagePos = LINKAGE_CLOSED;
-            releasePos = RELEASE_CLOSED;
-            releaseOpen = false;
-        } else if(firstLevel) {
-            liftToPosition(FIRST_LEVEL);
-//            linkagePos = LINKAGE_OPENED;
-        } else if(secondLevel) {
-            liftToPosition(SECOND_LEVEL);
-//            linkagePos = LINKAGE_OPENED;
-        } else if(thirdLevel) {
-            liftToPosition(THIRD_LEVEL);
-//            linkagePos = LINKAGE_OPENED;
+        if(releaseOpen < 0){
+            release.setPosition(releasePosClosed);
         }
-
-        if(!linkageMoving){
-            linkageResetTimer.reset();
-        }
-        telemetry.addData("linkage moving", linkageMoving);
-        telemetry.addData("running to pos", runningToPosition);
-
-        if(linkageMoving && linkageResetTimer.milliseconds() > 300) {
-            liftToPosition(liftPos, DOWN_SPEED);
-            linkageMoving = false;
-        }
-
-        if(runningToPosition && (reset || firstLevel || secondLevel || thirdLevel)) {
-            if(reset) {
-                if(lift.getTargetPosition() != BOTTOM_LEVEL) {
-                    linkageMoving = true;
-                    liftPos = BOTTOM_LEVEL;
-                }
-
-                linkagePos = LINKAGE_CLOSED;
-
-                releasePos = RELEASE_CLOSED;
-                releaseOpen = false;
-            }else if(firstLevel) {
-                if(lift.getTargetPosition() != FIRST_LEVEL) { lift.setTargetPosition(FIRST_LEVEL); }
-                liftPos = FIRST_LEVEL;
-//                linkagePos = LINKAGE_OPENED;
-            } else if(secondLevel) {
-                if(lift.getTargetPosition() != SECOND_LEVEL) { lift.setTargetPosition(SECOND_LEVEL); }
-                liftPos = SECOND_LEVEL;
-//                linkagePos = LINKAGE_OPENED;
-            } else if(thirdLevel) {
-                if(lift.getTargetPosition() != THIRD_LEVEL) { lift.setTargetPosition(THIRD_LEVEL); }
-                liftPos = THIRD_LEVEL;
-//                linkagePos = LINKAGE_OPENED;
-            }
-        }
-
-        if(lift.getTargetPosition() != BOTTOM_LEVEL && this.linkagePos == LINKAGE_CLOSED && pos > liftPos - 25 && !linkageMoving) {
-            linkagePos = LINKAGE_OPENED;
-        }
-
-
-//        if(pos < 150 && release.getPosition() != RELEASE_CLOSED){
-//            releasePos = RELEASE_CLOSED;
-//        }
-
-        release.setPosition(releasePos);
-        this.releasePos = releasePos;
-
-        if(Math.abs(liftStick) > 0.05 && runningToPosition) {
-            runningToPosition = false;
-            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-
-        if(Math.abs(liftStick) > 0.05 || !runningToPosition) {
-            double outputPower;
-            // Sigmoid
-            //value to tune here is the numerator-- higher number == faster acceleration curve
-            if (liftStick > 0) {
-                hold = false;
-                outputPower = liftStick / (1 + Math.exp(CONVERGENCE_SPEED * (pos - (MAX_HEIGHT - (LIMIT_RANGE / 2.0)))));
-            } else if (liftStick < 0) {
-                hold = false;
-                outputPower = liftStick / (1 + Math.exp(CONVERGENCE_SPEED * (LIMIT_RANGE / 2.0 - pos)));
-            } else {
-                if (!hold) {
-                    holdPosition = pos;
-                    hold = true;
-                }
-                outputPower = pid.run(holdPosition, pos);
-            }
-
-            lift.setPower(outputPower);
-        }
-
-        double elapsed = linkageTimer.milliseconds();
-
-        boolean nearOpened = !(linkagePos < LINKAGE_OPENED - LINKAGE_STICK_COEF * linkageStick * elapsed);
-        boolean nearClosed = !(linkagePos > LINKAGE_CLOSED + LINKAGE_STICK_COEF * linkageStick * elapsed);
-        if(linkageStick > 0 && !nearOpened) {
-            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick * elapsed;
-        } else if(linkageStick < 0 && !nearClosed) {
-            linkagePos = this.linkagePos + LINKAGE_STICK_COEF * linkageStick * elapsed;
-        }
-        linkageTimer.reset();
-
-        linkage.setPosition(linkagePos);
-        this.linkagePos = linkagePos;
-
-        telemetry.addData("lift pos", pos);
-//        telemetry.addData("lift pos", pos);
-//        telemetry.addData("hold", hold);
 
     }
-
 
     public void test(double liftStick) {
         lift.setPower(liftStick);
         telemetry.addData("lift pos", lift.getCurrentPosition());
     }
-
-    public void setLinkagePosition(double pos) {
-        linkage.setPosition(pos);
-    }
-
-    public void setReleasePosition(double pos) {
-        release.setPosition(pos);
-    }
-
-    public void liftToPosition(int position) {
-        lift.setTargetPosition(position);
-        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift.setPower(1);
-        runningToPosition = true;
-    }
-
-    public void liftToPosition(int position, double speed) {
-        lift.setTargetPosition(position);
-        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift.setPower(speed);
-        runningToPosition = true;
-    }
-
 }
