@@ -4,8 +4,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.robotcorelib.math.PID;
+import org.apache.commons.math3.analysis.function.Sigmoid;
+import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
 public class Lift extends Subsystem {
@@ -14,12 +16,23 @@ public class Lift extends Subsystem {
     private Servo release;
     private Servo linkage;
 
-    PID pid = new PID(0.0005, 0, 0, 1, -1);
+    private SimplePID liftPID = new SimplePID(0.0005, 0, 0, 1, -1);
+    private boolean liftHolding = false;
+    private double liftHoldPos;
+    private final int LIFT_MIN_POS = 0;
+    private final int LIFT_MAX_POS = 800;
+    private final double LIFT_CONVERGENCE_SPEED = 0.01;
+    private final double LIFT_LIMIT_RANGE = 100;
 
-    private double releaseOpen = -1;
+    private ElapsedTime linkageTimer = new ElapsedTime();
+    private final double LINKAGE_MIN_POS = 0.25;
+    private final double LINKAGE_MAX_POS = 0.75;
+    private final double LINKAGE_STICK_COEF = 0.0007;
+
+    private boolean releaseOpen = false;
     private boolean releaseButton = false;
-    private double releasePosOpen = 0.5;
-    private double releasePosClosed = 0.05;
+    private final double releasePosOpen = 0.5;
+    private final double releasePosClosed = 0.05;
 
     public void init(){
         release = hardwareMap.servo.get("release");
@@ -31,27 +44,59 @@ public class Lift extends Subsystem {
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void run(double liftStick, double turretStick, boolean releaseButton) {
+    public void run(double liftStick, double turretStick, double linkageStick, boolean releaseButton) {
+        //Lift Code
+        int liftPos = lift.getCurrentPosition();
+
+        double liftPower;
+        if(liftStick != 0) {
+            if(liftHolding) {
+                liftPID.reset();
+                liftHolding = false;
+            }
+            if(liftStick > 0) {
+                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
+            } else {
+                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (LIFT_LIMIT_RANGE/2 - liftPos));
+            }
+        } else {
+            if(!liftHolding) {
+                liftHoldPos = Range.clip(liftPos, LIFT_MIN_POS, LIFT_MAX_POS);
+                liftHolding = true;
+            }
+            liftPower = liftPID.run(liftHoldPos, liftPos);
+        }
+        lift.setPower(liftPower);
+
+
+        //Linkage Code
+        double elapsed = linkageTimer.milliseconds();
+        double targetPos = linkage.getPosition() + LINKAGE_STICK_COEF * elapsed * linkageStick;
+        linkage.setPosition(Range.clip(targetPos, LINKAGE_MIN_POS, LINKAGE_MAX_POS));
+        linkageTimer.reset();
+
 
         //Hopper Code
         if(releaseButton && !this.releaseButton) {
             this.releaseButton = true;
-            releaseOpen *= -1;
-        }
-        if(!releaseButton && this.releaseButton) {
+            releaseOpen = !releaseOpen;
+        } else if(!releaseButton && this.releaseButton) {
             this.releaseButton = false;
         }
-        if(releaseOpen > 0){
+
+        if(releaseOpen){
             release.setPosition(releasePosOpen);
-        }
-        if(releaseOpen < 0){
+        } else {
             release.setPosition(releasePosClosed);
         }
-
     }
 
     public void test(double liftStick) {
         lift.setPower(liftStick);
         telemetry.addData("lift pos", lift.getCurrentPosition());
+    }
+
+    public static double sigmoid(double x) {
+        return 1 / (1 + Math.exp(x));
     }
 }
