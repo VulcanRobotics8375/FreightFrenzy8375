@@ -24,6 +24,7 @@ public class Lift extends Subsystem {
     SimplePID pid = new SimplePID(0.0005, 0, 0, 1, -1);
     SimplePID turnPID = new SimplePID(0.05,0,0,1,-1);
     private SimplePID liftPID = new SimplePID(0.0005, 0, 0, 1, -1);
+
     private boolean liftHolding = false;
     private double liftHoldPos;
     private final int LIFT_MIN_POS = 0;
@@ -50,8 +51,6 @@ public class Lift extends Subsystem {
     public final int BASE_TURRET_POS = 0;
     public final int BASE_LIFT_POS = 0;
     public final double BASE_LINKAGE_POS = 0.01;
-    private final double releasePosOpen = 0.5;
-    private final double releasePosClosed = 0.05;
 
     public void init(){
         release = hardwareMap.servo.get("release");
@@ -65,46 +64,46 @@ public class Lift extends Subsystem {
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void run(double liftStick, double turretStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
+    public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
 
         //Auto-aim for auto
         Point target = new Point(GOAL_X, GOAL_Y);
         double turretAngle = turretAngleAnalog.getVoltage();
-        if(autoAim){
+        if (autoAim) {
             double angleToTarget = Math.atan2(target.x - Robot.getRobotPose().getX(), target.y - Robot.getRobotPose().getY());
             double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
             turret.setPower(turnPID.run(angleToTarget, currentAngle));
         }
 
         //Boooooooooooootons.
-        if(resetButton){
+        if (resetButton) {
             linkage.setPosition(BASE_LINKAGE_POS);
             liftToPosition(BASE_LIFT_POS);
             turretToPosition(BASE_TURRET_POS);
-            
+
         }
 
-        if(Math.abs(turretStick) > 0.05){
+        if (Math.abs(turretStick) > 0.05) {
             turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             turret.setPower(turretStick);
         }
-    public void run(double liftStick, double turretStick, double linkageStick, boolean releaseButton) {
+
         //Lift Code
         int liftPos = lift.getCurrentPosition();
 
         double liftPower;
-        if(liftStick != 0) {
-            if(liftHolding) {
+        if (liftStick != 0) {
+            if (liftHolding) {
                 liftPID.reset();
                 liftHolding = false;
             }
-            if(liftStick > 0) {
+            if (liftStick > 0) {
                 liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
             } else {
-                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (LIFT_LIMIT_RANGE/2 - liftPos));
+                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (LIFT_LIMIT_RANGE / 2 - liftPos));
             }
         } else {
-            if(!liftHolding) {
+            if (!liftHolding) {
                 liftHoldPos = Range.clip(liftPos, LIFT_MIN_POS, LIFT_MAX_POS);
                 liftHolding = true;
             }
@@ -121,19 +120,20 @@ public class Lift extends Subsystem {
 
 
         //Hopper Code
-        if(releaseButton && !this.releaseButton) {
+        if (releaseButton && !this.releaseButton) {
             this.releaseButton = true;
             releaseOpen = !releaseOpen;
-        } else if(!releaseButton && this.releaseButton) {
+        } else if (!releaseButton && this.releaseButton) {
             this.releaseButton = false;
         }
 
-        if(releaseOpen){
+        if (releaseOpen) {
             release.setPosition(releasePosOpen);
         } else {
             release.setPosition(releasePosClosed);
         }
     }
+
 
     public void turretToPosition(int pos){
         turret.setTargetPosition(pos);
