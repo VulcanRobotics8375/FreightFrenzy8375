@@ -41,4 +41,8 @@ public class SimplePID {
         return proportional + Ki * integral + derivative;
     }
 
+    public void reset() {
+        integral = 0;
+        lastError = 0;
+    }
 }
