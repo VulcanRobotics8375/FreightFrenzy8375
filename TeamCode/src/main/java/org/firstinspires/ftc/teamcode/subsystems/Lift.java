@@ -80,7 +80,7 @@ public class Lift extends Subsystem {
             linkage.setPosition(BASE_LINKAGE_POS);
             liftToPosition(BASE_LIFT_POS);
             turretToPosition(BASE_TURRET_POS);
-
+            releaseOpen = false;
         }
 
         if (Math.abs(turretStick) > 0.05) {
