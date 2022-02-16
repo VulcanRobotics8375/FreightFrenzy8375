@@ -60,8 +60,10 @@ public class Lift extends Subsystem {
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //turret does not have a quadrature encoder
         turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        turretAngleAnalog = hardwareMap.analogInput.get("turret_encoder");
     }
 
     public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
@@ -135,6 +137,7 @@ public class Lift extends Subsystem {
     }
 
 
+    //@matt this isnt going to work, our turret isnt using a quadrature encoder so we cant use any encoder modes (RUN_TO_POSITION, RUN_USING_ENCODER)
     public void turretToPosition(int pos){
         turret.setTargetPosition(pos);
         turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
