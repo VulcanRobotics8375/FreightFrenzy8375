@@ -21,10 +21,7 @@ public class Lift extends Subsystem {
     private Servo release;
     private Servo linkage;
 
-    SimplePID pid = new SimplePID(0.0005, 0, 0, 1, -1);
-    SimplePID turnPID = new SimplePID(0.05,0,0,1,-1);
     private SimplePID liftPID = new SimplePID(0.0005, 0, 0, 1, -1);
-
     private boolean liftHolding = false;
     private double liftHoldPos;
     private final int LIFT_MIN_POS = 0;
@@ -41,9 +38,10 @@ public class Lift extends Subsystem {
     private boolean releaseButton = false;
     private double releasePosOpen = 0.5;
     private double releasePosClosed = 0.05;
+
+    SimplePID turnPID = new SimplePID(0.05,0,0,1,-1);
     //Temporary until analog input
     private AnalogInput turretAngleAnalog;
-
     private boolean autoAim = false;
 
     public final double GOAL_X = 0;
@@ -80,7 +78,6 @@ public class Lift extends Subsystem {
             linkage.setPosition(BASE_LINKAGE_POS);
             liftToPosition(BASE_LIFT_POS);
             turretToPosition(BASE_TURRET_POS);
-
         }
 
         if (Math.abs(turretStick) > 0.05) {
@@ -97,6 +94,7 @@ public class Lift extends Subsystem {
                 liftPID.reset();
                 liftHolding = false;
             }
+            //Sigmoid Motor Limits
             if (liftStick > 0) {
                 liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
             } else {
@@ -153,6 +151,6 @@ public class Lift extends Subsystem {
     }
 
     public static double sigmoid(double x) {
-        return 1 / (1 + Math.exp(x));
+        return 1 / (1 + Math.exp(-x));
     }
 }
