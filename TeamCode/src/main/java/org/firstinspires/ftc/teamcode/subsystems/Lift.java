@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
 import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.AnalogEncoder;
 
 public class Lift extends Subsystem {
     private DcMotor lift;
@@ -42,7 +43,7 @@ public class Lift extends Subsystem {
     private double releasePosOpen = 0.5;
     private double releasePosClosed = 0.05;
     //Temporary until analog input
-    private AnalogInput turretAngleAnalog;
+    private AnalogEncoder turretAngleAnalog;
 
     private boolean autoAim = false;
 
@@ -63,10 +64,14 @@ public class Lift extends Subsystem {
         //turret does not have a quadrature encoder
         turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
-        turretAngleAnalog = hardwareMap.analogInput.get("turret_encoder");
+        turretAngleAnalog = hardwareMap.get(AnalogEncoder.class, "turret_encoder");
     }
 
     public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
+        //have to call AnalogEncoder.update() every loop
+        turretAngleAnalog.update();
+        //returns the number of rotations reported by the encoder
+        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
 
         //Auto-aim for auto
         Point target = new Point(GOAL_X, GOAL_Y);
