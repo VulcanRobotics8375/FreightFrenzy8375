@@ -89,3 +89,4 @@ lint/tmp/
 .idea/misc.xml
 TeamCode/.DS_Store
 TeamCode/src/.DS_Store
+.DS_Store

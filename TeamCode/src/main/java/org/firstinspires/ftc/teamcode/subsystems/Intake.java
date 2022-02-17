@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
@@ -9,108 +11,79 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
 
 public class Intake extends Subsystem {
-    private DcMotor intake;
-    private DcMotor transfer;
-    private Servo filter;
-    private AnalogInput indexerPot;
+    private DcMotorEx intakeMotor;
+    private Servo extendServo1;
+    private Servo extendServo2;
+    private Servo rotateServo;
 
-    private boolean indexer = false;
-    private boolean filterButton = false;
-    private double filterOn = -1.0;
+    public boolean lastFlip = false;
+    public double flipOn = -1;
+    public final double depositPosition = 0.2;
+    public final double intakePosition = 0.8;
 
-    private double intakePower;
-    private double transferPower;
+
+    public boolean lastExtend = false;
+    public double extendOn = -1;
+    public final double extendBackPosition = 0.2;
+    public final double extendForwardPosition = 0.8;
 
     public final double INTAKE_POWER = 1;
-    public final double TRANSFER_POWER = 1;
-    public final double INDEXER_POS = 0.98;
 
     @Override
     public void init() {
-        intake = hardwareMap.dcMotor.get("intake");
-        transfer = hardwareMap.dcMotor.get("transfer");
-        filter = hardwareMap.servo.get("filter");
-        indexerPot = hardwareMap.analogInput.get("indexer");
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
+        extendServo1 = hardwareMap.servo.get("extendServo1");
+        extendServo2 = hardwareMap.servo.get("extendServo2");
+        rotateServo = hardwareMap.servo.get("rotateServo");
 
-        indexer = false;
-        transfer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        transfer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        extendServo1.setPosition(extendBackPosition);
+        extendServo2.setPosition(extendBackPosition);
+        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public void run(boolean intake, boolean outake, boolean extend, boolean flip ) {
+        if (intake) {
+            intakeMotor.setPower(INTAKE_POWER);
+        }
+        else if (outake) {
+            intakeMotor.setPower(-1 * INTAKE_POWER);
+        }
+
+       // extension servos
+        if(extend && !lastExtend ) {
+            extendOn *= -1;
+            lastExtend = true;
+        }
+        else if (!extend && lastExtend) {
+            lastExtend = false;
+        }
+        if (extendOn > 0) {
+            extendServo1.setPosition(extendForwardPosition);
+            extendServo2.setPosition(extendForwardPosition);
+        }
+        else if (extendOn < 0) {
+            extendServo1.setPosition(extendBackPosition);
+            extendServo2.setPosition(extendBackPosition);
+        }
+
+        //flip servo
+        if(flip && !lastFlip ) {
+            flipOn *= -1;
+            lastFlip = true;
+        }
+        else if (!flip && lastFlip) {
+            lastFlip = false;
+        }
+        if (flipOn > 0) {
+            rotateServo.setPosition(intakePosition);
+        }
+        else if (flipOn < 0) {
+            rotateServo.setPosition(depositPosition);
+        }
+        
     }
 
 
-    public void run(boolean on, boolean outtake, boolean filterButton) {
-        boolean currentIndex = indexer;
 
-        double intakePower;
-        double transferPower;
-        double indexerPos = indexerPot.getVoltage();
-        if(on) {
-            transferPower = TRANSFER_POWER;
-//            intakePower = INTAKE_POWER;
-            intakePower = indexer ? -INTAKE_POWER : INTAKE_POWER;
-
-        } else if(outtake) {
-            intakePower = -INTAKE_POWER;
-            transferPower = -TRANSFER_POWER;
-        } else {
-            intakePower = 0;
-            transferPower = 0;
-        }
-
-        if(indexerPos < INDEXER_POS && on) {
-            indexer = true;
-        }
-        if(!on) {
-            indexer = false;
-        }
-
-        if(currentIndex != indexer && indexer) {
-            gamepad1.rumble(1.0, 1.0, 500);
-            gamepad2.rumble(1.0, 1.0, 500);
-        }
-
-        if(MathUtils.shouldHardwareUpdate(intakePower, this.intakePower, HardwarePrecision.LOW)) {
-            intake.setPower(intakePower);
-        }
-        if(MathUtils.shouldHardwareUpdate(transferPower, this.transferPower, HardwarePrecision.LOW)) {
-            transfer.setPower(transferPower);
-        }
-
-        if(filterButton && !this.filterButton){
-            filterOn *= -1;
-            this.filterButton = true;
-        }
-        if(!filterButton && this.filterButton){
-            this.filterButton = false;
-        }
-        if(filterOn > 0){
-            filter.setPosition(1.0);
-        }
-        if(filterOn < 0){
-            filter.setPosition(0.2);
-        }
-        telemetry.addData("indexer pos", indexerPos);
-
-        this.intakePower = intakePower;
-        this.transferPower = transferPower;
-    }
-
-    public void setIntakePower(double power) {
-        intake.setPower(power);
-    }
-
-    public void setTransferPower(double power) {
-        transfer.setPower(power);
-    }
-
-    public void setFilterPosition(double pos) {
-        filter.setPosition(pos);
-    }
-
-    public boolean indexerOn() {
-        return indexer;
-    }
 
 }
