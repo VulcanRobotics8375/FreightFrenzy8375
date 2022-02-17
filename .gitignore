@@ -87,3 +87,5 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 .idea/misc.xml
+TeamCode/.DS_Store
+TeamCode/src/.DS_Store
