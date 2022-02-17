@@ -22,10 +22,7 @@ public class Lift extends Subsystem {
     private Servo release;
     private Servo linkage;
 
-    SimplePID pid = new SimplePID(0.0005, 0, 0, 1, -1);
-    SimplePID turnPID = new SimplePID(0.05,0,0,1,-1);
     private SimplePID liftPID = new SimplePID(0.0005, 0, 0, 1, -1);
-
     private boolean liftHolding = false;
     private double liftHoldPos;
     private final int LIFT_MIN_POS = 0;
@@ -42,6 +39,8 @@ public class Lift extends Subsystem {
     private boolean releaseButton = false;
     private double releasePosOpen = 0.5;
     private double releasePosClosed = 0.05;
+
+    SimplePID turnPID = new SimplePID(0.05,0,0,1,-1);
     //Temporary until analog input
     private AnalogEncoder turretAngleAnalog;
 
@@ -73,29 +72,23 @@ public class Lift extends Subsystem {
         //returns the number of rotations reported by the encoder
         double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
 
-        //Auto-aim for auto
-        Point target = new Point(GOAL_X, GOAL_Y);
+        //Turret
         double turretAngle = turretAngleAnalog.getVoltage();
+        //Auto-aim for auto
         if (autoAim) {
+            Point target = new Point(GOAL_X, GOAL_Y);
             double angleToTarget = Math.atan2(target.x - Robot.getRobotPose().getX(), target.y - Robot.getRobotPose().getY());
             double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
             turret.setPower(turnPID.run(angleToTarget, currentAngle));
         }
 
-        //Boooooooooooootons.
-        if (resetButton) {
-            linkage.setPosition(BASE_LINKAGE_POS);
-            liftToPosition(BASE_LIFT_POS);
-            turretToPosition(BASE_TURRET_POS);
-
-        }
-
-        if (Math.abs(turretStick) > 0.05) {
+        if (turretStick != 0) {
             turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             turret.setPower(turretStick);
         }
 
-        //Lift Code
+
+        //Lift
         int liftPos = lift.getCurrentPosition();
 
         double liftPower;
@@ -104,6 +97,7 @@ public class Lift extends Subsystem {
                 liftPID.reset();
                 liftHolding = false;
             }
+            //Sigmoid Motor Limits
             if (liftStick > 0) {
                 liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
             } else {
@@ -119,14 +113,14 @@ public class Lift extends Subsystem {
         lift.setPower(liftPower);
 
 
-        //Linkage Code
+        //Linkage
         double elapsed = linkageTimer.milliseconds();
         double targetPos = linkage.getPosition() + LINKAGE_STICK_COEF * elapsed * linkageStick;
         linkage.setPosition(Range.clip(targetPos, LINKAGE_MIN_POS, LINKAGE_MAX_POS));
         linkageTimer.reset();
 
 
-        //Hopper Code
+        //Hopper
         if (releaseButton && !this.releaseButton) {
             this.releaseButton = true;
             releaseOpen = !releaseOpen;
@@ -138,6 +132,14 @@ public class Lift extends Subsystem {
             release.setPosition(releasePosOpen);
         } else {
             release.setPosition(releasePosClosed);
+        }
+
+
+        //Run To Position
+        if (resetButton) {
+            linkage.setPosition(BASE_LINKAGE_POS);
+            liftToPosition(BASE_LIFT_POS);
+            turretToPosition(BASE_TURRET_POS);
         }
     }
 
@@ -161,6 +163,6 @@ public class Lift extends Subsystem {
     }
 
     public static double sigmoid(double x) {
-        return 1 / (1 + Math.exp(x));
+        return 1 / (1 + Math.exp(-x));
     }
 }
