@@ -66,28 +66,23 @@ public class Lift extends Subsystem {
 
     public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
 
-        //Auto-aim for auto
-        Point target = new Point(GOAL_X, GOAL_Y);
+        //Turret
         double turretAngle = turretAngleAnalog.getVoltage();
+        //Auto-aim for auto
         if (autoAim) {
+            Point target = new Point(GOAL_X, GOAL_Y);
             double angleToTarget = Math.atan2(target.x - Robot.getRobotPose().getX(), target.y - Robot.getRobotPose().getY());
             double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
             turret.setPower(turnPID.run(angleToTarget, currentAngle));
         }
 
-        //Boooooooooooootons.
-        if (resetButton) {
-            linkage.setPosition(BASE_LINKAGE_POS);
-            liftToPosition(BASE_LIFT_POS);
-            turretToPosition(BASE_TURRET_POS);
-        }
-
-        if (Math.abs(turretStick) > 0.05) {
+        if (turretStick != 0) {
             turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             turret.setPower(turretStick);
         }
 
-        //Lift Code
+
+        //Lift
         int liftPos = lift.getCurrentPosition();
 
         double liftPower;
@@ -112,14 +107,14 @@ public class Lift extends Subsystem {
         lift.setPower(liftPower);
 
 
-        //Linkage Code
+        //Linkage
         double elapsed = linkageTimer.milliseconds();
         double targetPos = linkage.getPosition() + LINKAGE_STICK_COEF * elapsed * linkageStick;
         linkage.setPosition(Range.clip(targetPos, LINKAGE_MIN_POS, LINKAGE_MAX_POS));
         linkageTimer.reset();
 
 
-        //Hopper Code
+        //Hopper
         if (releaseButton && !this.releaseButton) {
             this.releaseButton = true;
             releaseOpen = !releaseOpen;
@@ -131,6 +126,14 @@ public class Lift extends Subsystem {
             release.setPosition(releasePosOpen);
         } else {
             release.setPosition(releasePosClosed);
+        }
+
+
+        //Run To Position
+        if (resetButton) {
+            linkage.setPosition(BASE_LINKAGE_POS);
+            liftToPosition(BASE_LIFT_POS);
+            turretToPosition(BASE_TURRET_POS);
         }
     }
 
