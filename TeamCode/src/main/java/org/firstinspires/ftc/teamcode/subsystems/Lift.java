@@ -24,7 +24,7 @@ public class Lift extends Subsystem {
 
     private SimplePID liftPID = new SimplePID(0.0005, 0, 0, 1, -1);
     private boolean liftHolding = false;
-    private double liftHoldPos;
+    private double liftTargetPos;
     private final int LIFT_MIN_POS = 0;
     private final int LIFT_MAX_POS = 800;
     private final double LIFT_CONVERGENCE_SPEED = 0.01;
@@ -40,9 +40,10 @@ public class Lift extends Subsystem {
     private double releasePosOpen = 0.5;
     private double releasePosClosed = 0.05;
 
-    SimplePID turnPID = new SimplePID(0.05,0,0,1,-1);
-    //Temporary until analog input
-    private AnalogEncoder turretAngleAnalog;
+    SimplePID turretPID = new SimplePID(0.05,0,0,1,-1);
+    private AnalogEncoder turretAngleAnalog; //Temporary until analog input
+    private boolean turretHolding = false;
+    private double turretTargetPos;
 
     private boolean autoAim = false;
 
@@ -67,27 +68,6 @@ public class Lift extends Subsystem {
     }
 
     public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
-        //have to call AnalogEncoder.update() every loop
-        turretAngleAnalog.update();
-        //returns the number of rotations reported by the encoder
-        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
-
-        //Turret
-        double turretAngle = turretAngleAnalog.getVoltage();
-        //Auto-aim for auto
-        if (autoAim) {
-            Point target = new Point(GOAL_X, GOAL_Y);
-            double angleToTarget = Math.atan2(target.x - Robot.getRobotPose().getX(), target.y - Robot.getRobotPose().getY());
-            double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
-            turret.setPower(turnPID.run(angleToTarget, currentAngle));
-        }
-
-        if (turretStick != 0) {
-            turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            turret.setPower(turretStick);
-        }
-
-
         //Lift
         int liftPos = lift.getCurrentPosition();
 
@@ -105,12 +85,43 @@ public class Lift extends Subsystem {
             }
         } else {
             if (!liftHolding) {
-                liftHoldPos = Range.clip(liftPos, LIFT_MIN_POS, LIFT_MAX_POS);
+                liftTargetPos = Range.clip(liftPos, LIFT_MIN_POS, LIFT_MAX_POS);
                 liftHolding = true;
             }
-            liftPower = liftPID.run(liftHoldPos, liftPos);
+            liftPower = liftPID.run(liftTargetPos, liftPos);
         }
         lift.setPower(liftPower);
+
+        
+        //Turret
+        //have to call AnalogEncoder.update() every loop
+        turretAngleAnalog.update();
+        //returns the number of rotations reported by the encoder
+        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
+        double turretAngle = turretAngleAnalog.getVoltage();
+
+        double turretPower;
+        if (turretStick != 0) {
+            if (turretHolding) {
+                turretPID.reset();
+                turretHolding = false;
+            }
+            turretPower = turretStick;
+        } else {
+            if (!turretHolding) {
+                turretTargetPos = turretRotations;
+                turretHolding = true;
+            }
+            turretPower = turretPID.run(turretTargetPos, turretRotations);
+        }
+//        should we put autoAim in the autopath class?
+//        if (autoAim) { //Auto-aim for auto
+//            Point target = new Point(GOAL_X, GOAL_Y);
+//            double angleToTarget = Math.atan2(target.x - Robot.getRobotPose().getX(), target.y - Robot.getRobotPose().getY());
+//            double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
+//            turretPower = turretPID.run(angleToTarget, currentAngle);
+//        }
+        turret.setPower(turretPower);
 
 
         //Linkage
