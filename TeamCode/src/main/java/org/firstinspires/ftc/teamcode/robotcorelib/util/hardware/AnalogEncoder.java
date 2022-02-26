@@ -13,7 +13,7 @@ public class AnalogEncoder extends AnalogInput {
     private double lastPos;
     private Mode mode = Mode.ABSOLUTE; // default mode is absolute
     private int totalRotations = 0;
-    public static final double WRAPAROUND_THRESHOLD = 3.0; //wraparound threshold in volts
+    public static final double WRAPAROUND_THRESHOLD = 1.0; //wraparound threshold in volts
 
     /**
      * Constructor
@@ -29,10 +29,10 @@ public class AnalogEncoder extends AnalogInput {
         lastPos = pos;
         pos = getVoltage() / getMaxVoltage();
         if(pos - lastPos > WRAPAROUND_THRESHOLD / getMaxVoltage()) {
-            totalRotations++;
+            totalRotations--;
         }
         if(pos - lastPos < -1.0 * WRAPAROUND_THRESHOLD / getMaxVoltage()) {
-            totalRotations--;
+            totalRotations++;
         }
     }
 

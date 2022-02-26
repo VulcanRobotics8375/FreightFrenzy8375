@@ -24,8 +24,8 @@ public class Intake extends Subsystem {
 
     public boolean lastExtend = false;
     public double extendOn = -1;
-    public final double extendBackPosition = 0.01;
-    public final double extendForwardPosition = 0.99;
+    public final double extendBackPosition = 0.05;
+    public final double extendForwardPosition = 0.27;
 
     public final double INTAKE_POWER = 1;
 

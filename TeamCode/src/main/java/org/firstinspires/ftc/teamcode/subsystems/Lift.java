@@ -17,7 +17,7 @@ public class Lift extends Subsystem {
     private Servo release;
     private Servo linkageOne, linkageTwo;
 
-    private SimplePID liftPID = new SimplePID(0.0005, 0, 0, 1, -1);
+    private SimplePID liftPID = new SimplePID(0.0005, 0, 0, -1, 1);
     private boolean liftHolding = false;
     private double liftTargetPos;
     private final int LIFT_MIN_POS = 0;
@@ -48,7 +48,7 @@ public class Lift extends Subsystem {
     public final int BASE_LIFT_POS = 0;
     public final double BASE_LINKAGE_POS = 0.01;
 
-    public void init(){
+    public void init() {
         release = hardwareMap.servo.get("release");
         lift = hardwareMap.get(DcMotorEx.class, "lift");
         linkageOne = hardwareMap.servo.get("linkage_one");
@@ -90,7 +90,6 @@ public class Lift extends Subsystem {
         }
         lift.setPower(liftPower);
 
-        
         //Turret
         //have to call AnalogEncoder.update() every loop
         turretAngleAnalog.update();
@@ -166,20 +165,45 @@ public class Lift extends Subsystem {
         lift.setPower(1);
     }
 
-    public void test(double liftStick, double turretStick, boolean linkageButton) {
-        lift.setPower(liftStick);
+    public void test(double liftStick, double turretStick, boolean linkageButton, boolean releaseButton) {
+        int liftPos = lift.getCurrentPosition();
+
+        double liftPower;
+        if (liftStick != 0) {
+            if (liftHolding) {
+                liftPID.reset();
+                liftHolding = false;
+            }
+            liftPower = liftStick;
+        } else {
+            if (!liftHolding) {
+                liftTargetPos = Range.clip(liftPos, LIFT_MIN_POS, LIFT_MAX_POS);
+                liftHolding = true;
+            }
+            liftPower = liftPID.run(liftTargetPos, liftPos);
+        }
+        lift.setPower(liftPower);
+
         turret.setPower(turretStick);
 
         if(linkageButton) {
-            linkageOne.setPosition(1.0);
-            linkageTwo.setPosition(1.0);
+            linkageOne.setPosition(0.8);
+            linkageTwo.setPosition(0.8);
         }
         else {
-            linkageTwo.setPosition(0.5);
-            linkageOne.setPosition(0.5);
+            linkageTwo.setPosition(0.1);
+            linkageOne.setPosition(0.1);
         }
+        if(releaseButton) {
+            release.setPosition(0.23);
+        } else {
+            release.setPosition(0.6);
+        }
+        turretAngleAnalog.update();
 
+        telemetry.addData("turret pos incremental", turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL));
         telemetry.addData("turret pos", turretAngleAnalog.getVoltage());
+
         telemetry.addData("turret encoder max voltage", turretAngleAnalog.getMaxVoltage());
 
         telemetry.addData("lift pos", lift.getCurrentPosition());
