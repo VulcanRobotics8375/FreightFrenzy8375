@@ -30,7 +30,10 @@ public class Main extends OpModePipeline {
     public void loop() {
         Robot.update();
 
+        subsystems.drivetrain.mechanumDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+        subsystems.lift.test(gamepad2.left_stick_y, gamepad2.right_stick_x, gamepad2.a);
 
+        subsystems.intake.run(gamepad2.dpad_down, gamepad2.dpad_up, gamepad2.dpad_left, gamepad2.dpad_right);
 
         telemetry.update();
 

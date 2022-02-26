@@ -1,16 +1,19 @@
 package org.firstinspires.ftc.teamcode.robotcorelib.util.hardware;
 
-
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.AnalogInputController;
+import com.qualcomm.robotcore.hardware.configuration.annotations.AnalogSensorType;
+import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 
+@AnalogSensorType
+@DeviceProperties(name = "analog encoder", xmlTag = "analog_encoder")
 public class AnalogEncoder extends AnalogInput {
 
     private double pos;
     private double lastPos;
     private Mode mode = Mode.ABSOLUTE; // default mode is absolute
     private int totalRotations = 0;
-    public static final double WRAPAROUND_THRESHOLD = 4.0; //wraparound threshold in volts
+    public static final double WRAPAROUND_THRESHOLD = 3.0; //wraparound threshold in volts
 
     /**
      * Constructor

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -19,7 +20,7 @@ import static org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils.*;
 
 public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
-    private DcMotor fl, fr, bl, br;
+    private DcMotorEx fl, fr, bl, br;
     private BNO055IMU imu;
     public static final DriveMode driveMode = DriveMode.MECANUM;
     public static final DrivetrainVelocityMode velocityMode = DrivetrainVelocityMode.DRIVE_MOTOR_ENCODERS;
@@ -30,15 +31,15 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
     @Override
     public void init() {
-        fl = hardwareMap.dcMotor.get("front_left");
-        fr = hardwareMap.dcMotor.get("front_right");
-        bl = hardwareMap.dcMotor.get("back_left");
-        br = hardwareMap.dcMotor.get("back_right");
+        fl = hardwareMap.get(DcMotorEx.class, "front_left");
+        fr = hardwareMap.get(DcMotorEx.class, "front_right");
+        bl = hardwareMap.get(DcMotorEx.class, "back_left");
+        br = hardwareMap.get(DcMotorEx.class, "back_right");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         odometryLift = hardwareMap.servo.get("odometry_lift");
 
         setDrivetrainMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        setDrivetrainMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        setDrivetrainMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         if(Robot.runMode == RobotRunMode.AUTONOMOUS) {
             setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

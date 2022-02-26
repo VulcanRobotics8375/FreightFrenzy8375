@@ -19,25 +19,24 @@ public class Intake extends Subsystem {
     public boolean lastFlip = false;
     public double flipOn = -1;
     public final double depositPosition = 0.2;
-    public final double intakePosition = 0.8;
+    public final double intakePosition = 0.99;
 
 
     public boolean lastExtend = false;
     public double extendOn = -1;
-    public final double extendBackPosition = 0.2;
-    public final double extendForwardPosition = 0.8;
+    public final double extendBackPosition = 0.01;
+    public final double extendForwardPosition = 0.99;
 
     public final double INTAKE_POWER = 1;
 
     @Override
     public void init() {
-        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
-        extendServo1 = hardwareMap.servo.get("extendServo1");
-        extendServo2 = hardwareMap.servo.get("extendServo2");
-        rotateServo = hardwareMap.servo.get("rotateServo");
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
+        extendServo1 = hardwareMap.servo.get("extend_one");
+        extendServo2 = hardwareMap.servo.get("extend_two");
+        rotateServo = hardwareMap.servo.get("flip");
 
-        extendServo1.setPosition(extendBackPosition);
-        extendServo2.setPosition(extendBackPosition);
+        extendServo1.setDirection(Servo.Direction.REVERSE);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
@@ -47,10 +46,12 @@ public class Intake extends Subsystem {
         }
         else if (outake) {
             intakeMotor.setPower(-1 * INTAKE_POWER);
+        } else {
+            intakeMotor.setPower(0.0);
         }
 
        // extension servos
-        if(extend && !lastExtend ) {
+        if(extend && !lastExtend) {
             extendOn *= -1;
             lastExtend = true;
         }
@@ -65,6 +66,14 @@ public class Intake extends Subsystem {
             extendServo1.setPosition(extendBackPosition);
             extendServo2.setPosition(extendBackPosition);
         }
+//        if(extend) {
+//            extendServo1.setPosition(extendForwardPosition);
+//            extendServo2.setPosition(extendForwardPosition);
+//        } else {
+//
+//            extendServo1.setPosition(extendBackPosition);
+//            extendServo2.setPosition(extendBackPosition);
+//        }
 
         //flip servo
         if(flip && !lastFlip ) {

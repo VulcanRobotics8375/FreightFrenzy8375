@@ -1,26 +1,21 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.robotcorelib.math.PID;
-import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
-import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
-import org.firstinspires.ftc.teamcode.robotcorelib.util.Point;
-import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.AnalogEncoder;
 
 public class Lift extends Subsystem {
-    private DcMotor lift;
-    private DcMotor turret;
+    private DcMotorEx lift;
+    private DcMotorEx turret;
     private Servo release;
-    private Servo linkage;
+    private Servo linkageOne, linkageTwo;
 
     private SimplePID liftPID = new SimplePID(0.0005, 0, 0, 1, -1);
     private boolean liftHolding = false;
@@ -55,15 +50,18 @@ public class Lift extends Subsystem {
 
     public void init(){
         release = hardwareMap.servo.get("release");
-        lift = hardwareMap.dcMotor.get("lift");
-        linkage = hardwareMap.servo.get("linkage");
-        turret = hardwareMap.dcMotor.get("turret");;
+        lift = hardwareMap.get(DcMotorEx.class, "lift");
+        linkageOne = hardwareMap.servo.get("linkage_one");
+        linkageTwo = hardwareMap.servo.get("linkage_two");
+        turret = hardwareMap.get(DcMotorEx.class, "turret");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //turret does not have a quadrature encoder
-        turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setDirection(DcMotorSimple.Direction.FORWARD);
+        turret.setDirection(DcMotorSimple.Direction.REVERSE);
+        linkageTwo.setDirection(Servo.Direction.REVERSE);
         turretAngleAnalog = hardwareMap.get(AnalogEncoder.class, "turret_encoder");
     }
 
@@ -126,8 +124,8 @@ public class Lift extends Subsystem {
 
         //Linkage
         double elapsed = linkageTimer.milliseconds();
-        double targetPos = linkage.getPosition() + LINKAGE_STICK_COEF * elapsed * linkageStick;
-        linkage.setPosition(Range.clip(targetPos, LINKAGE_MIN_POS, LINKAGE_MAX_POS));
+        double targetPos = linkageOne.getPosition() + LINKAGE_STICK_COEF * elapsed * linkageStick;
+        linkageOne.setPosition(Range.clip(targetPos, LINKAGE_MIN_POS, LINKAGE_MAX_POS));
         linkageTimer.reset();
 
 
@@ -148,7 +146,7 @@ public class Lift extends Subsystem {
 
         //Run To Position
         if (resetButton) {
-            linkage.setPosition(BASE_LINKAGE_POS);
+            linkageOne.setPosition(BASE_LINKAGE_POS);
             liftToPosition(BASE_LIFT_POS);
             turretToPosition(BASE_TURRET_POS);
         }
@@ -168,8 +166,22 @@ public class Lift extends Subsystem {
         lift.setPower(1);
     }
 
-    public void test(double liftStick) {
+    public void test(double liftStick, double turretStick, boolean linkageButton) {
         lift.setPower(liftStick);
+        turret.setPower(turretStick);
+
+        if(linkageButton) {
+            linkageOne.setPosition(1.0);
+            linkageTwo.setPosition(1.0);
+        }
+        else {
+            linkageTwo.setPosition(0.5);
+            linkageOne.setPosition(0.5);
+        }
+
+        telemetry.addData("turret pos", turretAngleAnalog.getVoltage());
+        telemetry.addData("turret encoder max voltage", turretAngleAnalog.getMaxVoltage());
+
         telemetry.addData("lift pos", lift.getCurrentPosition());
     }
 
