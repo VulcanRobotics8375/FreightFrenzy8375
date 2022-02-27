@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.robotcorelib.math.KalmanFilter;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.AnalogEncoder;
@@ -17,7 +19,7 @@ public class Lift extends Subsystem {
     private Servo release;
     private Servo linkageOne, linkageTwo;
 
-    private SimplePID liftPID = new SimplePID(0.0005, 0, 0, -1, 1);
+    private SimplePID liftPID = new SimplePID(0.0, 0, 0, -1, 1);
     private boolean liftHolding = false;
     private double liftTargetPos;
     private final int LIFT_MIN_POS = 0;
@@ -36,7 +38,7 @@ public class Lift extends Subsystem {
     private double releasePosClosed = 0.05;
 
     SimplePID turretPID = new SimplePID(0.05,0,0,1,-1);
-    private AnalogEncoder turretAngleAnalog; //Temporary until analog input
+    private AnalogInput turretAngleAnalog; //Temporary until analog input
     private boolean turretHolding = false;
     private double turretTargetPos;
 
@@ -62,7 +64,7 @@ public class Lift extends Subsystem {
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
         linkageTwo.setDirection(Servo.Direction.REVERSE);
-        turretAngleAnalog = hardwareMap.get(AnalogEncoder.class, "turret_encoder");
+        turretAngleAnalog = hardwareMap.get(AnalogInput.class, "turret_encoder");
     }
 
     public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
@@ -92,9 +94,9 @@ public class Lift extends Subsystem {
 
         //Turret
         //have to call AnalogEncoder.update() every loop
-        turretAngleAnalog.update();
+//        turretAngleAnalog.update();
         //returns the number of rotations reported by the encoder
-        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
+//        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
         double turretAngle = turretAngleAnalog.getVoltage();
 
         double turretPower;
@@ -106,10 +108,10 @@ public class Lift extends Subsystem {
             turretPower = turretStick;
         } else {
             if (!turretHolding) {
-                turretTargetPos = turretRotations;
+//                turretTargetPos = turretRotations;
                 turretHolding = true;
             }
-            turretPower = turretPID.run(turretTargetPos, turretRotations);
+//            turretPower = turretPID.run(turretTargetPos, turretRotations);
         }
 //        should we put autoAim in the autopath class?
 //        if (autoAim) { //Auto-aim for auto
@@ -118,7 +120,7 @@ public class Lift extends Subsystem {
 //            double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
 //            turretPower = turretPID.run(angleToTarget, currentAngle);
 //        }
-        turret.setPower(turretPower);
+//        turret.setPower(turretPower);
 
 
         //Linkage
@@ -165,9 +167,13 @@ public class Lift extends Subsystem {
         lift.setPower(1);
     }
 
+    double lastTurretAngle = 0.0;
+    double turretFullRotations = 0.0;
+    int wrapping = 0;
     public void test(double liftStick, double turretStick, boolean linkageButton, boolean releaseButton) {
         int liftPos = lift.getCurrentPosition();
 
+        turretStick *= 0.5;
         double liftPower;
         if (liftStick != 0) {
             if (liftHolding) {
@@ -194,19 +200,40 @@ public class Lift extends Subsystem {
             linkageTwo.setPosition(0.1);
             linkageOne.setPosition(0.1);
         }
+        double turretVoltage = turretAngleAnalog.getVoltage();
+
+        if(wrapping == 0) {
+            if (turretStick < 0 && turretVoltage - lastTurretAngle > 0.01) {
+                turretFullRotations -= 1.0;
+                wrapping = 1;
+            } else if (turretStick > 0 && turretVoltage - lastTurretAngle < -0.01) {
+                turretFullRotations += 1.0;
+                wrapping = 1;
+            }
+        } else {
+            wrapping++;
+            if(wrapping > 5) {
+                wrapping = 0;
+            }
+        }
+
+        double turretPos = (turretVoltage / turretAngleAnalog.getMaxVoltage()) + turretFullRotations;
+
+        lastTurretAngle = turretVoltage;
         if(releaseButton) {
             release.setPosition(0.23);
         } else {
             release.setPosition(0.6);
         }
-        turretAngleAnalog.update();
+//        turretAngleAnalog.update();
 
-        telemetry.addData("turret pos incremental", turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL));
+        telemetry.addData("turret pos incremental", turretPos);
+        telemetry.addData("turret full rotations", turretFullRotations);
         telemetry.addData("turret pos", turretAngleAnalog.getVoltage());
+//        telemetry.addData("turret stick", turretStick);
+//        telemetry.addData("turret encoder max voltage", turretAngleAnalog.getMaxVoltage());
 
-        telemetry.addData("turret encoder max voltage", turretAngleAnalog.getMaxVoltage());
-
-        telemetry.addData("lift pos", lift.getCurrentPosition());
+//        telemetry.addData("lift pos", lift.getCurrentPosition());
     }
 
     public static double sigmoid(double x) {
