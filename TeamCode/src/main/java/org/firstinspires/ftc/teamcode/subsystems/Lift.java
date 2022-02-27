@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.firstinspires.ftc.teamcode.robotcorelib.math.KalmanFilter;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.AnalogEncoder;
@@ -18,8 +20,6 @@ public class Lift extends Subsystem {
     private Servo release;
     private Servo linkageOne, linkageTwo;
 
-    private SimplePID liftPID = new SimplePID(0.0005, 0, 0, -1, 1);
-    private boolean liftHolding = false;
     private double liftTargetPos;
     private LiftMin LIFT_MIN = new LiftMin();
     private final int LIFT_MAX_POS = 800;
@@ -37,7 +37,7 @@ public class Lift extends Subsystem {
     private double releasePosClosed = 0.05;
 
     SimplePID turretPID = new SimplePID(0.05,0,0,1,-1);
-    private AnalogEncoder turretAngleAnalog; //Temporary until analog input
+    private AnalogInput turretAngleAnalog; //Temporary until analog input
     private boolean turretHolding = false;
     private double turretTargetPos;
 
@@ -56,14 +56,15 @@ public class Lift extends Subsystem {
         linkageTwo = hardwareMap.servo.get("linkage_two");
         turret = hardwareMap.get(DcMotorEx.class, "turret");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //turret does not have a quadrature encoder
-        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lift.setDirection(DcMotorSimple.Direction.FORWARD);
+        turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
         linkageTwo.setDirection(Servo.Direction.REVERSE);
-        turretAngleAnalog = hardwareMap.get(AnalogEncoder.class, "turret_encoder");
+        turretAngleAnalog = hardwareMap.get(AnalogInput.class, "turret_encoder");
     }
 
     public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
@@ -82,11 +83,8 @@ public class Lift extends Subsystem {
 
         //Lift
         double liftPower;
+//        double feedForwardCoeff = liftPos > 50 ? 0.15 : 0.0;
         if (liftStick != 0) {
-            if (liftHolding) {
-                liftPID.reset();
-                liftHolding = false;
-            }
             //Sigmoid Motor Limits
             if (liftStick > 0) {
                 liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
@@ -103,6 +101,12 @@ public class Lift extends Subsystem {
         lift.setPower(liftPower);
 
         //Turret
+        //have to call AnalogEncoder.update() every loop
+//        turretAngleAnalog.update();
+        //returns the number of rotations reported by the encoder
+        double turretRotations = 0;
+        double turretAngle = turretAngleAnalog.getVoltage();
+
         double turretPower;
         if (turretStick != 0) {
             if (turretHolding) {
@@ -124,7 +128,7 @@ public class Lift extends Subsystem {
 //            double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
 //            turretPower = turretPID.run(angleToTarget, currentAngle);
 //        }
-        turret.setPower(turretPower);
+        turret.setPower(turretStick);
 
         //Linkage
         double elapsed = linkageTimer.milliseconds();
@@ -156,6 +160,66 @@ public class Lift extends Subsystem {
         }
     }
 
+    LiftState liftState = LiftState.HOME;
+    boolean liftRunning = false;
+    boolean liftReady = false;
+    public void basicRun(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust) {
+        double liftPos = lift.getCurrentPosition();
+        double turretPos = turret.getCurrentPosition();
+
+        if(shared) {
+            liftState = LiftState.SHARED;
+        } else if(alliance) {
+            liftState = LiftState.ALLIANCE;
+        } else if(reset) {
+            liftState = LiftState.HOME;
+        }
+
+        if(liftAdjust != 0 || turretAdjust != 0) {
+           liftState = LiftState.MANUAL;
+        }
+
+        //state machine controller
+        switch (liftState) {
+            case HOME:
+                if (Math.abs(turret.getCurrentPosition()) > 100 && !liftRunning) {
+                    liftRunning = true;
+                    liftToPosition(400);
+                }
+                if (liftPos >= 400) {
+                    liftRunning = false;
+                    turretToPosition(0);
+                }
+                if (Math.abs(turretPos) < 10) {
+                    liftToPosition(0);
+                }
+                if (Math.abs(liftPos) < 10 && Math.abs(turretPos) < 10) {
+                    
+                    liftReady = true;
+                }
+                break;
+            case SHARED:
+                //shared code
+                break;
+            case ALLIANCE:
+                //alliance code
+                break;
+            case MANUAL:
+
+                lift.setPower(liftAdjust);
+                turret.setPower(turretAdjust);
+                break;
+        }
+
+    }
+
+    enum LiftState {
+        SHARED,
+        ALLIANCE,
+        HOME,
+        MANUAL
+    }
+
 
     //@matt this isnt going to work, our turret isnt using a quadrature encoder so we cant use any encoder modes (RUN_TO_POSITION, RUN_USING_ENCODER)
     public void turretToPosition(int pos){
@@ -170,48 +234,36 @@ public class Lift extends Subsystem {
         lift.setPower(1);
     }
 
+    public boolean isReset() {
+        return liftReady;
+    }
+
     public void test(double liftStick, double turretStick, boolean linkageButton, boolean releaseButton) {
-        int liftPos = lift.getCurrentPosition();
 
-        double liftPower;
-        if (liftStick != 0) {
-            if (liftHolding) {
-                liftPID.reset();
-                liftHolding = false;
-            }
-            liftPower = liftStick;
-        } else {
-            if (!liftHolding) {
-                liftTargetPos = Range.clip(liftPos, LIFT_MIN_POS, LIFT_MAX_POS);
-                liftHolding = true;
-            }
-            liftPower = liftPID.run(liftTargetPos, liftPos);
-        }
+        double liftPower = liftStick;
+        double liftFeedForward = 0.15;
+//        if(lift.getCurrentPosition() > 50) {
+//            liftPower += liftFeedForward;
+//        }
         lift.setPower(liftPower);
-
         turret.setPower(turretStick);
-
         if(linkageButton) {
             linkageOne.setPosition(0.8);
             linkageTwo.setPosition(0.8);
-        }
-        else {
-            linkageTwo.setPosition(0.1);
+        } else {
             linkageOne.setPosition(0.1);
+            linkageTwo.setPosition(0.1);
         }
+
         if(releaseButton) {
             release.setPosition(0.23);
         } else {
             release.setPosition(0.6);
         }
-        turretAngleAnalog.update();
-
-        telemetry.addData("turret pos incremental", turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL));
-        telemetry.addData("turret pos", turretAngleAnalog.getVoltage());
-
-        telemetry.addData("turret encoder max voltage", turretAngleAnalog.getMaxVoltage());
 
         telemetry.addData("lift pos", lift.getCurrentPosition());
+        telemetry.addData("turret pos", turret.getCurrentPosition());
+        telemetry.addData("lift power", liftStick);
     }
 
     public static double sigmoid(double x) {
