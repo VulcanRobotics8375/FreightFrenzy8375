@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
@@ -27,7 +28,7 @@ public class Intake extends Subsystem {
 
     public boolean lastExtend = false;
     public double extendOn = -1;
-    public final double extendBackPosition = 0.3;
+    public final double extendBackPosition = 0.28;
     public final double extendForwardPosition = 0.05;
 
     public final double INTAKE_POWER = 1;
@@ -42,6 +43,7 @@ public class Intake extends Subsystem {
         extendServo1.setDirection(Servo.Direction.REVERSE);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    ElapsedTime timer = new ElapsedTime();
 
     private IntakeState intakeState = IntakeState.RESET;
     public void run(boolean intake, boolean reset, boolean liftReady) {
@@ -59,6 +61,7 @@ public class Intake extends Subsystem {
                 extendServo2.setPosition(extendForwardPosition);
                 intakeMotor.setPower(INTAKE_POWER);
                 if(intakeMotor.getCurrent(CurrentUnit.AMPS) > 6.0) {
+                    timer.reset();
                     intakeState = IntakeState.INDEXED;
                 }
                 break;
@@ -67,7 +70,7 @@ public class Intake extends Subsystem {
                 extendServo1.setPosition(extendBackPosition);
                 extendServo2.setPosition(extendBackPosition);
                 intakeMotor.setPower(INTAKE_POWER * 0.5);
-                if(liftReady) {
+                if(liftReady && timer.seconds() > 1) {
                     intakeState = IntakeState.DEPOSIT;
                 }
                 break;
@@ -78,7 +81,7 @@ public class Intake extends Subsystem {
                 intakeMotor.setPower(INTAKE_POWER * -0.8);
                 break;
             case RESET:
-                rotateServo.setPosition(depositPosition);
+                rotateServo.setPosition(intakePosition);
                 extendServo1.setPosition(extendBackPosition);
                 extendServo2.setPosition(extendBackPosition);
                 intakeMotor.setPower(0.0);

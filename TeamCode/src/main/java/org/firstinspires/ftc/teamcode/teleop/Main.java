@@ -34,7 +34,7 @@ public class Main extends OpModePipeline {
 //        subsystems.lift.test(-gamepad2.left_stick_y, gamepad2.right_stick_x, gamepad2.a, gamepad2.b);
         subsystems.lift.basicRun(gamepad2.x, gamepad2.y, gamepad2.a, -gamepad2.left_stick_y, gamepad2.right_stick_x);
 
-        subsystems.intake.run(gamepad2.dpad_down, gamepad2.left_bumper, gamepad2.dpad_up);
+        subsystems.intake.run(gamepad2.dpad_down, gamepad2.left_bumper, subsystems.lift.isReset());
 
         telemetry.update();
 

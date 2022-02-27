@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -64,6 +65,11 @@ public class Lift extends Subsystem {
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
         linkageTwo.setDirection(Servo.Direction.REVERSE);
         turretAngleAnalog = hardwareMap.get(AnalogInput.class, "turret_encoder");
+        
+        PIDFCoefficients stockLiftCoeff = lift.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+//        lift.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(stockLiftCoeff.p, stockLiftCoeff.i, stockLiftCoeff.d, 0.1));
+
+
     }
 
     public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
@@ -147,6 +153,7 @@ public class Lift extends Subsystem {
 
     LiftState liftState = LiftState.HOME;
     boolean liftRunning = false;
+    boolean turretRunning = false;
     boolean liftReady = false;
     public void basicRun(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust) {
         double liftPos = lift.getCurrentPosition();
@@ -167,34 +174,59 @@ public class Lift extends Subsystem {
         //state machine controller
         switch (liftState) {
             case HOME:
-                if (Math.abs(turret.getCurrentPosition()) > 100 && !liftRunning) {
+                linkageOne.setPosition(0.1);
+                linkageTwo.setPosition(0.1);
+                boolean turretClosed = Math.abs(turretPos) < 35;
+                boolean liftUp = liftPos > 400;
+                if(!turretClosed && !liftUp && !liftRunning) {
                     liftRunning = true;
-                    liftToPosition(400);
-                }
-                if (liftPos >= 400) {
+                    liftToPosition(405);
+                } else if(!turretClosed && liftUp && liftRunning && !turretRunning) {
+                    // liftrunning false, and run turret
                     liftRunning = false;
                     turretToPosition(0);
-                }
-                if (Math.abs(turretPos) < 10) {
+                    turretRunning = true;
+                } else if(turretClosed) {
+                    if(turret.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+                        turretToPosition(0);
+                    }
                     liftToPosition(0);
+                    lift.setPower(0.5);
+                    liftRunning = false;
+                    turretRunning = false;
                 }
-                if (Math.abs(liftPos) < 10 && Math.abs(turretPos) < 10) {
-                    
-                    liftReady = true;
-                }
+
                 break;
             case SHARED:
-                //shared code
+
                 break;
             case ALLIANCE:
                 //alliance code
                 break;
             case MANUAL:
-
+                liftRunning = false;
+                turretRunning = false;
+                if(lift.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
+                    lift.setPower(0.0);
+                    lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                }
+                if(turret.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
+                    turret.setPower(0.0);
+                    turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                }
                 lift.setPower(liftAdjust);
                 turret.setPower(turretAdjust);
                 break;
         }
+
+        if(Math.abs(turretPos) < 30 && Math.abs(liftPos) < 20) {
+            liftReady = true;
+        } else {
+            liftReady = false;
+        }
+
+        telemetry.addData("turret pos", turretPos);
+        telemetry.addData("lift pos", liftPos);
 
     }
 
