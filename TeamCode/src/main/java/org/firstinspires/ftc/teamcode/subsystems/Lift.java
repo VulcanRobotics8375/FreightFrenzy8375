@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.AnalogEncoder;
@@ -20,7 +21,7 @@ public class Lift extends Subsystem {
     private SimplePID liftPID = new SimplePID(0.0005, 0, 0, -1, 1);
     private boolean liftHolding = false;
     private double liftTargetPos;
-    private final int LIFT_MIN_POS = 0;
+    private LiftMin LIFT_MIN = new LiftMin();
     private final int LIFT_MAX_POS = 800;
     private final double LIFT_CONVERGENCE_SPEED = 0.01;
     private final double LIFT_LIMIT_RANGE = 100;
@@ -66,9 +67,20 @@ public class Lift extends Subsystem {
     }
 
     public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
-        //Lift
+        // Get Positions!
         int liftPos = lift.getCurrentPosition();
 
+        //have to call AnalogEncoder.update() every loop
+        turretAngleAnalog.update();
+        //returns the number of rotations reported by the encoder
+        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
+        double turretAngle = turretAngleAnalog.getVoltage();
+
+        //TODO linkage kinematics
+
+        //TODO Convert Analog Encoder Output to Angle(Radians)
+
+        //Lift
         double liftPower;
         if (liftStick != 0) {
             if (liftHolding) {
@@ -79,11 +91,11 @@ public class Lift extends Subsystem {
             if (liftStick > 0) {
                 liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
             } else {
-                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (LIFT_LIMIT_RANGE / 2 - liftPos));
+                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (LIFT_LIMIT_RANGE / 2 - liftPos));x
             }
         } else {
             if (!liftHolding) {
-                liftTargetPos = Range.clip(liftPos, LIFT_MIN_POS, LIFT_MAX_POS);
+                liftTargetPos = Range.clip(liftPos, LIFT_MIN.value(turretAngle), LIFT_MAX_POS);
                 liftHolding = true;
             }
             liftPower = liftPID.run(liftTargetPos, liftPos);
@@ -91,12 +103,6 @@ public class Lift extends Subsystem {
         lift.setPower(liftPower);
 
         //Turret
-        //have to call AnalogEncoder.update() every loop
-        turretAngleAnalog.update();
-        //returns the number of rotations reported by the encoder
-        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
-        double turretAngle = turretAngleAnalog.getVoltage();
-
         double turretPower;
         if (turretStick != 0) {
             if (turretHolding) {
@@ -119,7 +125,6 @@ public class Lift extends Subsystem {
 //            turretPower = turretPID.run(angleToTarget, currentAngle);
 //        }
         turret.setPower(turretPower);
-
 
         //Linkage
         double elapsed = linkageTimer.milliseconds();
@@ -211,5 +216,29 @@ public class Lift extends Subsystem {
 
     public static double sigmoid(double x) {
         return 1 / (1 + Math.exp(-x));
+    }
+
+    private class LiftMin implements UnivariateFunction {
+        public double value(double turretAngle) {
+            double minHeight;
+            if(turretAngle > -Math.PI/12 && turretAngle < Math.PI/12) {
+                minHeight = 0;
+            } else {
+                minHeight = Lift.this.LIFT_MAX_POS;
+            }
+            return minHeight;
+        }
+    }
+
+    private class ExtensionMax implements UnivariateFunction {
+        public double value(double turretAngle){
+            double extend;
+            if(turretAngle > -Math.PI/2 && turretAngle < Math.PI/2) {
+                extend = 1;
+            } else {
+                extend = 0;
+            }
+            return extend;
+        }
     }
 }
