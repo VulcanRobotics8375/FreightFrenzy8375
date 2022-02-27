@@ -73,98 +73,98 @@ public class Lift extends Subsystem {
 
     }
 
-    public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
-        // Get Positions!
-        int liftPos = lift.getCurrentPosition();
-
-        //have to call AnalogEncoder.update() every loop
-        turretAngleAnalog.update();
-        //returns the number of rotations reported by the encoder
-        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
-        double turretAngle = turretAngleAnalog.getVoltage();
-
-        //TODO linkage kinematics
-
-        //TODO Convert Analog Encoder Output to Angle(Radians)
-
-        //Lift
-        double liftPower;
-//        double feedForwardCoeff = liftPos > 50 ? 0.15 : 0.0;
-        if (liftStick != 0) {
-            //Sigmoid Motor Limits
-            if (liftStick > 0) {
-                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
-            } else {
-                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (LIFT_LIMIT_RANGE / 2 - liftPos));x
-            }
-        } else {
-            if (!liftHolding) {
-                liftTargetPos = Range.clip(liftPos, LIFT_MIN.value(turretAngle), LIFT_MAX_POS);
-                liftHolding = true;
-            }
-            liftPower = liftPID.run(liftTargetPos, liftPos);
-        }
-        lift.setPower(liftPower);
-
-        //Turret
-        //have to call AnalogEncoder.update() every loop
+//    public void run(double liftStick, double turretStick, double linkageStick, boolean turretButton, boolean resetButton, boolean releaseButton) {
+//        // Get Positions!
+//        int liftPos = lift.getCurrentPosition();
+//
+//        //have to call AnalogEncoder.update() every loop
 //        turretAngleAnalog.update();
-        //returns the number of rotations reported by the encoder
-        double turretRotations = 0;
-        double turretAngle = turretAngleAnalog.getVoltage();
-
-        double turretPower;
-        if (turretStick != 0) {
-            if (turretHolding) {
-                turretPID.reset();
-                turretHolding = false;
-            }
-            turretPower = turretStick;
-        } else {
-            if (!turretHolding) {
-                turretTargetPos = turretRotations;
-                turretHolding = true;
-            }
-            turretPower = turretPID.run(turretTargetPos, turretRotations);
-        }
-//        should we put autoAim in the autopath class?
-//        if (autoAim) { //Auto-aim for auto
-//            Point target = new Point(GOAL_X, GOAL_Y);
-//            double angleToTarget = Math.atan2(target.x - Robot.getRobotPose().getX(), target.y - Robot.getRobotPose().getY());
-//            double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
-//            turretPower = turretPID.run(angleToTarget, currentAngle);
+//        //returns the number of rotations reported by the encoder
+//        double turretRotations = turretAngleAnalog.getCurrentPosition(AnalogEncoder.Mode.INCREMENTAL);
+//        double turretAngle = turretAngleAnalog.getVoltage();
+//
+//        //TODO linkage kinematics
+//
+//        //TODO Convert Analog Encoder Output to Angle(Radians)
+//
+//        //Lift
+//        double liftPower;
+////        double feedForwardCoeff = liftPos > 50 ? 0.15 : 0.0;
+//        if (liftStick != 0) {
+//            //Sigmoid Motor Limits
+//            if (liftStick > 0) {
+//                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
+//            } else {
+//                liftPower = liftStick * sigmoid(LIFT_CONVERGENCE_SPEED * (LIFT_LIMIT_RANGE / 2 - liftPos));x
+//            }
+//        } else {
+//            if (!liftHolding) {
+//                liftTargetPos = Range.clip(liftPos, LIFT_MIN.value(turretAngle), LIFT_MAX_POS);
+//                liftHolding = true;
+//            }
+//            liftPower = liftPID.run(liftTargetPos, liftPos);
 //        }
-        turret.setPower(turretStick);
-
-        //Linkage
-        double elapsed = linkageTimer.milliseconds();
-        double targetPos = linkageOne.getPosition() + LINKAGE_STICK_COEF * elapsed * linkageStick;
-        linkageOne.setPosition(Range.clip(targetPos, LINKAGE_MIN_POS, LINKAGE_MAX_POS));
-        linkageTimer.reset();
-
-
-        //Hopper
-        if (releaseButton && !this.releaseButton) {
-            this.releaseButton = true;
-            releaseOpen = !releaseOpen;
-        } else if (!releaseButton && this.releaseButton) {
-            this.releaseButton = false;
-        }
-
-        if (releaseOpen) {
-            release.setPosition(releasePosOpen);
-        } else {
-            release.setPosition(releasePosClosed);
-        }
-
-
-        //Run To Position
-        if (resetButton) {
-            linkageOne.setPosition(BASE_LINKAGE_POS);
-            liftToPosition(BASE_LIFT_POS);
-            turretToPosition(BASE_TURRET_POS);
-        }
-    }
+//        lift.setPower(liftPower);
+//
+//        //Turret
+//        //have to call AnalogEncoder.update() every loop
+////        turretAngleAnalog.update();
+//        //returns the number of rotations reported by the encoder
+//        double turretRotations = 0;
+//        double turretAngle = turretAngleAnalog.getVoltage();
+//
+//        double turretPower;
+//        if (turretStick != 0) {
+//            if (turretHolding) {
+//                turretPID.reset();
+//                turretHolding = false;
+//            }
+//            turretPower = turretStick;
+//        } else {
+//            if (!turretHolding) {
+//                turretTargetPos = turretRotations;
+//                turretHolding = true;
+//            }
+//            turretPower = turretPID.run(turretTargetPos, turretRotations);
+//        }
+////        should we put autoAim in the autopath class?
+////        if (autoAim) { //Auto-aim for auto
+////            Point target = new Point(GOAL_X, GOAL_Y);
+////            double angleToTarget = Math.atan2(target.x - Robot.getRobotPose().getX(), target.y - Robot.getRobotPose().getY());
+////            double currentAngle = Robot.getRobotPose().getHeading() + turretAngle;
+////            turretPower = turretPID.run(angleToTarget, currentAngle);
+////        }
+//        turret.setPower(turretStick);
+//
+//        //Linkage
+//        double elapsed = linkageTimer.milliseconds();
+//        double targetPos = linkageOne.getPosition() + LINKAGE_STICK_COEF * elapsed * linkageStick;
+//        linkageOne.setPosition(Range.clip(targetPos, LINKAGE_MIN_POS, LINKAGE_MAX_POS));
+//        linkageTimer.reset();
+//
+//
+//        //Hopper
+//        if (releaseButton && !this.releaseButton) {
+//            this.releaseButton = true;
+//            releaseOpen = !releaseOpen;
+//        } else if (!releaseButton && this.releaseButton) {
+//            this.releaseButton = false;
+//        }
+//
+//        if (releaseOpen) {
+//            release.setPosition(releasePosOpen);
+//        } else {
+//            release.setPosition(releasePosClosed);
+//        }
+//
+//
+//        //Run To Position
+//        if (resetButton) {
+//            linkageOne.setPosition(BASE_LINKAGE_POS);
+//            liftToPosition(BASE_LIFT_POS);
+//            turretToPosition(BASE_TURRET_POS);
+//        }
+//    }
 
     LiftState liftState = LiftState.HOME;
     boolean liftRunning = false;
