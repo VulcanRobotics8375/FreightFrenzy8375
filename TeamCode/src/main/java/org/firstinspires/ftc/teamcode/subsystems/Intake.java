@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
@@ -18,14 +19,16 @@ public class Intake extends Subsystem {
 
     public boolean lastFlip = false;
     public double flipOn = -1;
-    public final double depositPosition = 0.2;
+    public final double depositPosition = 0.25;
     public final double intakePosition = 0.99;
 
+    private boolean intakeButton;
+    private boolean indexed = false;
 
     public boolean lastExtend = false;
     public double extendOn = -1;
-    public final double extendBackPosition = 0.05;
-    public final double extendForwardPosition = 0.27;
+    public final double extendBackPosition = 0.3;
+    public final double extendForwardPosition = 0.05;
 
     public final double INTAKE_POWER = 1;
 
@@ -40,7 +43,60 @@ public class Intake extends Subsystem {
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public void run(boolean intake, boolean outake, boolean extend, boolean flip ) {
+    private IntakeState intakeState = IntakeState.RESET;
+    public void run(boolean intake, boolean reset, boolean liftReady) {
+        if(intake) {
+            intakeState = IntakeState.INTAKING;
+        }
+        if(reset) {
+            intakeState = IntakeState.RESET;
+        }
+
+        switch (intakeState) {
+            case INTAKING:
+                rotateServo.setPosition(intakePosition);
+                extendServo1.setPosition(extendForwardPosition);
+                extendServo2.setPosition(extendForwardPosition);
+                intakeMotor.setPower(INTAKE_POWER);
+                if(intakeMotor.getCurrent(CurrentUnit.AMPS) > 6.0) {
+                    intakeState = IntakeState.INDEXED;
+                }
+                break;
+            case INDEXED:
+                rotateServo.setPosition(depositPosition);
+                extendServo1.setPosition(extendBackPosition);
+                extendServo2.setPosition(extendBackPosition);
+                intakeMotor.setPower(INTAKE_POWER * 0.5);
+                if(liftReady) {
+                    intakeState = IntakeState.DEPOSIT;
+                }
+                break;
+            case DEPOSIT:
+                rotateServo.setPosition(depositPosition);
+                extendServo1.setPosition(extendBackPosition);
+                extendServo2.setPosition(extendBackPosition);
+                intakeMotor.setPower(INTAKE_POWER * -0.8);
+                break;
+            case RESET:
+                rotateServo.setPosition(depositPosition);
+                extendServo1.setPosition(extendBackPosition);
+                extendServo2.setPosition(extendBackPosition);
+                intakeMotor.setPower(0.0);
+                break;
+        }
+
+        telemetry.addData("intake current", intakeMotor.getCurrent(CurrentUnit.AMPS));
+
+    }
+
+    enum IntakeState {
+        INTAKING,
+        INDEXED,
+        DEPOSIT,
+        RESET
+    }
+
+    public void test(boolean intake, boolean outake, boolean extend, boolean flip) {
         if (intake) {
             intakeMotor.setPower(INTAKE_POWER);
         }
