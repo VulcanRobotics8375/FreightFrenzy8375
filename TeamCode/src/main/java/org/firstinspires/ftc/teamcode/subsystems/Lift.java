@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.KalmanFilter;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
@@ -264,7 +265,7 @@ public class Lift extends Subsystem {
                     liftRunning = false;
                     turretToPosition(turret90Degrees, 0.3);
                     turretRunning = true;
-                } else if(Math.abs(turretPos) < turret90Degrees + 10){
+                } else if(Math.abs(turretPos) > turret90Degrees - 10){
                     turretRunning = false;
                 }
 
@@ -277,7 +278,7 @@ public class Lift extends Subsystem {
                     liftRunning = false;
                     turretToPosition(turret90Degrees, 0.3);
                     turretRunning = true;
-                } else if(Math.abs(turretPos) < turret90Degrees + 10){
+                } else if(Math.abs(turretPos) > turret90Degrees - 10){
                     turretRunning = false;
                 }
 
@@ -327,6 +328,7 @@ public class Lift extends Subsystem {
 
         telemetry.addData("turret pos", turretPos);
         telemetry.addData("lift pos", liftPos);
+        telemetry.addData("lift current", lift.getCurrent(CurrentUnit.AMPS));
 
     }
 
