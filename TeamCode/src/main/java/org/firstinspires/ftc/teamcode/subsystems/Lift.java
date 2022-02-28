@@ -231,65 +231,39 @@ public class Lift extends Subsystem {
         }
 
         boolean turretClosed = Math.abs(turretPos) < 35;
-        boolean liftCleared = liftPos > LIFT_CLEARED_POS;
+        boolean liftCleared;
         boolean liftUpAlliance = liftPos > LIFT_ALLIANCE_POS;
 
         //state machine controller
         switch (liftState) {
             case HOME:
+                liftCleared = liftPos > LIFT_CLEARED_POS || turretClosed;
                 linkageOne.setPosition(0.1);
                 linkageTwo.setPosition(0.1);
-                if(!turretClosed && !liftCleared && !liftRunning) {
-                    liftRunning = true;
+                if(!liftCleared) {
                     liftToPosition(LIFT_CLEARED_POS + 10);
-                } else if(!turretClosed && liftCleared && liftRunning && !turretRunning) {
-                    // liftrunning false, and run turret
-                    liftRunning = false;
+                } else if(!turretClosed) {
                     turretToPosition(0);
-                    turretRunning = true;
-                } else if (!turretClosed && liftCleared && !liftRunning && !turretRunning) {
-                    turretRunning = true;
-                    turretToPosition(0);
-                } else if(turretClosed) {
-                    if(turret.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
-                        turretToPosition(0);
-                    }
+                } else {
                     liftToPosition(0);
-                    lift.setPower(0.5);
-                    liftRunning = false;
-                    turretRunning = false;
                 }
-
                 break;
             case SHARED:
-                if(turretClosed && !liftCleared && !liftRunning){
-                    liftRunning = true;
-                    liftToPosition(LIFT_CLEARED_POS + 10, 0.7);
-                } else if(liftCleared){
-                    liftRunning = false;
-                    turretToPosition(turret90Degrees, 0.5);
-                    turretRunning = true;
-                } else if(Math.abs(turretPos) > turret90Degrees - 10){
-                    turretRunning = false;
+                liftCleared = liftPos > LIFT_CLEARED_POS;
+                liftToPosition(LIFT_CLEARED_POS + 10);
+                if(liftCleared) {
+                    turretToPosition(turret90Degrees);
                 }
-
                 break;
             case ALLIANCE:
-                if(turretClosed && !liftUpAlliance && !liftRunning){
-                    liftRunning = true;
-                    liftToPosition(LIFT_ALLIANCE_POS + 10, 0.3);
-                } else if(liftCleared){
-                    liftRunning = false;
-                    turretToPosition(turret90Degrees, 0.3);
-                    turretRunning = true;
-                } else if(Math.abs(turretPos) > turret90Degrees - 10){
-                    turretRunning = false;
+                liftCleared = liftPos > LIFT_CLEARED_POS;
+                liftToPosition(LIFT_ALLIANCE_POS);
+                if(liftCleared) {
+                    turretToPosition(turret90Degrees);
                 }
 
                 break;
             case MANUAL:
-                liftRunning = false;
-                turretRunning = false;
                 if(lift.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
                     lift.setPower(0.0);
                     lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -375,7 +349,9 @@ public class Lift extends Subsystem {
     }
 
     public void liftToPosition(int pos) {
-        lift.setTargetPosition(pos);
+        if(lift.getTargetPosition() != pos) {
+            lift.setTargetPosition(pos);
+        }
         if(lift.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
             lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
