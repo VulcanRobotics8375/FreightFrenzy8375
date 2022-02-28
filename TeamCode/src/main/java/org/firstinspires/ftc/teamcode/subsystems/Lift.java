@@ -24,6 +24,8 @@ public class Lift extends Subsystem {
     private double liftTargetPos;
     private LiftMin LIFT_MIN = new LiftMin();
     private final int LIFT_MAX_POS = 800;
+    private final int LIFT_CLEARED_POS = 400;
+    private final int LIFT_ALLIANCE_POS = 500;
     private final double LIFT_CONVERGENCE_SPEED = 0.01;
     private final double LIFT_LIMIT_RANGE = 100;
 
@@ -41,6 +43,7 @@ public class Lift extends Subsystem {
     private AnalogInput turretAngleAnalog; //Temporary until analog input
     private boolean turretHolding = false;
     private double turretTargetPos;
+    private int turret90Degrees = -364;
 
     private boolean autoAim = false;
 
@@ -186,17 +189,19 @@ public class Lift extends Subsystem {
            liftState = LiftState.MANUAL;
         }
 
+        boolean turretClosed = Math.abs(turretPos) < 35;
+        boolean liftCleared = liftPos > LIFT_CLEARED_POS;
+        boolean liftUpAlliance = liftPos > LIFT_ALLIANCE_POS;
+
         //state machine controller
         switch (liftState) {
             case HOME:
                 linkageOne.setPosition(0.1);
                 linkageTwo.setPosition(0.1);
-                boolean turretClosed = Math.abs(turretPos) < 35;
-                boolean liftUp = liftPos > 400;
-                if(!turretClosed && !liftUp && !liftRunning) {
+                if(!turretClosed && !liftCleared && !liftRunning) {
                     liftRunning = true;
-                    liftToPosition(405);
-                } else if(!turretClosed && liftUp && liftRunning && !turretRunning) {
+                    liftToPosition(LIFT_CLEARED_POS + 10);
+                } else if(!turretClosed && liftCleared && liftRunning && !turretRunning) {
                     // liftrunning false, and run turret
                     liftRunning = false;
                     turretToPosition(0);
@@ -213,10 +218,24 @@ public class Lift extends Subsystem {
 
                 break;
             case SHARED:
-
+                if(turretClosed && !liftCleared && !liftRunning){
+                    liftRunning = true;
+                    liftToPosition(LIFT_CLEARED_POS + 10, 0.3);
+                } else if(liftCleared){
+                    liftRunning = false;
+                    turretToPosition(turret90Degrees, 0.3);
+                    turretRunning = true;
+                }
                 break;
             case ALLIANCE:
-                //alliance code
+                if(turretClosed && !liftUpAlliance && !liftRunning){
+                    liftRunning = true;
+                    liftToPosition(LIFT_ALLIANCE_POS + 10, 0.3);
+                } else if(liftCleared){
+                    liftRunning = false;
+                    turretToPosition(turret90Degrees, 0.3);
+                    turretRunning = true;
+                }
                 break;
             case MANUAL:
                 liftRunning = false;
@@ -253,17 +272,28 @@ public class Lift extends Subsystem {
     }
 
 
-    //@matt this isnt going to work, our turret isnt using a quadrature encoder so we cant use any encoder modes (RUN_TO_POSITION, RUN_USING_ENCODER)
+
     public void turretToPosition(int pos){
         turret.setTargetPosition(pos);
         turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turret.setPower(1);
     }
 
+    public void turretToPosition(int pos, double power){
+        turret.setTargetPosition(pos);
+        turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turret.setPower(power);
+    }
+
     public void liftToPosition(int pos) {
         lift.setTargetPosition(pos);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(1);
+    }
+    public void liftToPosition(int pos, double power) {
+        lift.setTargetPosition(pos);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setPower(power);
     }
 
     public boolean isReset() {
