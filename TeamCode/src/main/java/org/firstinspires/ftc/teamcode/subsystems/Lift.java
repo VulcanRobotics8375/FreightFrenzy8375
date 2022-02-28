@@ -22,15 +22,19 @@ public class Lift extends Subsystem {
     private Servo release;
     private Servo linkageOne, linkageTwo;
 
+    SimplePID liftPID = new SimplePID(0.005, 0.0, 0.0, 1.0, -1.0);
     private double liftTargetPos;
+    private boolean liftHolding = false;
     private LiftMin LIFT_MIN = new LiftMin();
-    private final int LIFT_MAX_POS = 800;
+    private final int LIFT_MAX_POS = 650;
     private final int LIFT_CLEARED_POS = 400;
-    private final int LIFT_ALLIANCE_POS = 500;
+    private final int LIFT_ALLIANCE_POS = 475;
     private final double LIFT_CONVERGENCE_SPEED = 0.01;
-    private final double LIFT_LIMIT_RANGE = 100;
+    private final double LIFT_LIMIT_RANGE = 100.0;
 
     private ElapsedTime linkageTimer = new ElapsedTime();
+    private boolean linkageButton = false;
+    private boolean linkageOpen = false;
     private final double LINKAGE_MIN_POS = 0.25;
     private final double LINKAGE_MAX_POS = 0.75;
     private final double LINKAGE_STICK_COEF = 0.0007;
@@ -40,7 +44,7 @@ public class Lift extends Subsystem {
     private double releasePosOpen = 0.5;
     private double releasePosClosed = 0.05;
 
-    SimplePID turretPID = new SimplePID(0.05,0,0,1,-1);
+    SimplePID turretPID = new SimplePID(0.05,0.0,0.0,1.0,-1.0);
     private AnalogInput turretAngleAnalog; //Temporary until analog input
     private boolean turretHolding = false;
     private double turretTargetPos;
@@ -174,10 +178,41 @@ public class Lift extends Subsystem {
     boolean liftRunning = false;
     boolean turretRunning = false;
     boolean liftReady = false;
-    public void basicRun(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust) {
+    public void basicRun(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust, boolean linkageButton, boolean releaseButton) {
         double liftPos = lift.getCurrentPosition();
         double turretPos = turret.getCurrentPosition();
 
+        //Linkage Code
+        if(linkageButton && !this.linkageButton){
+            this.linkageButton = true;
+            linkageOpen = !linkageOpen;
+        } else if (!linkageButton && this.linkageButton){
+            this.releaseButton = false;
+        }
+
+        if(linkageOpen){
+            linkageOne.setPosition(LINKAGE_MAX_POS);
+            linkageTwo.setPosition(LINKAGE_MAX_POS);
+        } else {
+            linkageOne.setPosition(LINKAGE_MIN_POS);
+            linkageTwo.setPosition(LINKAGE_MAX_POS);
+        }
+
+        //Hopper Code
+        if (releaseButton && !this.releaseButton) {
+            this.releaseButton = true;
+            releaseOpen = !releaseOpen;
+        } else if (!releaseButton && this.releaseButton) {
+            this.releaseButton = false;
+        }
+
+        if (releaseOpen) {
+            release.setPosition(releasePosOpen);
+        } else {
+            release.setPosition(releasePosClosed);
+        }
+
+        LiftState prevLiftState = liftState;
         if(shared) {
             liftState = LiftState.SHARED;
         } else if(alliance) {
@@ -185,9 +220,13 @@ public class Lift extends Subsystem {
         } else if(reset) {
             liftState = LiftState.HOME;
         }
-
         if(liftAdjust != 0 || turretAdjust != 0) {
            liftState = LiftState.MANUAL;
+        }
+        
+        if(prevLiftState != liftState) {
+            turretRunning = false;
+            liftRunning = false;
         }
 
         boolean turretClosed = Math.abs(turretPos) < 35;
@@ -226,7 +265,10 @@ public class Lift extends Subsystem {
                     liftRunning = false;
                     turretToPosition(turret90Degrees, 0.3);
                     turretRunning = true;
+                } else if(Math.abs(turretPos) < turret90Degrees + 10){
+                    turretRunning = false;
                 }
+
                 break;
             case ALLIANCE:
                 if(turretClosed && !liftUpAlliance && !liftRunning){
@@ -236,7 +278,10 @@ public class Lift extends Subsystem {
                     liftRunning = false;
                     turretToPosition(turret90Degrees, 0.3);
                     turretRunning = true;
+                } else if(Math.abs(turretPos) < turret90Degrees + 10){
+                    turretRunning = false;
                 }
+
                 break;
             case MANUAL:
                 liftRunning = false;
@@ -249,7 +294,28 @@ public class Lift extends Subsystem {
                     turret.setPower(0.0);
                     turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 }
-                lift.setPower(liftAdjust);
+
+                double liftPower;
+                int minPos = (turretClosed) ? 0 : LIFT_CLEARED_POS;
+                if (liftAdjust != 0) {
+                    if (liftHolding) {
+                        liftHolding = false;
+                        liftPID.reset();
+                    }
+                    if (liftAdjust > 0) {
+                        liftPower = liftAdjust * sigmoid(LIFT_CONVERGENCE_SPEED * (liftPos - (LIFT_ALLIANCE_POS - LIFT_LIMIT_RANGE)));
+                    } else {
+                        liftPower = liftAdjust * sigmoid(LIFT_CONVERGENCE_SPEED * (LIFT_LIMIT_RANGE / 2 - (liftPos - minPos)));
+                    }
+                } else {
+                    if (!liftHolding) {
+                        liftTargetPos = Range.clip(liftPos, minPos, LIFT_MAX_POS);
+                        liftHolding = true;
+                    }
+                    liftPower = liftPID.run(liftTargetPos, liftPos);
+                }
+
+                lift.setPower(liftPower);
                 turret.setPower(turretAdjust);
                 break;
         }
