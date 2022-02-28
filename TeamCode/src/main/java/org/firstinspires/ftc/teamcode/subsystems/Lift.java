@@ -190,13 +190,8 @@ public class Lift extends Subsystem {
             this.linkageButton = false;
         }
 
-        if(linkageOpen){
-            linkageOne.setPosition(LINKAGE_MAX_POS);
-            linkageTwo.setPosition(LINKAGE_MAX_POS);
-        } else {
-            linkageOne.setPosition(LINKAGE_MIN_POS);
-            linkageTwo.setPosition(LINKAGE_MIN_POS);
-        }
+        double linkagePos = LINKAGE_MAX_POS;
+
 
         //Hopper Code
         if (releaseButton && !this.releaseButton) {
@@ -232,14 +227,12 @@ public class Lift extends Subsystem {
 
         boolean turretClosed = Math.abs(turretPos) < 35;
         boolean liftCleared;
-        boolean liftUpAlliance = liftPos > LIFT_ALLIANCE_POS;
 
         //state machine controller
         switch (liftState) {
             case HOME:
                 liftCleared = liftPos > LIFT_CLEARED_POS || turretClosed;
-                linkageOne.setPosition(0.1);
-                linkageTwo.setPosition(0.1);
+                linkageOpen = false;
                 if(!liftCleared) {
                     liftToPosition(LIFT_CLEARED_POS + 10, 1.0);
                 } else if(!turretClosed) {
@@ -249,6 +242,7 @@ public class Lift extends Subsystem {
                 }
                 break;
             case SHARED:
+                linkagePos = 0.4;
                 liftCleared = liftPos > LIFT_CLEARED_POS;
                 liftToPosition(LIFT_CLEARED_POS + 10, 1.0);
                 if(liftCleared) {
@@ -307,6 +301,14 @@ public class Lift extends Subsystem {
                 lift.setPower(liftPower + 0.05);
                 turret.setPower(turretAdjust);
                 break;
+        }
+
+        if(linkageOpen){
+            linkageOne.setPosition(linkagePos);
+            linkageTwo.setPosition(linkagePos);
+        } else {
+            linkageOne.setPosition(LINKAGE_MIN_POS);
+            linkageTwo.setPosition(LINKAGE_MIN_POS);
         }
 
         if(Math.abs(turretPos) < 30 && Math.abs(liftPos) < 20) {
