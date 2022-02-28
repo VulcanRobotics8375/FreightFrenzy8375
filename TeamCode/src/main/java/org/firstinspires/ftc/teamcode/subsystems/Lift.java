@@ -241,35 +241,34 @@ public class Lift extends Subsystem {
                 linkageOne.setPosition(0.1);
                 linkageTwo.setPosition(0.1);
                 if(!liftCleared) {
-                    liftToPosition(LIFT_CLEARED_POS + 10);
+                    liftToPosition(LIFT_CLEARED_POS + 10, 1.0);
                 } else if(!turretClosed) {
-                    turretToPosition(0);
+                    turretToPosition(0, 1.0);
                 } else {
-                    liftToPosition(0);
+                    liftToPosition(0, 0.5);
                 }
                 break;
             case SHARED:
                 liftCleared = liftPos > LIFT_CLEARED_POS;
-                liftToPosition(LIFT_CLEARED_POS + 10);
+                liftToPosition(LIFT_CLEARED_POS + 10, 1.0);
                 if(liftCleared) {
                     turretToPosition(turret90Degrees);
                 }
                 break;
             case ALLIANCE:
                 liftCleared = liftPos > LIFT_CLEARED_POS;
-                liftToPosition(LIFT_ALLIANCE_POS);
+                liftToPosition(LIFT_ALLIANCE_POS, 1.0);
                 if(liftCleared) {
-                    turretToPosition(turret90Degrees);
+                    turretToPosition(turret90Degrees, 1.0);
                 }
-
                 break;
             case MANUAL:
                 if(lift.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
-                    lift.setPower(0.0);
+//                    lift.setPower(0.0);
                     lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 }
                 if(turret.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
-                    turret.setPower(0.0);
+//                    turret.setPower(0.0);
                     turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 }
 
