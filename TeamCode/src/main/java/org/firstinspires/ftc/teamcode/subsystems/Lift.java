@@ -226,8 +226,8 @@ public class Lift extends Subsystem {
         
         if(prevLiftState != liftState) {
             liftTargetPos = liftPos;
-//            turretRunning = false;
-//            liftRunning = false;
+            turretRunning = false;
+            liftRunning = false;
         }
 
         boolean turretClosed = Math.abs(turretPos) < 35;
@@ -331,7 +331,7 @@ public class Lift extends Subsystem {
 
                 telemetry.addData("lift power", liftPower);
                 telemetry.addData("lift holding", liftHolding);
-                lift.setPower(liftPower);
+                lift.setPower(liftPower + 0.05);
                 turret.setPower(turretAdjust);
                 break;
         }
@@ -360,24 +360,32 @@ public class Lift extends Subsystem {
 
     public void turretToPosition(int pos){
         turret.setTargetPosition(pos);
-        turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        if(turret.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
         turret.setPower(1);
     }
 
     public void turretToPosition(int pos, double power){
         turret.setTargetPosition(pos);
-        turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        if(turret.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
         turret.setPower(power);
     }
 
     public void liftToPosition(int pos) {
         lift.setTargetPosition(pos);
-        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        if(lift.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
         lift.setPower(1);
     }
     public void liftToPosition(int pos, double power) {
         lift.setTargetPosition(pos);
-        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        if(lift.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
         lift.setPower(power);
     }
 
