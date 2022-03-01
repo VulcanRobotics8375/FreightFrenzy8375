@@ -6,44 +6,28 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
 public class Carousel extends Subsystem {
-    private CRServo carousel;
-    private Servo opener;
+    private CRServo carousel, carouselTwo;
 
-    private boolean openButton = false;
-    private double openOn = -1;
 
     @Override
     public void init() {
-        carousel = hardwareMap.crservo.get("carousel");
-        opener = hardwareMap.servo.get("carousel_opener");
+        carousel = hardwareMap.crservo.get("carousel_one");
+        carouselTwo = hardwareMap.crservo.get("carousel_two");
     }
 
-    public void run(boolean spin, boolean openButton, boolean oppositeSpin) {
+    public void run(boolean spin, boolean oppositeSpin) {
         if(spin) {
-            carousel.setPower(-1);
+            carousel.setPower(1.0);
+            carouselTwo.setPower(1.0);
         } else if(oppositeSpin){
-            carousel.setPower(1);
+            carousel.setPower(-1.0);
+            carouselTwo.setPower(-1.0);
         } else{
             carousel.setPower(0);
+            carouselTwo.setPower(0);
         }
 
-        if (openButton && !this.openButton) {
-            openOn *= -1;
-            this.openButton = true;
-        }
-        if (!openButton && this.openButton) {
-            this.openButton = false;
-        }
-        if(openOn > 0){
-            opener.setPosition(0.01);
-        }
-        if(openOn < 0){
-            opener.setPosition(1.0);
-        }
-    }
 
-    public void setOpenerPosition(double pos) {
-        opener.setPosition(pos);
     }
 
     public void setCarouselPower(double power) {

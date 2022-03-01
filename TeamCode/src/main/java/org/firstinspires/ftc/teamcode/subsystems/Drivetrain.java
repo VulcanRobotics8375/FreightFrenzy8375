@@ -25,9 +25,10 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
     public static final DriveMode driveMode = DriveMode.MECANUM;
     public static final DrivetrainVelocityMode velocityMode = DrivetrainVelocityMode.DRIVE_MOTOR_ENCODERS;
 
+
     BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
-    private Servo odometryLift;
+    private Servo odometryLift, odometryLift2;
 
     @Override
     public void init() {
@@ -37,6 +38,8 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         br = hardwareMap.get(DcMotorEx.class, "back_right");
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         odometryLift = hardwareMap.servo.get("odometry_lift");
+        odometryLift2 = hardwareMap.servo.get("odometry_lift_two");
+        odometryLift2.setDirection(Servo.Direction.REVERSE);
 
         setDrivetrainMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setDrivetrainMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -129,10 +132,12 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
 
     public void startOdometryLift() {
         odometryLift.setPosition(1.0);
+        odometryLift2.setPosition(1.0);
     }
 
     public void stopOdometryLift() {
         odometryLift.setPosition(0.0);
+        odometryLift2.setPosition(0.0);
     }
 
     public void setDrivetrainMode(DcMotor.RunMode runMode) {

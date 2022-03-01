@@ -27,8 +27,8 @@ public class Lift extends Subsystem {
     private boolean liftHolding = false;
     private LiftMin LIFT_MIN = new LiftMin();
     private final int LIFT_MAX_POS = 650;
-    private final int LIFT_CLEARED_POS = 400;
-    private final int LIFT_ALLIANCE_POS = 475;
+    private final int LIFT_CLEARED_POS = 380;
+    private final int LIFT_ALLIANCE_POS = 550;
     private final double LIFT_CONVERGENCE_SPEED = 0.1;
     private final double LIFT_LIMIT_RANGE = 100.0;
 
@@ -38,6 +38,8 @@ public class Lift extends Subsystem {
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.8;
     private final double LINKAGE_STICK_COEF = 0.0007;
+    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 0.525;
+//    private final double
 
     private boolean releaseOpen = false;
     private boolean releaseButton = false;
@@ -75,8 +77,9 @@ public class Lift extends Subsystem {
         linkageTwo.setDirection(Servo.Direction.REVERSE);
         turretAngleAnalog = hardwareMap.get(AnalogInput.class, "turret_encoder");
         
-        PIDFCoefficients stockLiftCoeff = lift.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-//        lift.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(stockLiftCoeff.p, stockLiftCoeff.i, stockLiftCoeff.d, 0.1));
+        PIDFCoefficients stockTurretCoeff = turret.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+//        turret.setVelocityPIDFCoefficients(stockTurretCoeff.p, stockTurretCoeff.i, stockTurretCoeff.d + 0.02, stockTurretCoeff.f);
+//        lift.setVelocityPIDFCoefficients(stockLiftCoeff.p, stockLiftCoeff.i, stockLiftCoeff.d + 0.01, stockLiftCoeff.f);
 
 
     }
@@ -238,31 +241,32 @@ public class Lift extends Subsystem {
                 } else if(!turretClosed) {
                     turretToPosition(0, 1.0);
                 } else {
-                    liftToPosition(0, 0.5);
+                    turretToPosition(0, 0.5);
+                    liftToPosition(2, 0.5);
                 }
                 break;
             case SHARED:
                 linkagePos = 0.4;
                 liftCleared = liftPos > LIFT_CLEARED_POS;
                 liftToPosition(LIFT_CLEARED_POS + 10, 1.0);
-                if(liftCleared) {
+                if(liftCleared || Math.abs(turretPos) > Math.abs(turret90Degrees)) {
                     turretToPosition(turret90Degrees);
                 }
                 break;
             case ALLIANCE:
                 liftCleared = liftPos > LIFT_CLEARED_POS;
                 liftToPosition(LIFT_ALLIANCE_POS, 1.0);
-                if(liftCleared) {
+                if(liftCleared || Math.abs(turretPos) > Math.abs(turret90Degrees)) {
                     turretToPosition(turret90Degrees, 1.0);
                 }
                 break;
             case MANUAL:
                 if(lift.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
-//                    lift.setPower(0.0);
+                    lift.setPower(0.0);
                     lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 }
                 if(turret.getMode() == DcMotor.RunMode.RUN_TO_POSITION) {
-//                    turret.setPower(0.0);
+                    turret.setPower(0.0);
                     turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 }
 
@@ -296,9 +300,10 @@ public class Lift extends Subsystem {
                     liftPower = liftPID.run(liftTargetPos, liftPos);
                 }
 
+                telemetry.addData("lift PID feedforward", lift.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER).f);
                 telemetry.addData("lift power", liftPower);
                 telemetry.addData("lift holding", liftHolding);
-                lift.setPower(liftPower + 0.05);
+                lift.setPower(liftPower);
                 turret.setPower(turretAdjust);
                 break;
         }
@@ -318,9 +323,10 @@ public class Lift extends Subsystem {
         }
 
         telemetry.addData("lift state", liftState.toString());
-        telemetry.addData("turret pos", turretPos);
-        telemetry.addData("lift pos", liftPos);
-        telemetry.addData("lift current", lift.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("analog encoder", turretAngleAnalog.getVoltage());
+//        telemetry.addData("turret pos", turretPos);
+//        telemetry.addData("lift pos", liftPos);
+//        telemetry.addData("lift current", lift.getCurrent(CurrentUnit.AMPS));
 
     }
 

@@ -29,6 +29,7 @@ public class Intake extends Subsystem {
     public boolean lastExtend = false;
     public double extendOn = -1;
     public final double extendBackPosition = 0.28;
+    public final double extendDepositPosition = 0.32;
     public final double extendForwardPosition = 0.05;
 
     public final double INTAKE_POWER = 1;
@@ -67,8 +68,8 @@ public class Intake extends Subsystem {
                 break;
             case INDEXED:
                 rotateServo.setPosition(depositPosition);
-                extendServo1.setPosition(extendBackPosition);
-                extendServo2.setPosition(extendBackPosition);
+                extendServo1.setPosition(extendDepositPosition);
+                extendServo2.setPosition(extendDepositPosition);
                 intakeMotor.setPower(INTAKE_POWER * 0.5);
                 if(liftReady && timer.seconds() > 1) {
                     intakeState = IntakeState.DEPOSIT;
@@ -76,8 +77,8 @@ public class Intake extends Subsystem {
                 break;
             case DEPOSIT:
                 rotateServo.setPosition(depositPosition);
-                extendServo1.setPosition(extendBackPosition);
-                extendServo2.setPosition(extendBackPosition);
+                extendServo1.setPosition(extendDepositPosition);
+                extendServo2.setPosition(extendDepositPosition);
                 intakeMotor.setPower(INTAKE_POWER * -0.8);
                 break;
             case RESET:
