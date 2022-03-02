@@ -23,6 +23,7 @@ public class Lift extends Subsystem {
     private Servo linkageOne, linkageTwo;
 
     SimplePID liftPID = new SimplePID(0.005, 0.0, 0.0, -1.0, 1.0);
+    private ElapsedTime liftTimer = new ElapsedTime();
     private double liftTargetPos;
     private boolean liftHolding = false;
     private LiftMin LIFT_MIN = new LiftMin();
@@ -31,6 +32,7 @@ public class Lift extends Subsystem {
     private final int LIFT_ALLIANCE_POS = 550;
     private final double LIFT_CONVERGENCE_SPEED = 0.1;
     private final double LIFT_LIMIT_RANGE = 100.0;
+    private final double LIFT_STICK_COEF = 0.005;
 
     private ElapsedTime linkageTimer = new ElapsedTime();
     private boolean linkageButton = false;
@@ -301,39 +303,44 @@ public class Lift extends Subsystem {
                 }
 
                 //                  effective deadzone
-                if (Math.abs(liftAdjust) > 0.05) {
-                    if (liftHolding) {
-                        liftHolding = false;
-                        liftPID.reset();
-                    }
-                    if (liftAdjust > 0) {
-                        if(liftPos > LIFT_MAX_POS - LIFT_LIMIT_RANGE) {
-                            liftPower = liftAdjust - ((liftAdjust / LIFT_LIMIT_RANGE) * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
-                        } else {
-                            liftPower = liftAdjust;
-                        }
-                    } else {
-                        if(liftPos < minPos + LIFT_LIMIT_RANGE) {
-                            liftPower = (liftAdjust / LIFT_LIMIT_RANGE) * (liftPos - minPos);
-                        } else {
-                            liftPower = liftAdjust;
-                        }
-                    }
-                } else {
-                    if (!liftHolding) {
-                        liftTargetPos = Range.clip(liftPos, minPos, LIFT_MAX_POS);
-                        liftHolding = true;
-                    }
-//                    liftPower = liftAdjust;
-                    liftPower = liftPID.run(liftTargetPos, liftPos);
-                }
+//                if (Math.abs(liftAdjust) > 0.05) {
+//                    if (liftHolding) {
+//                        liftHolding = false;
+//                        liftPID.reset();
+//                    }
+//                    if (liftAdjust > 0) {
+//                        if(liftPos > LIFT_MAX_POS - LIFT_LIMIT_RANGE) {
+//                            liftPower = liftAdjust - ((liftAdjust / LIFT_LIMIT_RANGE) * (liftPos - (LIFT_MAX_POS - LIFT_LIMIT_RANGE)));
+//                        } else {
+//                            liftPower = liftAdjust;
+//                        }
+//                    } else {
+//                        if(liftPos < minPos + LIFT_LIMIT_RANGE) {
+//                            liftPower = (liftAdjust / LIFT_LIMIT_RANGE) * (liftPos - minPos);
+//                        } else {
+//                            liftPower = liftAdjust;
+//                        }
+//                    }
+//                } else {
+//                    if (!liftHolding) {
+//                        liftTargetPos = Range.clip(liftPos, minPos, LIFT_MAX_POS);
+//                        liftHolding = true;
+//                    }
+////                    liftPower = liftAdjust;
+//                    liftPower = liftPID.run(liftTargetPos, liftPos);
+//                }
+
+                double elapsed = liftTimer.milliseconds();
+                double targetPos = liftPos + LIFT_STICK_COEF * elapsed * liftAdjust;
+                liftToPosition((int)Range.clip(targetPos, minPos, LIFT_MAX_POS));
+                liftTimer.reset();
 
                 telemetry.addData("lift PID feedforward", lift.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER).f);
-                telemetry.addData("lift power", liftPower);
-                telemetry.addData("lift pos", liftPos);
+                telemetry.addData("lift target", lift);
+                telemetry.addData("lift pos", targetPos);
                 telemetry.addData("lift current", lift.getCurrent(CurrentUnit.AMPS));
 //                telemetry.addData("lift holding", liftHolding);
-                lift.setPower(liftPower);
+//                lift.setPower(liftPower);
                 turret.setPower(turretAdjust);
                 break;
         }
