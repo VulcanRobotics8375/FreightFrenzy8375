@@ -14,7 +14,7 @@ public class FreightFrenzyConfig extends RobotConfig {
     public Intake intake;
     public Lift lift;
 //    public Carousel carousel;
-//    public Cap cap;
+    public Cap cap;
 
 
     @Override
@@ -24,6 +24,6 @@ public class FreightFrenzyConfig extends RobotConfig {
         intake = new Intake();
         lift = new Lift();
 //        carousel = new Carousel();
-//        cap = new Cap();
+        cap = new Cap();
     }
 }
