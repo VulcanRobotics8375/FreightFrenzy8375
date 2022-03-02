@@ -11,10 +11,9 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.robotcorelib.math.KalmanFilter;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
+import org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics.AbstractModel1D;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
-import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.AnalogEncoder;
 
 public class Lift extends Subsystem {
     private DcMotorEx lift;
@@ -31,6 +30,8 @@ public class Lift extends Subsystem {
     private final int LIFT_ALLIANCE_POS = 550;
     private final double LIFT_CONVERGENCE_SPEED = 0.1;
     private final double LIFT_LIMIT_RANGE = 100.0;
+
+    private final AbstractModel1D linkageModel = new AbstractModel1D(new LinkageModelFunction(), 0.0, 1.0);
 
     private ElapsedTime linkageTimer = new ElapsedTime();
     private boolean linkageButton = false;
@@ -192,7 +193,6 @@ public class Lift extends Subsystem {
     public void basicRun(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust, boolean linkageButton, boolean releaseButton, boolean flipSides) {
         double liftPos = lift.getCurrentPosition();
         double turretPos = turret.getCurrentPosition() + turretOffset;
-
 
         if(flipSides && !flippingSides) {
             flippingSides = true;
@@ -462,4 +462,12 @@ public class Lift extends Subsystem {
             return extend;
         }
     }
+
+    static class LinkageModelFunction implements UnivariateFunction {
+        @Override
+        public double value(double x) {
+            return -1.0 * (-23.1 * Math.sqrt(1.0 - 0.0168663*Math.pow(-4.235*Math.sin(0.0424451 - 3.04245*x) - 0.933, 2)) - 0.55 * Math.cos(0.0424451-3.04245*x) - 0.468516);
+        }
+    }
+
 }
