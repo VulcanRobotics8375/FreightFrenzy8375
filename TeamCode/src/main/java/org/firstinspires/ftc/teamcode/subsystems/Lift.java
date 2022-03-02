@@ -202,7 +202,7 @@ public class Lift extends Subsystem {
             flippingSides = false;
         }
 
-        int turret90Degrees = this.turret90Degrees * (flipped ? -1 : 1) - (int)turretOffset;
+        int turret90Degrees = (this.turret90Degrees - (int)turretOffset) * (flipped ? -1 : 1);
 
         //Linkage Code
         if(linkageButton && !this.linkageButton){
@@ -325,7 +325,8 @@ public class Lift extends Subsystem {
                         liftHolding = true;
                     }
 //                    liftPower = liftAdjust;
-                    liftPower = liftPID.run(liftTargetPos, liftPos);
+                    double feedForward = 0.03;
+                    liftPower = liftPID.run(liftTargetPos, liftPos) + feedForward;
                 }
 
                 telemetry.addData("lift PID feedforward", lift.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER).f);
