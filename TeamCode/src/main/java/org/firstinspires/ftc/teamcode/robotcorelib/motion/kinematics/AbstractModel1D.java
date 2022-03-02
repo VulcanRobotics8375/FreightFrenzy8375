@@ -5,9 +5,9 @@ import org.apache.commons.math3.analysis.solvers.BisectionSolver;
 
 public class AbstractModel1D {
 
-    private UnivariateFunction function;
-    private double min, max;
-    private BisectionSolver solver = new BisectionSolver();
+    private final UnivariateFunction function;
+    private final double min, max;
+    private final BisectionSolver solver = new BisectionSolver();
 
     public AbstractModel1D(UnivariateFunction function, double min, double max) {
         this.function = function;
