@@ -190,6 +190,8 @@ public class Lift extends Subsystem {
     boolean liftReady = false;
     boolean flippingSides = false;
     boolean flipped = false;
+    boolean linkageAdjust = false;
+    double linkageAdjustAmountInches = 0.0;
     public void runTurretAndArm(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust, boolean linkageButton, boolean releaseButton, boolean linkageForward, boolean linkageBack, boolean flipSides) {
         double liftPos = lift.getCurrentPosition();
         double turretPos = turret.getCurrentPosition() + turretOffset;
@@ -210,6 +212,18 @@ public class Lift extends Subsystem {
             linkageOpen = !linkageOpen;
         } else if (!linkageButton && this.linkageButton){
             this.linkageButton = false;
+        }
+
+        if(linkageForward && !linkageAdjust) {
+            linkageAdjustAmountInches += 2.5;
+            linkageAdjust = true;
+        } else if(linkageBack && !linkageAdjust) {
+            linkageAdjustAmountInches -= 2.5;
+            linkageAdjust = false;
+        }
+
+        if(!(linkageForward || linkageBack) && linkageAdjust) {
+            linkageAdjust = false;
         }
 
         double linkagePos = LINKAGE_MAX_POS;
@@ -340,6 +354,8 @@ public class Lift extends Subsystem {
         }
 
         if(linkageOpen){
+            double linkagePosOffset = linkageModel.inverse(linkageModel.value(linkagePos) + linkageAdjustAmountInches);
+            linkagePos = Range.clip(linkagePos + linkagePosOffset, 0.1, LINKAGE_MAX_POS);
             linkageOne.setPosition(linkagePos);
             linkageTwo.setPosition(linkagePos);
         } else {
