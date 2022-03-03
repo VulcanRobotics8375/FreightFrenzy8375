@@ -190,7 +190,7 @@ public class Lift extends Subsystem {
     boolean liftReady = false;
     boolean flippingSides = false;
     boolean flipped = false;
-    public void basicRun(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust, boolean linkageButton, boolean releaseButton, boolean flipSides) {
+    public void runTurretAndArm(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust, boolean linkageButton, boolean releaseButton, boolean linkageForward, boolean linkageBack, boolean flipSides) {
         double liftPos = lift.getCurrentPosition();
         double turretPos = turret.getCurrentPosition() + turretOffset;
 
