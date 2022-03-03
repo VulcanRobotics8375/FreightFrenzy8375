@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics;
 
+import com.qualcomm.robotcore.util.Range;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.solvers.BisectionSolver;
 
@@ -19,6 +21,7 @@ public class AbstractModel1D {
     }
 
     public double inverse(double y) {
+        y = Range.clip(y, minInv, maxInv);
         return solver.solve(1000, new InverseUnivariateFunctionSolver(function, y), min, max);
     }
 
