@@ -7,12 +7,15 @@ public class AbstractModel1D {
 
     private final UnivariateFunction function;
     private final double min, max;
+    private final double minInv, maxInv;
     private final BisectionSolver solver = new BisectionSolver();
 
     public AbstractModel1D(UnivariateFunction function, double min, double max) {
         this.function = function;
         this.min = min;
         this.max = max;
+        minInv = function.value(min);
+        maxInv = function.value(max);
     }
 
     public double inverse(double y) {
