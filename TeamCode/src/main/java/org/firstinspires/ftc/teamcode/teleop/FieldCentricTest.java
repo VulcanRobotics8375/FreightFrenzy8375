@@ -29,15 +29,15 @@ public class FieldCentricTest extends OpModePipeline {
     private KalmanFilter sensor3Filter = new KalmanFilter(0.6, 0.0001, 0.0, 0.1);
 
     public void init() {
-        sensor1 = hardwareMap.get(LVMaxbotixEZ4.class, "sensor_1");
-        sensor2 = hardwareMap.get(LVMaxbotixEZ4.class, "sensor_2");
-        sensor3 = hardwareMap.get(LVMaxbotixEZ4.class, "sensor_3");
+//        sensor1 = hardwareMap.get(LVMaxbotixEZ4.class, "sensor_1");
+//        sensor2 = hardwareMap.get(LVMaxbotixEZ4.class, "sensor_2");
+//        sensor3 = hardwareMap.get(LVMaxbotixEZ4.class, "sensor_3");
 
-        sensor2.PRE_SCALAR_INCHES = 24.0 / 0.177;
-        sensor2.VOLTAGE_OFFSET = 2.271;
-
-        sensor3.PRE_SCALAR_INCHES = 24.0 / 0.414;
-        sensor3.VOLTAGE_OFFSET = 0.572;
+//        sensor2.PRE_SCALAR_INCHES = 24.0 / 0.177;
+//        sensor2.VOLTAGE_OFFSET = 2.271;
+//
+//        sensor3.PRE_SCALAR_INCHES = 24.0 / 0.414;
+//        sensor3.VOLTAGE_OFFSET = 0.572;
         super.subsystems = subsystems;
         runMode = RobotRunMode.TELEOP;
         super.init();

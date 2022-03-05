@@ -39,7 +39,7 @@ public class Lift extends Subsystem {
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.9;
 //    private final double LINKAGE_STICK_COEF = 0.0007;
-    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 0.525;
+    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 0.186;
     private final double TURRET_TICKS_PER_DEGREE = 1456.0 / 360.0;
     private final double TURRET_VOLTS_PER_DEGREE = (3.3 * 5.0) / 360.0;
     private final double TURRET_TICKS_PER_VOLT = TURRET_TICKS_PER_DEGREE / TURRET_VOLTS_PER_DEGREE;
@@ -47,49 +47,46 @@ public class Lift extends Subsystem {
 
     private boolean releaseOpen = false;
     private boolean releaseButton = false;
-    private double releasePosOpen = 0.23;
-    private double releasePosClosed = 0.4;
+    private final double releasePosOpen = 0.23;
+    private final double releasePosClosed = 0.4;
 
-    SimplePID turretPID = new SimplePID(0.05,0.0,0.0,-1.0,1.0);
     private AnalogInput turretAngleAnalog; //Temporary until analog input
-    private boolean turretHolding = false;
-    private double turretTargetPos;
     private final int turret90Degrees = -364;
 
-    private boolean autoAim = false;
-
-    public final double GOAL_X = 0;
-    public final double GOAL_Y = 0;
-    public final int BASE_TURRET_POS = 0;
-    public final int BASE_LIFT_POS = 0;
-    public final double BASE_LINKAGE_POS = 0.01;
-
     public void init() {
+        //Hardware Mapping
         release = hardwareMap.servo.get("release");
         lift = hardwareMap.get(DcMotorEx.class, "lift");
         linkageOne = hardwareMap.servo.get("linkage_one");
         linkageTwo = hardwareMap.servo.get("linkage_two");
         turret = hardwareMap.get(DcMotorEx.class, "turret");
+        turretAngleAnalog = hardwareMap.get(AnalogInput.class, "turret_encoder");
+
+        //motor and servo modes
+        //lift
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //turret does not have a quadrature encoder
-        turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        //turret
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
-        linkageTwo.setDirection(Servo.Direction.REVERSE);
-        turretAngleAnalog = hardwareMap.get(AnalogInput.class, "turret_encoder");
 
+        //servo modes
+        linkageTwo.setDirection(Servo.Direction.REVERSE);
+
+        //calculate turet offset based on absolute encoder voltage
         turretOffset = (TURRET_TICKS_PER_VOLT * (turretAngleAnalog.getVoltage() - ANALOG_ENCODER_VOLTAGE_OFFSET));
         PIDFCoefficients stockTurretCoeff = turret.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
 //        turret.setVelocityPIDFCoefficients(stockTurretCoeff.p, stockTurretCoeff.i, stockTurretCoeff.d + 0.02, stockTurretCoeff.f);
 //        lift.setVelocityPIDFCoefficients(stockLiftCoeff.p, stockLiftCoeff.i, stockLiftCoeff.d + 0.01, stockLiftCoeff.f);
-
-
-
     }
 
+    //independent state machine variables
+    //there is a main state machine, liftState, that controls most of the lift.
+    // Some components of the lift are state-independent or need slightly more complex logic,
+    // so we add some booleans to control those states.
     LiftState liftState = LiftState.HOME;
     boolean liftRunning = false;
     boolean turretRunning = false;
@@ -98,6 +95,7 @@ public class Lift extends Subsystem {
     boolean flipped = false;
     boolean linkageAdjust = false;
     double linkageAdjustAmountInches = 0.0;
+    //main teleop arm and turret sequence
     public void runTurretAndArm(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust, boolean linkageButton, boolean releaseButton, boolean linkageForward, boolean linkageBack, boolean flipSides) {
         double liftPos = lift.getCurrentPosition();
         double turretPos = turret.getCurrentPosition() + turretOffset;
@@ -174,6 +172,7 @@ public class Lift extends Subsystem {
         boolean turretOut = Math.abs(turretPos) > Math.abs(turret90Degrees);
         switch (liftState) {
             case HOME:
+                linkageAdjustAmountInches = 0.0;
                 liftCleared = liftPos > LIFT_CLEARED_POS || turretClosed;
                 linkageOpen = false;
                 if(!liftCleared) {
@@ -252,6 +251,9 @@ public class Lift extends Subsystem {
                 telemetry.addData("lift pos", liftPos);
                 telemetry.addData("lift current", lift.getCurrent(CurrentUnit.AMPS));
 //                telemetry.addData("lift holding", liftHolding);
+                if(lift.getCurrent(CurrentUnit.AMPS) > 14) {
+                    liftPower *= 0.8;
+                }
                 lift.setPower(liftPower);
                 turret.setPower(turretAdjust);
                 break;
