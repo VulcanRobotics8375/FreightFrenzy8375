@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.robotcorelib.motion.followers.PurePursuit;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.Path;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.PathBuilder;
 import org.firstinspires.ftc.teamcode.robotcorelib.opmode.AutoPipeline;
+import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.AutoTask;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 import org.firstinspires.ftc.teamcode.vision.aruco.ArucoPipeline;
@@ -23,34 +24,41 @@ public class CabbageAuto extends AutoPipeline {
     ElapsedTime timer = new ElapsedTime();
 
     Path startToAlliance = new PathBuilder()
-            .speed(0.35)
+            .speed(0.8)
             .turnSpeed(0.5)
             .maintainHeading(true)
             .start(new Pose2d(0.0, 0.0, 0.0))
-            .addGuidePoint(new Pose2d(-24.0, 0.0, 0.0))
-            .end(new Pose2d(-24.0, 12.0, 0))
+            .addGuidePoint(new Pose2d(10.0, 0.01, 0.0))
+            .end(new Pose2d(24.01, 12.0, 0))
             .build();
     Path allianceToWarehouse = new PathBuilder()
-            .speed(0.5)
+            .speed(0.8)
             .turnSpeed(0.5)
             .maintainHeading(true)
-            .start(new Pose2d(-24.0, 12.0, 0))
-            .addGuidePoint(new Pose2d(0,0,0))
-            .end(new Pose2d(30,0,0))
+            .start(new Pose2d(24.0, 12.0, 0))
+            .addGuidePoint(new Pose2d(0,0.5,0))
+            .end(new Pose2d(-30,0.51,0))
             .build();
     Path warehouseToAlliance = new PathBuilder()
-            .speed(0.5)
+            .speed(0.8)
             .turnSpeed(0.5)
             .maintainHeading(true)
-            .start(new Pose2d(30,0,0))
-            .addGuidePoint(new Pose2d(0,0,0))
-            .end(new Pose2d(-24,12,0))
+            .start(new Pose2d(-30,0.51,0))
+            .addGuidePoint(new Pose2d(0,0.5,0))
+            .end(new Pose2d(24,12,0))
             .build();
 
-    public void robotInit() {
+    public void runOpMode() {
+
+        super.subsystems = subsystems;
+        runMode = RobotRunMode.AUTONOMOUS;
+        robotInit();
+
         waitForStart();
 
-        follower.followPath(startToAlliance);
+        while(!isStopRequested()) {
+            subsystems.intake.run(false, true, false);
+            follower.followPath(startToAlliance);
 
 //        runTask(new AutoTask() {
 //            @Override
@@ -65,14 +73,16 @@ public class CabbageAuto extends AutoPipeline {
 //            }
 //        });
 
-        follower.followPath(allianceToWarehouse);
+            follower.followPath(allianceToWarehouse);
+            Pose2d robotPose = Robot.getRobotPose();
+            Robot.setRobotPose(new Pose2d(robotPose.getX(), -0.5, robotPose.getHeading()));
+//
+            follower.followPath(warehouseToAlliance);
+        }
 
-        follower.followPath(warehouseToAlliance);
-    }
-    public void runOpMode(){
-        super.subsystems = subsystems;
-        runMode = RobotRunMode.AUTONOMOUS;
-        robotInit();
+        telemetry.addLine("done");
+        subsystems.drivetrain.setPowers(0, 0, 0, 0);
+        Robot.stop();
     }
 
 }

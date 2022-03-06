@@ -82,6 +82,8 @@ public class Lift extends Subsystem {
         PIDFCoefficients stockTurretCoeff = turret.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
 //        turret.setVelocityPIDFCoefficients(stockTurretCoeff.p, stockTurretCoeff.i, stockTurretCoeff.d + 0.02, stockTurretCoeff.f);
 //        lift.setVelocityPIDFCoefficients(stockLiftCoeff.p, stockLiftCoeff.i, stockLiftCoeff.d + 0.01, stockLiftCoeff.f);
+        lift.setPositionPIDFCoefficients(12.0);
+        turret.setPositionPIDFCoefficients(15.0);
     }
 
     //independent state machine variables
@@ -120,14 +122,16 @@ public class Lift extends Subsystem {
         }
 
         if(linkageForward && !linkageAdjust) {
-            linkageAdjustAmountInches += 2.5;
+            linkageAdjustAmountInches += 0.25;
             linkageAdjust = true;
         } else if(linkageBack && !linkageAdjust) {
-            linkageAdjustAmountInches -= 2.5;
-            linkageAdjust = false;
+            linkageAdjustAmountInches -= 0.25;
+            linkageAdjust = true;
         }
 
-        if(!(linkageForward || linkageBack) && linkageAdjust) {
+        telemetry.addData("linkage adjust", linkageAdjustAmountInches);
+
+        if(!linkageForward && !linkageBack && linkageAdjust) {
             linkageAdjust = false;
         }
 
@@ -215,7 +219,7 @@ public class Lift extends Subsystem {
                 if(turretClosed) {
                     minPos = 0;
                 } else if(linkageOpen) {
-                    minPos = 200;
+                    minPos = 100;
                 } else {
                     minPos = LIFT_CLEARED_POS;
                 }

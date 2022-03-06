@@ -48,7 +48,7 @@ public class Main extends OpModePipeline {
                  gamepad2.dpad_left //alliance side flip
          );
 
-//         subsystems.cap.run(gamepad2.dpad_left);
+         subsystems.cap.run(gamepad1.left_trigger, gamepad1.right_trigger);
         subsystems.intake.run(gamepad2.dpad_down, gamepad2.x || gamepad2.y || gamepad2.left_bumper, subsystems.lift.isReset());
 
         if(gamepad1.dpad_up) {

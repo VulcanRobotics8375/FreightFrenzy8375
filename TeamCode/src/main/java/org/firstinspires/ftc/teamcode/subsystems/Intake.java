@@ -1,16 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
-import org.firstinspires.ftc.teamcode.robotcorelib.util.hardware.HardwarePrecision;
 
 public class Intake extends Subsystem {
     private DcMotorEx intakeMotor;
@@ -20,8 +16,9 @@ public class Intake extends Subsystem {
 
     public boolean lastFlip = false;
     public double flipOn = -1;
-    public final double depositPosition = 0.25;
-    public final double intakePosition = 0.99;
+    public final double depositPosition = 0.15;
+    public final double intakePosition = 0.85;
+    public final double resetPosition = 0.99;
 
     private boolean intakeButton;
     private boolean indexed = false;
@@ -82,7 +79,7 @@ public class Intake extends Subsystem {
                 intakeMotor.setPower(INTAKE_POWER * -0.8);
                 break;
             case RESET:
-                rotateServo.setPosition(intakePosition);
+                rotateServo.setPosition(resetPosition);
                 extendServo1.setPosition(extendBackPosition);
                 extendServo2.setPosition(extendBackPosition);
                 intakeMotor.setPower(0.0);

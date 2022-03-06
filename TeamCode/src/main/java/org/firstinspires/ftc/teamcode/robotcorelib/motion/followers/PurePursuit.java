@@ -26,7 +26,7 @@ public class PurePursuit extends Follower {
 
     public volatile boolean following;
     private SimplePID velocityPid = new SimplePID(1.0, 0.0, 0.0, -1.0, 1.0);
-    private SimplePID turnPid = new SimplePID(-1.2, -0.01, 0.0, -0.8, 0.8);
+    private SimplePID turnPid = new SimplePID(-1.5, -0.01, 0.0, -0.8, 0.8);
 
     private LinearOpMode opMode;
 
@@ -137,13 +137,13 @@ public class PurePursuit extends Follower {
         if(distanceFromEnd < accelDistance) {
             followPoint.speed *= m * distanceFromEnd;
         }
-//        else if(distanceFromStart < accelDistance) {
-//            double minSpeedStart = 0.5*followPoint.speed;
-//            followPoint.speed *= m * distanceFromStart;
-//            if(Math.abs(followPoint.speed) < minSpeedStart) {
-//                followPoint.speed = minSpeedStart * Math.signum(originalSpeed);
-//            }
-//        }
+        else if(distanceFromStart < accelDistance) {
+            double minSpeedStart = 0.5*followPoint.speed;
+            followPoint.speed *= m * distanceFromStart;
+            if(Math.abs(followPoint.speed) < minSpeedStart) {
+                followPoint.speed = minSpeedStart * Math.signum(originalSpeed);
+            }
+        }
 
         if(Math.abs(followPoint.speed) < minSpeed) {
             followPoint.speed = minSpeed * Math.signum(originalSpeed);
@@ -158,12 +158,13 @@ public class PurePursuit extends Follower {
             case MECANUM:
                 double absoluteAngleToPoint = MathUtils.fullAngleWrap(Math.atan2(robotPose.getY() - point.y, robotPose.getX() - point.x));
 
-                Vector2d poseVelocity = new Vector2d(-Math.cos(absoluteAngleToPoint), Math.sin(absoluteAngleToPoint)).times(point.speed);
+                Vector2d poseVelocity = new Vector2d(Math.cos(absoluteAngleToPoint), -Math.sin(absoluteAngleToPoint)).times(point.speed);
 
                 double headingError = MathUtils.calcAngularError(point.theta, robotPose.getHeading());
                 //TODO remove this
 //                opMode.telemetry.addData("theta error", headingError);
                 opMode.telemetry.addData("x pos", robotPose.getX());
+                opMode.telemetry.addData("y pos", robotPose.getY());
                 double headingOutput = turnPid.run(headingError);
                 Pose2d outputVelocity;
                 switch(Robot.drivetrain.getVelocityControlMode()) {
