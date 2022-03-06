@@ -52,18 +52,49 @@ public class CabbageAuto extends AutoPipeline {
 
         follower.followPath(startToAlliance);
 
-//        runTask(new AutoTask() {
-//            @Override
-//            public boolean conditional() {
-//                return subsystems.lift;
-//            }
-//
-//            @Override
-//            public void run() {
-//                subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
-//                subsystems.lift.
-//            }
-//        });
+        subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return Math.abs(subsystems.lift.getLiftPosition() - subsystems.lift.getLiftAlliancePos()) < 10
+                        && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) < 10;
+            }
+
+            @Override
+            public void run() {
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+            }
+        });
+
+        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, false, false, false, false);
+        timer.reset();
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return timer.milliseconds() >= 1500;
+            }
+
+            @Override
+            public void run() {
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+            }
+        });
+
+        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+        timer.reset();
+        runTask(new AutoTask() {
+            @Override
+            public boolean conditional() {
+                return timer.milliseconds() >= 200;
+            }
+
+            @Override
+            public void run() {
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+            }
+        });
+        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+
 
         follower.followPath(allianceToWarehouse);
 
