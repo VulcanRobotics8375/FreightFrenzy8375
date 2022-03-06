@@ -11,8 +11,10 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics.AbstractModel1D;
+import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
 public class Lift extends Subsystem {
@@ -260,6 +262,8 @@ public class Lift extends Subsystem {
                     liftPower *= 0.8;
                 }
                 lift.setPower(liftPower);
+
+                double turretPower = MathUtils.joystickCurve(turretAdjust, JoystickCurve.MODIFIED_CUBIC);
                 turret.setPower(turretAdjust);
                 break;
         }
