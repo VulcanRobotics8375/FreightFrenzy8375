@@ -34,7 +34,7 @@ public class Main extends OpModePipeline {
         telemetry.addData("right wheel", subsystems.localizer.getWheelPositions().get(1));
         telemetry.addData("center wheel", subsystems.localizer.getWheelPositions().get(2));
 
-        subsystems.cap.run(gamepad2.left_trigger, gamepad2.right_trigger);
+//        subsystems.cap.run(gamepad2.left_trigger, gamepad2.right_trigger);
          subsystems.lift.runTurretAndArm(
                  gamepad2.x, //shared
                  gamepad2.y, //alliance
