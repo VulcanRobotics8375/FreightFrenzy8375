@@ -266,7 +266,7 @@ public class Lift extends Subsystem {
 
         if(linkageOpen){
             double linkagePosOffset = linkageModel.inverse(linkageModel.value(linkagePos) + linkageAdjustAmountInches);
-            linkagePos = Range.clip(linkagePos + linkagePosOffset, 0.1, LINKAGE_MAX_POS);
+            linkagePos = Range.clip(linkagePosOffset, 0.1, LINKAGE_MAX_POS);
             linkageOne.setPosition(linkagePos);
             linkageTwo.setPosition(linkagePos);
         } else {
@@ -303,7 +303,7 @@ public class Lift extends Subsystem {
 
     public int getLiftAlliancePos() { return LIFT_ALLIANCE_POS; }
 
-    public int getTurret90Degrees() { return this.turret90Degrees - (int)turretOffset; }
+    public int getTurret90Degrees() { return this.turret90Degrees; }
 
     public void turretToPosition(int pos){
         turret.setTargetPosition(pos);

@@ -56,59 +56,59 @@ public class CabbageAuto extends AutoPipeline {
 
         waitForStart();
 
-        while(!isStopRequested()) {
+        if(!isStopRequested()) {
             subsystems.intake.run(false, true, false);
             follower.followPath(startToAlliance);
 
-        subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
+        subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, true);
         runTask(new AutoTask() {
             @Override
             public boolean conditional() {
-                return Math.abs(subsystems.lift.getLiftPosition() - subsystems.lift.getLiftAlliancePos()) < 10
-                        && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) < 10;
+                return !(Math.abs(subsystems.lift.getLiftPosition() - subsystems.lift.getLiftAlliancePos()) < 10
+                        && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) < 10);
             }
 
             @Override
             public void run() {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+                subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
             }
         });
 
-        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, false, false, false, false);
-        timer.reset();
-        runTask(new AutoTask() {
-            @Override
-            public boolean conditional() {
-                return timer.milliseconds() >= 1500;
-            }
+//        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, false, false, false, false);
+//        timer.reset();
+//        runTask(new AutoTask() {
+//            @Override
+//            public boolean conditional() {
+//                return timer.milliseconds() >= 1500;
+//            }
+//
+//            @Override
+//            public void run() {
+//                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+//            }
+//        });
+//
+//        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+//        timer.reset();
+//        runTask(new AutoTask() {
+//            @Override
+//            public boolean conditional() {
+//                return timer.milliseconds() >= 200;
+//            }
+//
+//            @Override
+//            public void run() {
+//                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+//            }
+//        });
+//        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
 
-            @Override
-            public void run() {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
-            }
-        });
 
-        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
-        timer.reset();
-        runTask(new AutoTask() {
-            @Override
-            public boolean conditional() {
-                return timer.milliseconds() >= 200;
-            }
-
-            @Override
-            public void run() {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
-            }
-        });
-        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
-
-
-            follower.followPath(allianceToWarehouse);
+//            follower.followPath(allianceToWarehouse);
             Pose2d robotPose = Robot.getRobotPose();
             Robot.setRobotPose(new Pose2d(robotPose.getX(), -0.5, robotPose.getHeading()));
 //
-            follower.followPath(warehouseToAlliance);
+//            follower.followPath(warehouseToAlliance);
         }
 
         telemetry.addLine("done");
