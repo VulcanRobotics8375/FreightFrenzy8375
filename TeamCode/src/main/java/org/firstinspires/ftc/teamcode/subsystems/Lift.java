@@ -293,6 +293,17 @@ public class Lift extends Subsystem {
     }
 
 
+    public int getLiftPosition() {
+        return lift.getCurrentPosition();
+    }
+
+    public double getTurretPosition() {
+        return turret.getCurrentPosition() + turretOffset;
+    }
+
+    public int getLiftAlliancePos() { return LIFT_ALLIANCE_POS; }
+
+    public int getTurret90Degrees() { return this.turret90Degrees - (int)turretOffset; }
 
     public void turretToPosition(int pos){
         turret.setTargetPosition(pos);
@@ -357,10 +368,6 @@ public class Lift extends Subsystem {
         telemetry.addData("lift pos", lift.getCurrentPosition());
         telemetry.addData("turret pos", turret.getCurrentPosition());
         telemetry.addData("lift power", liftStick);
-    }
-
-    public static double sigmoid(double x) {
-        return 1 / (1 + Math.exp(x));
     }
 
     private class LiftMin implements UnivariateFunction {
