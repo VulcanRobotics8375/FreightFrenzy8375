@@ -21,7 +21,7 @@ public class PathBuilder {
     private double speed = 1;
     private double turnSpeed = 1;
     private double lookahead = 5;
-    private boolean maintainHeadng = false;
+    private boolean maintainHeading = false;
 
     public PathBuilder() {}
 
@@ -60,7 +60,7 @@ public class PathBuilder {
     }
 
     public PathBuilder addGuidePoint(Pose2d point) {
-        if(maintainHeadng) {
+        if(maintainHeading) {
             PathPoint pathPoint = new PathPoint(point.getX(), point.getY(), point.getHeading(), speed, turnSpeed, lookahead);
             guidePoints.add(pathPoint);
             lastPoint = pathPoint;
@@ -80,7 +80,7 @@ public class PathBuilder {
     }
 
     public PathBuilder end(Pose2d end) {
-        if(maintainHeadng) {
+        if(maintainHeading) {
             endPoint = new PathPoint(end.getX(), end.getY(), end.getHeading(), speed, turnSpeed, lookahead);
         } else {
             double theta = MathUtils.fullAngleWrap(Math.atan2(end.getY() - lastPoint.y, end.getX() - lastPoint.x));
@@ -105,8 +105,8 @@ public class PathBuilder {
         return this;
     }
 
-    public PathBuilder maintainHeading(boolean maintainHeadng) {
-        this.maintainHeadng = maintainHeadng;
+    public PathBuilder maintainHeading(boolean maintainHeading) {
+        this.maintainHeading = maintainHeading;
         return this;
     }
 
