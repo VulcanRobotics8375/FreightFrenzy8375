@@ -39,7 +39,7 @@ public class Lift extends Subsystem {
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.9;
 //    private final double LINKAGE_STICK_COEF = 0.0007;
-    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 0.186;
+    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.08;
     private final double TURRET_TICKS_PER_DEGREE = 1456.0 / 360.0;
     private final double TURRET_VOLTS_PER_DEGREE = (3.3 * 5.0) / 360.0;
     private final double TURRET_TICKS_PER_VOLT = TURRET_TICKS_PER_DEGREE / TURRET_VOLTS_PER_DEGREE;
