@@ -157,7 +157,7 @@ public class Lift extends Subsystem {
             liftState = LiftState.SHARED;
         } else if(alliance) {
             liftState = LiftState.ALLIANCE;
-        } else if(reset) {
+        } else if(reset && !linkageOpen) {
             liftState = LiftState.HOME;
         }
         if(liftAdjust != 0 || turretAdjust != 0) {
@@ -274,7 +274,7 @@ public class Lift extends Subsystem {
             linkageTwo.setPosition(LINKAGE_MIN_POS);
         }
 
-        liftReady = Math.abs(turretPos) < 30 && Math.abs(liftPos) < 20;
+        liftReady = Math.abs(turretPos) < 30 && Math.abs(liftPos) < 10;
 
         telemetry.addData("lift state", liftState.toString());
         telemetry.addData("analog encoder", turretAngleAnalog.getVoltage());

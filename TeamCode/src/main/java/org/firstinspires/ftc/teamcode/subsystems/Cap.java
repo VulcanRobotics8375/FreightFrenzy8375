@@ -14,7 +14,7 @@ public class Cap extends Subsystem {
     private final double upPos = 0.65;
     private boolean goingUp = false;
     private double position = upPos;
-    private final double ARM_COEF = 0.02;
+    private final double ARM_COEF = 0.002;
 
     @Override
     public void init() {
@@ -28,10 +28,10 @@ public class Cap extends Subsystem {
             setPower(up);
             goingUp = true;
         } else if(down > 0 && up == 0) {
-            setPower(down);
+            setPower(-down);
             goingUp = false;
         } else if(goingUp) {
-            setPower(down);
+            setPower(-down);
         } else {
             setPower(up);
         }
