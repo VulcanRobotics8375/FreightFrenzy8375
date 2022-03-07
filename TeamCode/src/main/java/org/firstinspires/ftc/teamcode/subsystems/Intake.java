@@ -17,7 +17,7 @@ public class Intake extends Subsystem {
     public boolean lastFlip = false;
     public double flipOn = -1;
     public final double depositPosition = 0.15;
-    public final double intakePosition = 0.85;
+    public final double intakePosition = 0.9;
     public final double resetPosition = 0.99;
 
     private boolean intakeButton;
@@ -67,8 +67,8 @@ public class Intake extends Subsystem {
                 rotateServo.setPosition(depositPosition);
                 extendServo1.setPosition(extendDepositPosition);
                 extendServo2.setPosition(extendDepositPosition);
-                intakeMotor.setPower(INTAKE_POWER * 0.5);
-                if(liftReady && timer.seconds() > 1) {
+                intakeMotor.setPower(INTAKE_POWER);
+                if(liftReady && timer.seconds() > 0.5) {
                     intakeState = IntakeState.DEPOSIT;
                 }
                 break;
@@ -76,7 +76,7 @@ public class Intake extends Subsystem {
                 rotateServo.setPosition(depositPosition);
                 extendServo1.setPosition(extendDepositPosition);
                 extendServo2.setPosition(extendDepositPosition);
-                intakeMotor.setPower(INTAKE_POWER * -0.8);
+                intakeMotor.setPower(INTAKE_POWER * -1.0);
                 break;
             case RESET:
                 rotateServo.setPosition(resetPosition);
@@ -90,11 +90,15 @@ public class Intake extends Subsystem {
 
     }
 
-    enum IntakeState {
+    public enum IntakeState {
         INTAKING,
         INDEXED,
         DEPOSIT,
         RESET
+    }
+
+    public IntakeState getIntakeState() {
+        return intakeState;
     }
 
     public void test(boolean intake, boolean outake, boolean extend, boolean flip) {

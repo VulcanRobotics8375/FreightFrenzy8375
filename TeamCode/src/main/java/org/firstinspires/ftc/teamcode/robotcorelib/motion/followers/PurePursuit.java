@@ -35,7 +35,7 @@ public class PurePursuit extends Follower {
     //TODO make these something accessible by the user
     public static final double ALLOWED_POSE_ERROR = 0.9;
     public static final double ALLOWED_HEADING_ERROR = 5.0;
-    public static final double POSE_ERROR_GAIN = 0.2;
+    public static final double POSE_ERROR_GAIN = 0.3;
     public static final double HEADING_ERROR_GAIN = 3.0;
 
     public PurePursuit() {}
@@ -128,7 +128,7 @@ public class PurePursuit extends Follower {
         //transfer function-- https://www.desmos.com/calculator/rlv4hdqutl
         double targetVel = MAX_VELOCITY * followPoint.speed;
         double accelDistance = (targetVel*targetVel) / (2.0 * MAX_ACCEL);
-        double minSpeed = 0.15;
+        double minSpeed = 0.2;
         double m = (1 - minSpeed) / accelDistance;
 
         double originalSpeed = followPoint.speed;

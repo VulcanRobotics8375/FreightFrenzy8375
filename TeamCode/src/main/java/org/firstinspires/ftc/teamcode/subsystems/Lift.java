@@ -29,7 +29,7 @@ public class Lift extends Subsystem {
     private LiftMin LIFT_MIN = new LiftMin();
     private final int LIFT_MAX_POS = 570;
     private final int LIFT_CLEARED_POS = 380;
-    private final int LIFT_ALLIANCE_POS = 550;
+    private final int LIFT_ALLIANCE_POS = 525;
     private final double LIFT_CONVERGENCE_SPEED = 0.1;
     private final double LIFT_LIMIT_RANGE = 100.0;
 
@@ -41,7 +41,7 @@ public class Lift extends Subsystem {
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.9;
 //    private final double LINKAGE_STICK_COEF = 0.0007;
-    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.08;
+    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.57;
 
     private final double TURRET_TICKS_PER_DEGREE = 1456.0 / 360.0;
     private final double TURRET_VOLTS_PER_DEGREE = (3.3 * 5.0) / 360.0;
@@ -113,7 +113,7 @@ public class Lift extends Subsystem {
             flippingSides = false;
         }
 
-        int turret90Degrees = (this.turret90Degrees - (int)turretOffset) * (flipped ? -1 : 1);
+        int turret90Degrees = (this.turret90Degrees + (int)turretOffset) * (flipped ? -1 : 1);
 
         //Linkage Code
         if(linkageButton && !this.linkageButton){
@@ -263,14 +263,14 @@ public class Lift extends Subsystem {
                 }
                 lift.setPower(liftPower);
 
-                double turretPower = MathUtils.joystickCurve(turretAdjust, JoystickCurve.MODIFIED_CUBIC);
-                turret.setPower(turretAdjust);
+                double turretPower = MathUtils.joystickCurve(turretAdjust, JoystickCurve.MODIFIED_CUBIC) * (linkageOpen ? 0.2 : 1.0);
+                turret.setPower(turretPower);
                 break;
         }
 
         if(linkageOpen){
             double linkagePosOffset = linkageModel.inverse(linkageModel.value(linkagePos) + linkageAdjustAmountInches);
-            linkagePos = Range.clip(linkagePosOffset, 0.1, LINKAGE_MAX_POS);
+            linkagePos = Range.clip(linkagePos, 0.1, LINKAGE_MAX_POS);
             linkageOne.setPosition(linkagePos);
             linkageTwo.setPosition(linkagePos);
         } else {
