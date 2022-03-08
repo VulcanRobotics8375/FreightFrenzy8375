@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
@@ -35,7 +37,7 @@ public class Lift extends Subsystem {
 
     private boolean auto = false;
 
-    private final AbstractModel1D linkageModel = new AbstractModel1D(new LinkageModelFunction(), 0.0, 1.0);
+    private PolynomialSplineFunction inverseLinkageKinematics;
 
     private ElapsedTime linkageTimer = new ElapsedTime();
     private boolean linkageButton = false;
@@ -59,6 +61,29 @@ public class Lift extends Subsystem {
     private final int turret90Degrees = -364;
 
     public void init() {
+
+        //inverse linkage kinematics: cubic spline estimation of inverse curve
+        double[] x = new double[] {
+                0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 23.6
+        };
+        double[] y = new double[] {
+                0.1,
+                0.24829894162,
+                0.341717448755,
+                0.413980186568,
+                0.474883421125,
+                0.529068086363,
+                0.579273889518,
+                0.627418731134,
+                0.675115801525,
+                0.724065058856,
+                0.77661899685,
+                0.837325861947,
+                0.9
+        };
+        SplineInterpolator interpolator = new SplineInterpolator();
+        inverseLinkageKinematics = interpolator.interpolate(x, y);
+
         //Hardware Mapping
         release = hardwareMap.servo.get("release");
         lift = hardwareMap.get(DcMotorEx.class, "lift");
@@ -134,10 +159,10 @@ public class Lift extends Subsystem {
         }
 
         if(linkageForward && !linkageAdjust) {
-            linkageAdjustAmountInches += 0.05;
+            linkageAdjustAmountInches += 2.0;
             linkageAdjust = true;
         } else if(linkageBack && !linkageAdjust) {
-            linkageAdjustAmountInches -= 0.05;
+            linkageAdjustAmountInches -= 2.0;
             linkageAdjust = true;
         }
 
@@ -188,7 +213,6 @@ public class Lift extends Subsystem {
         boolean turretOut = Math.abs(turretPos) > Math.abs(turret90Degrees);
         switch (liftState) {
             case HOME:
-                linkageAdjustAmountInches = 0.0;
                 releaseOpen = false;
                 liftCleared = liftPos > LIFT_CLEARED_POS || turretClosed;
                 linkageOpen = false;
@@ -210,6 +234,8 @@ public class Lift extends Subsystem {
                 }
                 break;
             case ALLIANCE:
+                linkageAdjustAmountInches = 0.0;
+                linkagePos = LINKAGE_MAX_POS;
                 liftCleared = liftPos > LIFT_CLEARED_POS;
                 liftToPosition(LIFT_ALLIANCE_POS, 1.0);
                 if(liftCleared || turretOut) {
@@ -279,10 +305,10 @@ public class Lift extends Subsystem {
         }
 
         if(linkageOpen){
-//            double linkagePosOffset = linkageModel.inverse(linkageModel.value(linkagePos) + linkageAdjustAmountInches);
-            linkagePos = Range.clip(linkagePos + linkageAdjustAmountInches, 0.1, LINKAGE_MAX_POS);
-            linkageOne.setPosition(linkagePos);
-            linkageTwo.setPosition(linkagePos);
+            double linkagePosOffset = inverseLinkageKinematics.value(new LinkageModelFunction().value(linkagePos) + linkageAdjustAmountInches);
+            linkagePosOffset = Range.clip(linkagePosOffset, 0.1, LINKAGE_MAX_POS);
+            linkageOne.setPosition(linkagePosOffset);
+            linkageTwo.setPosition(linkagePosOffset);
         } else {
             linkageOne.setPosition(LINKAGE_MIN_POS);
             linkageTwo.setPosition(LINKAGE_MIN_POS);
@@ -434,7 +460,8 @@ public class Lift extends Subsystem {
     static class LinkageModelFunction implements UnivariateFunction {
         @Override
         public double value(double x) {
-            return -1.0 * (-23.1 * Math.sqrt(1.0 - 0.0168663*Math.pow(-4.235*Math.sin(0.0424451 - 3.04245*x) - 0.933, 2)) - 0.55 * Math.cos(0.0424451-3.04245*x) - 0.468516);
+            double servoPosToTheta = (((3 - (Math.PI / 12.0)) / 0.9) * (x - 0.1)) + (Math.PI / 12.0);
+            return -3.0 * (4.235 * Math.cos(servoPosToTheta) + (7.7 * Math.cos(Math.PI + Math.asin(((4.235 * Math.sin(servoPosToTheta) - 0.933) / 7.7)))) + 3.60757658307);
         }
     }
 
