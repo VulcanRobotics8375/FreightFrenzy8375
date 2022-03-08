@@ -289,6 +289,10 @@ public class Lift extends Subsystem {
 
     }
 
+    public void runTurretAndArm() {
+        runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+    }
+
     enum LiftState {
         SHARED,
         ALLIANCE,
