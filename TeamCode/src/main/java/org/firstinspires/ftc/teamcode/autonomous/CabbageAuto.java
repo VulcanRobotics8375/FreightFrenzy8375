@@ -31,7 +31,7 @@ public class CabbageAuto extends AutoPipeline {
             .start(new Pose2d(0.0, 0.0, 0.0))
             .addGuidePoint(new Pose2d(0.0, 0.0, 0.0))
             .addTask(() -> {
-                subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, true);
+                subsystems.lift.runTurretAndArm();
             })
             .end(new Pose2d(16.0, 8.0, 0))
             .build();
@@ -41,14 +41,9 @@ public class CabbageAuto extends AutoPipeline {
             .maintainHeading(true)
             .start(new Pose2d(16.0, 8.0, 0))
             .addGuidePoint(new Pose2d(16.0, 8.0, 0))
-            .addTask(() -> {
-                subsystems.intake.run(false, true, false);
-                subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, true, false, false, false);
-            })
+            .addTask(() -> { subsystems.lift.runTurretAndArm(); })
             .addGuidePoint(new Pose2d(0,0.5,0))
-            .addTask(() -> {
-                subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, true, false, false, false);
-            })
+            .addTask(() -> { subsystems.lift.runTurretAndArm(); })
             .end(new Pose2d(-20,0.51,0))
             .build();
     Path warehouseToAlliance = new PathBuilder()
@@ -58,12 +53,11 @@ public class CabbageAuto extends AutoPipeline {
             .start(new Pose2d(-20,0.51,0))
             .addGuidePoint(new Pose2d(-20,0.51,0))
             .addTask(() -> {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+                subsystems.lift.runTurretAndArm();
                 subsystems.intake.run(false, false, subsystems.lift.isReset());
             })
             .addGuidePoint(new Pose2d(0,0.5,0))
             .addTask(() -> {
-                subsystems.intake.run(false, false, false);
                 subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
             })
             .end(new Pose2d(16.0,12.0,0))
@@ -79,71 +73,73 @@ public class CabbageAuto extends AutoPipeline {
 
         waitForStart();
 
+        // Go to preload and start bringing out lift/
+        subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, true);
         subsystems.intake.run(false, true, false);
         follower.followPath(startToAlliance);
+
         int cycle = 0;
         while(!isStopRequested()) {
-
-
-            subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
-
+            // Bring lift and turret all the way out
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return Math.abs(subsystems.lift.getLiftPosition() - subsystems.lift.getLiftAlliancePos()) > 10
-                            && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) > 10;
+                    return Math.abs(subsystems.lift.getLiftPosition() - subsystems.lift.getLiftAlliancePos()) >= 10
+                            && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) >= 10;
                 }
-
                 @Override
                 public void run() {
-                    subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
+                    subsystems.lift.runTurretAndArm();
                 }
             });
 
-                subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, true, false, false, false, false);
-                timer.reset();
+            // Bring linkage out
+            subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, false, false, false, false);
+            timer.reset();
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
                     return timer.milliseconds() <= 500;
                 }
-
                 @Override
                 public void run() {
-                    subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, true, false, false, false, false);
+                    subsystems.lift.runTurretAndArm();
                 }
             });
+
+            // Hopper OPEN
             subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
-
             timer.reset();
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return timer.milliseconds() < 200;
+                    return timer.milliseconds() <= 200;
                 }
-
                 @Override
                 public void run() {
-
+                    subsystems.lift.runTurretAndArm();
                 }
             });
-            timer.reset();
 
+            // Linkage + Hopper reset
+            subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, true, false, false, false);
+            timer.reset();
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return timer.milliseconds() < 500;
+                    return timer.milliseconds() <= 500;
                 }
-
                 @Override
                 public void run() {
-                    subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, true, false, false, false, false);
+                    subsystems.lift.runTurretAndArm();
                 }
             });
 
+            // Lift + Turret reset, go from alliance to warehouse
             subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, false, false, false);
             follower.followPath(allianceToWarehouse);
 
+            // Intake, moving forward slowly until indexed
             subsystems.intake.run(true, false, false);
             double turn = 0.1 * cycle;
             runTask(new AutoTask() {
@@ -151,21 +147,20 @@ public class CabbageAuto extends AutoPipeline {
                 public boolean conditional() {
                     return subsystems.intake.getIntakeState() != Intake.IntakeState.INDEXED;
                 }
-
                 @Override
                 public void run() {
                     subsystems.drivetrain.setPowers(0.25 + turn, 0.25, 0.25 + turn, 0.25);
-                    subsystems.intake.run(false, false, false);
                 }
             });
-            subsystems.intake.run(false, false, false);
-                Pose2d robotPose = Robot.getRobotPose();
-                double robotAngle = Math.toRadians(subsystems.drivetrain.getIMU().getAngularOrientation().firstAngle);
-                Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() - 1.0, robotAngle));
 
-    //
-                follower.followPath(warehouseToAlliance);
-                cycle++;
+            // Use IMU to correct heading
+            Pose2d robotPose = Robot.getRobotPose();
+            double robotAngle = Math.toRadians(subsystems.drivetrain.getIMU().getAngularOrientation().firstAngle);
+            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY(), robotAngle));
+
+
+            follower.followPath(warehouseToAlliance);
+            cycle++;
         }
 
         telemetry.addLine("done");
