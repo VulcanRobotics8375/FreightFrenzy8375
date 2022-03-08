@@ -68,7 +68,7 @@ public class Intake extends Subsystem {
                 extendServo1.setPosition(extendDepositPosition);
                 extendServo2.setPosition(extendDepositPosition);
                 intakeMotor.setPower(INTAKE_POWER);
-                if(liftReady && timer.seconds() > 0.5) {
+                if(liftReady && timer.seconds() > 0.7) {
                     intakeState = IntakeState.DEPOSIT;
                 }
                 break;

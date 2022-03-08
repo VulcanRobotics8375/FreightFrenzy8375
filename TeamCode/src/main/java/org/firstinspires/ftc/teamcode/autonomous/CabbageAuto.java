@@ -33,15 +33,18 @@ public class CabbageAuto extends AutoPipeline {
             .addTask(() -> {
                 subsystems.lift.runTurretAndArm();
             })
-            .end(new Pose2d(16.0, 8.0, 0))
+            .end(new Pose2d(17.0, 8.0, 0))
             .build();
     Path allianceToWarehouse = new PathBuilder()
             .speed(1.0)
             .turnSpeed(0.5)
             .maintainHeading(true)
-            .start(new Pose2d(16.0, 8.0, 0))
+            .start(new Pose2d(17.0, 8.0, 0))
             .addGuidePoint(new Pose2d(16.0, 8.0, 0))
-            .addTask(() -> { subsystems.lift.runTurretAndArm(); })
+            .addTask(() -> {
+                subsystems.intake.run(false, true, false);
+                subsystems.lift.runTurretAndArm();
+            })
             .addGuidePoint(new Pose2d(0,0.5,0))
             .addTask(() -> { subsystems.lift.runTurretAndArm(); })
             .end(new Pose2d(-20,0.51,0))
@@ -59,8 +62,9 @@ public class CabbageAuto extends AutoPipeline {
             .addGuidePoint(new Pose2d(0,0.5,0))
             .addTask(() -> {
                 subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
+                subsystems.intake.run(false, false, false);
             })
-            .end(new Pose2d(16.0,12.0,0))
+            .end(new Pose2d(17.0,12.0,0))
             .build();
 
     public void runOpMode() {
@@ -93,36 +97,71 @@ public class CabbageAuto extends AutoPipeline {
                 }
             });
 
-            // Bring linkage out
-            subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, false, false, false, false);
-            timer.reset();
-            runTask(new AutoTask() {
-                @Override
-                public boolean conditional() {
-                    return timer.milliseconds() <= 500;
-                }
-                @Override
-                public void run() {
-                    subsystems.lift.runTurretAndArm();
-                }
-            });
+            if(cycle == 0) {
+                subsystems.lift.liftToPosition(220, 1.0);
+                timer.reset();
+                runTask(new AutoTask() {
+                    @Override
+                    public boolean conditional() {
+                        return timer.milliseconds() <= 600;
+                    }
 
-            // Hopper OPEN
-            subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
-            timer.reset();
-            runTask(new AutoTask() {
-                @Override
-                public boolean conditional() {
-                    return timer.milliseconds() <= 200;
-                }
-                @Override
-                public void run() {
-                    subsystems.lift.runTurretAndArm();
-                }
-            });
+                    @Override
+                    public void run() {
+                        subsystems.lift.setLinkagePos(0.9);
+                    }
+                });
+                timer.reset();
+                runTask(new AutoTask() {
+                    @Override
+                    public boolean conditional() {
+                        return timer.milliseconds() <= 200;
+                    }
+
+                    @Override
+                    public void run() {
+                        subsystems.lift.setReleasePosition(0.23);
+                    }
+                });
+
+            } else {
+                // Bring linkage out
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, false, false, false, false);
+                timer.reset();
+                runTask(new AutoTask() {
+                    @Override
+                    public boolean conditional() {
+                        return timer.milliseconds() <= 600;
+                    }
+
+                    @Override
+                    public void run() {
+                        subsystems.lift.runTurretAndArm();
+                    }
+                });
+
+                // Hopper OPEN
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+                timer.reset();
+                runTask(new AutoTask() {
+                    @Override
+                    public boolean conditional() {
+                        return timer.milliseconds() <= 250;
+                    }
+
+                    @Override
+                    public void run() {
+                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+                    }
+                });
+            }
 
             // Linkage + Hopper reset
-            subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, true, false, false, false);
+            if(cycle == 0) {
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+            } else {
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, true, false, false, false);
+            }
             timer.reset();
             runTask(new AutoTask() {
                 @Override
@@ -140,7 +179,6 @@ public class CabbageAuto extends AutoPipeline {
             follower.followPath(allianceToWarehouse);
 
             // Intake, moving forward slowly until indexed
-            subsystems.intake.run(true, false, false);
             double turn = 0.1 * cycle;
             runTask(new AutoTask() {
                 @Override
@@ -150,13 +188,14 @@ public class CabbageAuto extends AutoPipeline {
                 @Override
                 public void run() {
                     subsystems.drivetrain.setPowers(0.25 + turn, 0.25, 0.25 + turn, 0.25);
+                    subsystems.intake.run(true, false, false);
                 }
             });
 
             // Use IMU to correct heading
             Pose2d robotPose = Robot.getRobotPose();
             double robotAngle = Math.toRadians(subsystems.drivetrain.getIMU().getAngularOrientation().firstAngle);
-            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY(), robotAngle));
+            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() - 1.2, robotAngle));
 
 
             follower.followPath(warehouseToAlliance);

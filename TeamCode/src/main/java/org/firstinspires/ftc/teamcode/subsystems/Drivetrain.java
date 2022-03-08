@@ -86,6 +86,7 @@ public class Drivetrain extends Subsystem implements DrivetrainImpl {
         double multiplier = 2.0 / Math.sqrt(2.0);
         forward = joystickCurve(forward, JoystickCurve.MODIFIED_CUBIC);
         strafe = joystickCurve(strafe, JoystickCurve.MODIFIED_CUBIC);
+        turn = joystickCurve(turn, JoystickCurve.MODIFIED_CUBIC);
 
         double theta = Math.atan2(forward, strafe) - Math.PI / 4.0;
 //        turn = joystickCurve(turn, JoystickCurve.MODIFIED_CUBIC);

@@ -15,13 +15,10 @@ public class Carousel extends Subsystem {
         carouselTwo = hardwareMap.crservo.get("carousel_two");
     }
 
-    public void run(boolean spin, boolean oppositeSpin) {
+    public void run(boolean spin) {
         if(spin) {
             carousel.setPower(1.0);
             carouselTwo.setPower(1.0);
-        } else if(oppositeSpin){
-            carousel.setPower(-1.0);
-            carouselTwo.setPower(-1.0);
         } else{
             carousel.setPower(0);
             carouselTwo.setPower(0);
