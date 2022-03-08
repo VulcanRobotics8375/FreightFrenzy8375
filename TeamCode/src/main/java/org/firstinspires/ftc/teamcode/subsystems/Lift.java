@@ -15,7 +15,6 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.MathUtils;
 import org.firstinspires.ftc.teamcode.robotcorelib.math.SimplePID;
-import org.firstinspires.ftc.teamcode.robotcorelib.motion.kinematics.AbstractModel1D;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.JoystickCurve;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.Subsystem;
 
@@ -305,7 +304,7 @@ public class Lift extends Subsystem {
         }
 
         if(linkageOpen){
-            double linkagePosOffset = inverseLinkageKinematics.value(new LinkageModelFunction().value(linkagePos) + linkageAdjustAmountInches);
+            double linkagePosOffset = inverseLinkageKinematics.value(new LinkageForwardKinematics().value(linkagePos) + linkageAdjustAmountInches);
             linkagePosOffset = Range.clip(linkagePosOffset, 0.1, LINKAGE_MAX_POS);
             linkageOne.setPosition(linkagePosOffset);
             linkageTwo.setPosition(linkagePosOffset);
@@ -457,7 +456,7 @@ public class Lift extends Subsystem {
         }
     }
 
-    static class LinkageModelFunction implements UnivariateFunction {
+    static class LinkageForwardKinematics implements UnivariateFunction {
         @Override
         public double value(double x) {
             double servoPosToTheta = (((3 - (Math.PI / 12.0)) / 0.9) * (x - 0.1)) + (Math.PI / 12.0);
