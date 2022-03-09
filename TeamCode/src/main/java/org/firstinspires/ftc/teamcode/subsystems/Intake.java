@@ -59,8 +59,12 @@ public class Intake extends Subsystem {
                 extendServo2.setPosition(extendForwardPosition);
                 intakeMotor.setPower(INTAKE_POWER);
                 if(intakeMotor.getCurrent(CurrentUnit.AMPS) > 6.0) {
+                    if(timer.milliseconds() > 100) {
+                        timer.reset();
+                        intakeState = IntakeState.INDEXED;
+                    }
+                } else {
                     timer.reset();
-                    intakeState = IntakeState.INDEXED;
                 }
                 break;
             case INDEXED:

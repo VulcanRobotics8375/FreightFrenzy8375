@@ -39,7 +39,7 @@ public class CabbageAuto extends AutoPipeline {
             .speed(1.0)
             .turnSpeed(0.5)
             .maintainHeading(true)
-            .start(new Pose2d(17.0, 8.0, 0))
+            .start(new Pose2d(16.0, 8.0, 0))
             .addGuidePoint(new Pose2d(16.0, 8.0, 0))
             .addTask(() -> {
                 subsystems.intake.run(false, true, false);
@@ -64,10 +64,13 @@ public class CabbageAuto extends AutoPipeline {
                 subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
                 subsystems.intake.run(false, false, false);
             })
-            .end(new Pose2d(17.0,12.0,0))
+            .end(new Pose2d(16.0,12.0,0))
             .build();
 
     public void runOpMode() {
+        double preloadHeight = 80;
+//        double preloadHeight = 220;
+//        double preloadHeight = subsystems.lift.getLiftAlliancePos();
         allianceToWarehouse.setPrecise(false);
         warehouseToAlliance.setPrecise(false);
 
@@ -79,17 +82,18 @@ public class CabbageAuto extends AutoPipeline {
         waitForStart();
 
         // Go to preload and start bringing out lift/
-        subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, true);
+        subsystems.lift.runTurretAndArm(true, false, false, 0.0, 0.0, false, false, false, false, true);
         subsystems.intake.run(false, true, false);
         follower.followPath(startToAlliance);
 
         int cycle = 0;
         while(!isStopRequested()) {
             // Bring lift and turret all the way out
+            double targetLiftPos = cycle == 0 ? subsystems.lift.getLiftSharedPos() : subsystems.lift.getLiftAlliancePos();
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return Math.abs(subsystems.lift.getLiftPosition() - subsystems.lift.getLiftAlliancePos()) >= 10
+                    return Math.abs(subsystems.lift.getLiftPosition() - targetLiftPos) >= 10
                             && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) >= 10;
                 }
                 @Override
@@ -99,7 +103,7 @@ public class CabbageAuto extends AutoPipeline {
             });
 
             if(cycle == 0) {
-                subsystems.lift.liftToPosition(220, 1.0);
+                subsystems.lift.liftToPosition(95, 1.0);
                 timer.reset();
                 runTask(new AutoTask() {
                     @Override
@@ -109,7 +113,7 @@ public class CabbageAuto extends AutoPipeline {
 
                     @Override
                     public void run() {
-                        subsystems.lift.setLinkagePos(0.9);
+                        subsystems.lift.setLinkagePos(0.87);
                     }
                 });
                 timer.reset();
@@ -127,12 +131,11 @@ public class CabbageAuto extends AutoPipeline {
 
             } else {
                 // Bring linkage out
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, false, false, false, false);
                 timer.reset();
                 runTask(new AutoTask() {
                     @Override
                     public boolean conditional() {
-                        return timer.milliseconds() <= 600;
+                        return timer.milliseconds() <= 300;
                     }
 
                     @Override
@@ -152,7 +155,7 @@ public class CabbageAuto extends AutoPipeline {
 
                     @Override
                     public void run() {
-                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
                     }
                 });
             }
@@ -180,7 +183,7 @@ public class CabbageAuto extends AutoPipeline {
             follower.followPath(allianceToWarehouse);
 
             // Intake, moving forward slowly until indexed
-            double turn = 0.1 * cycle;
+            double turn = 0.06 * cycle;
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
@@ -188,7 +191,7 @@ public class CabbageAuto extends AutoPipeline {
                 }
                 @Override
                 public void run() {
-                    subsystems.drivetrain.setPowers(0.25 + turn, 0.25, 0.25 + turn, 0.25);
+                    subsystems.drivetrain.setPowers(0.25 + turn, 0.25 - turn, 0.25 + turn, 0.25 - turn);
                     subsystems.intake.run(true, false, false);
                 }
             });
