@@ -68,7 +68,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
             .build();
 
     public void runOpMode() {
-        double preloadHeight = 80;
+        double preloadHeight = 75;
 //        double preloadHeight = 220;
 //        double preloadHeight = subsystems.lift.getLiftAlliancePos();
         allianceToWarehouse.setPrecise(false);
@@ -94,7 +94,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
                 @Override
                 public boolean conditional() {
                     return Math.abs(subsystems.lift.getLiftPosition() - targetLiftPos) >= 10
-                            && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) >= 10;
+                            && Math.abs(Math.abs(subsystems.lift.getTurretPosition()) - Math.abs(subsystems.lift.getTurret90Degrees())) >= 10;
                 }
                 @Override
                 public void run() {
@@ -199,7 +199,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
             // Use IMU to correct heading
             Pose2d robotPose = Robot.getRobotPose();
             double robotAngle = Math.toRadians(subsystems.drivetrain.getIMU().getAngularOrientation().firstAngle);
-            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() + 1.2, robotAngle));
+            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() - 0.0, robotAngle));
 
 
             follower.followPath(warehouseToAlliance);

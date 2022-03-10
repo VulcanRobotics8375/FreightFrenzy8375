@@ -44,7 +44,7 @@ public class Lift extends Subsystem {
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.86;
 //    private final double LINKAGE_STICK_COEF = 0.0007;
-    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.37;
+    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.47;
 
     private final double TURRET_TICKS_PER_DEGREE = 1456.0 / 360.0;
     private final double TURRET_VOLTS_PER_DEGREE = (3.3 * 5.0) / 360.0;
@@ -142,7 +142,7 @@ public class Lift extends Subsystem {
             flippingSides = false;
         }
 
-        int turret90Degrees = (this.turret90Degrees + (int)turretOffset) * (flipped ? -1 : 1);
+        int turret90Degrees = (this.turret90Degrees + ((flipped ? 1 : -1) * (int)turretOffset)) * (flipped ? -1 : 1);
         int teleopAlliancePos;
         if(auto) {
             teleopAlliancePos = turret90Degrees;
