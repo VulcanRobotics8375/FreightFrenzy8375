@@ -39,7 +39,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
             .speed(1.0)
             .turnSpeed(0.5)
             .maintainHeading(true)
-            .start(new Pose2d(16.0, -8.0, 0))
+            .start(new Pose2d(16.0, -10.0, 0))
             .addGuidePoint(new Pose2d(16.0, -8.0, 0))
             .addTask(() -> {
                 subsystems.intake.run(false, true, false);
@@ -64,7 +64,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
                 subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
                 subsystems.intake.run(false, false, false);
             })
-            .end(new Pose2d(16.0,-12.0,0))
+            .end(new Pose2d(16.0,-14.0,0))
             .build();
 
     public void runOpMode() {

@@ -111,7 +111,7 @@ public class Lift extends Subsystem {
 //        turret.setVelocityPIDFCoefficients(stockTurretCoeff.p, stockTurretCoeff.i, stockTurretCoeff.d + 0.02, stockTurretCoeff.f);
 //        lift.setVelocityPIDFCoefficients(stockLiftCoeff.p, stockLiftCoeff.i, stockLiftCoeff.d + 0.01, stockLiftCoeff.f);
         lift.setPositionPIDFCoefficients(12.0);
-        turret.setPositionPIDFCoefficients(15.0);
+        turret.setPositionPIDFCoefficients(19.0);
     }
 
     //independent state machine variables
