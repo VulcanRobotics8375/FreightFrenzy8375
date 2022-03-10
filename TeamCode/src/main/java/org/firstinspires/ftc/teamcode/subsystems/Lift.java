@@ -41,9 +41,10 @@ public class Lift extends Subsystem {
     private ElapsedTime linkageTimer = new ElapsedTime();
     private boolean linkageButton = false;
     private boolean linkageOpen = false;
+    private double linkagePower;
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.86;
-//    private final double LINKAGE_STICK_COEF = 0.0007;
+    private final double LINKAGE_POWER_COEF = 0.0007;
     private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.47;
 
     private final double TURRET_TICKS_PER_DEGREE = 1456.0 / 360.0;
@@ -124,13 +125,13 @@ public class Lift extends Subsystem {
     boolean liftReady = false;
     boolean flippingSides = false;
     boolean flipped = false;
-    boolean linkageAdjust = false;
+    boolean linkageGoingUp = false;
     double linkageAdjustAmountInches = 0.0;
     boolean relocalize = false;
     boolean automaticLinkageExtend;
     double linkagePos = LINKAGE_MAX_POS;
     //main teleop arm and turret sequence
-    public void runTurretAndArm(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust, boolean linkageButton, boolean releaseButton, boolean linkageForward, boolean linkageBack, boolean flipSides) {
+    public void runTurretAndArm(boolean shared, boolean alliance, boolean reset, double liftAdjust, double turretAdjust, boolean linkageButton, boolean releaseButton, double linkageForward, double linkageBack, boolean flipSides) {
         double liftPos = lift.getCurrentPosition();
         double turretPos = turret.getCurrentPosition() + turretOffset;
 
@@ -158,20 +159,18 @@ public class Lift extends Subsystem {
             this.linkageButton = false;
         }
 
-        if(linkageForward && !linkageAdjust) {
-            linkageAdjustAmountInches += 2.0;
-            linkageAdjust = true;
-        } else if(linkageBack && !linkageAdjust) {
-            linkageAdjustAmountInches -= 2.0;
-            linkageAdjust = true;
+        if(linkageForward > 0 && linkageBack == 0) {
+            linkagePower = linkageForward;
+            linkageGoingUp = true;
+        } else if(linkageBack > 0 && linkageForward == 0) {
+            linkagePower = -linkageBack;
+            linkageGoingUp = false;
+        } else if(linkageGoingUp) {
+            linkagePower = -linkageBack;
+        } else {
+            linkagePower = linkageForward;
         }
-
-        telemetry.addData("linkage adjust", linkageAdjustAmountInches);
-
-        if(!linkageForward && !linkageBack && linkageAdjust) {
-            linkageAdjust = false;
-        }
-
+        linkageAdjustAmountInches += new LinkageForwardKinematics().value(linkagePower * LINKAGE_POWER_COEF);
 
 
         //Hopper Code
@@ -312,7 +311,7 @@ public class Lift extends Subsystem {
         if(linkageOpen){
             double linkageTargetInches = Range.clip(new LinkageForwardKinematics().value(linkagePos) + linkageAdjustAmountInches, 0.0, 23.6);
             double linkagePosOffset = inverseLinkageKinematics.value(linkageTargetInches);
-            linkagePosOffset = Range.clip(linkagePosOffset, 0.1, LINKAGE_MAX_POS);
+            linkagePosOffset = Range.clip(linkagePosOffset, LINKAGE_MIN_POS, LINKAGE_MAX_POS);
             linkageOne.setPosition(linkagePosOffset);
             linkageTwo.setPosition(linkagePosOffset);
         } else {
@@ -339,7 +338,7 @@ public class Lift extends Subsystem {
     }
 
     public void runTurretAndArm() {
-        runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+        runTurretAndArm(false, false, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
     }
 
     enum LiftState {
