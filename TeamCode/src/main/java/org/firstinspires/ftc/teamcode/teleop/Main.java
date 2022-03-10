@@ -44,8 +44,8 @@ public class Main extends OpModePipeline {
                  gamepad2.right_stick_x, //turret manual
                  gamepad2.b, //linkage
                  gamepad2.right_bumper, //release
-                 gamepad2.right_trigger > 0, //linkage adjust out
-                 gamepad2.left_trigger >0, //linkage adjust in
+                 gamepad2.right_trigger, //linkage adjust out
+                 gamepad2.left_trigger, //linkage adjust in
                  gamepad2.dpad_left //alliance side flip
          );
 
