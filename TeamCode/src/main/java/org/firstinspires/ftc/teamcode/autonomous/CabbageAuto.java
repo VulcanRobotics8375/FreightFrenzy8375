@@ -82,6 +82,7 @@ public class CabbageAuto extends AutoPipeline {
         super.subsystems = subsystems;
         runMode = RobotRunMode.AUTONOMOUS;
         robotInit();
+        subsystems.lift.autoMode();
 
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
