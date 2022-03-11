@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.robot.FreightFrenzyConfig;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.followers.PurePursuit;
 import org.firstinspires.ftc.teamcode.robotcorelib.motion.path.Path;
@@ -14,6 +15,9 @@ import org.firstinspires.ftc.teamcode.robotcorelib.util.AutoTask;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.vision.aruco.ArucoPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous(name = "Blue - Warehouse Side", group = "blue")
@@ -33,14 +37,14 @@ public class CabbageAuto extends AutoPipeline {
             .addTask(() -> {
                 subsystems.lift.runTurretAndArm();
             })
-            .end(new Pose2d(17.0, 8.0, 0))
+            .end(new Pose2d(15.0, 8.0, 0))
             .build();
     Path allianceToWarehouse = new PathBuilder()
             .speed(1.0)
             .turnSpeed(0.5)
             .maintainHeading(true)
-            .start(new Pose2d(16.0, 8.0, 0))
-            .addGuidePoint(new Pose2d(16.0, 8.0, 0))
+            .start(new Pose2d(13.0, 8.0, 0))
+            .addGuidePoint(new Pose2d(13.0, 8.0, 0))
             .addTask(() -> {
                 subsystems.intake.run(false, true, false);
                 subsystems.lift.runTurretAndArm();
@@ -61,14 +65,15 @@ public class CabbageAuto extends AutoPipeline {
             })
             .addGuidePoint(new Pose2d(0,0.5,0))
             .addTask(() -> {
-                subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
+                subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
                 subsystems.intake.run(false, false, false);
             })
-            .end(new Pose2d(16.0,12.0,0))
+            .end(new Pose2d(13.0,13.0,0))
             .build();
 
     public void runOpMode() {
-        double preloadHeight = 80;
+        msStuckDetectStop = 3000;
+        int preloadHeight;
 //        double preloadHeight = 220;
 //        double preloadHeight = subsystems.lift.getLiftAlliancePos();
         allianceToWarehouse.setPrecise(false);
@@ -77,24 +82,57 @@ public class CabbageAuto extends AutoPipeline {
         super.subsystems = subsystems;
         runMode = RobotRunMode.AUTONOMOUS;
         robotInit();
-        subsystems.lift.autoMode();
 
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        webcam.setPipeline(new ArucoPipeline(telemetry));
+        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode)
+            {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+            }
+        });
         waitForStart();
 
+        double markerPos = 0;
+
+        if(markerPos < 250) {
+            preloadHeight = 70;
+        } else if(markerPos >= 250 && markerPos < 500) {
+            preloadHeight = 220;
+        } else {
+            preloadHeight = subsystems.lift.getLiftAlliancePos();
+        }
+
         // Go to preload and start bringing out lift/
-        subsystems.lift.runTurretAndArm(true, false, false, 0.0, 0.0, false, false, false, false, true);
+        subsystems.lift.runTurretAndArm(true, false, false, 0.0, 0.0, false, false, 0.0, 0.0, true);
         subsystems.intake.run(false, true, false);
         follower.followPath(startToAlliance);
 
+
+
         int cycle = 0;
-        while(!isStopRequested()) {
+        while(cycle <= 4) {
             // Bring lift and turret all the way out
             double targetLiftPos = cycle == 0 ? subsystems.lift.getLiftSharedPos() : subsystems.lift.getLiftAlliancePos();
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
                     return Math.abs(subsystems.lift.getLiftPosition() - targetLiftPos) >= 10
-                            && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) >= 10;
+                            && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) >= 20;
                 }
                 @Override
                 public void run() {
@@ -103,7 +141,7 @@ public class CabbageAuto extends AutoPipeline {
             });
 
             if(cycle == 0) {
-                subsystems.lift.liftToPosition(95, 1.0);
+                subsystems.lift.liftToPosition(220, 1.0);
                 timer.reset();
                 runTask(new AutoTask() {
                     @Override
@@ -120,12 +158,12 @@ public class CabbageAuto extends AutoPipeline {
                 runTask(new AutoTask() {
                     @Override
                     public boolean conditional() {
-                        return timer.milliseconds() <= 200;
+                        return timer.milliseconds() <= 350;
                     }
 
                     @Override
                     public void run() {
-                        subsystems.lift.setReleasePosition(0.23);
+                        subsystems.lift.setReleasePosition(0.27);
                     }
                 });
 
@@ -135,7 +173,7 @@ public class CabbageAuto extends AutoPipeline {
                 runTask(new AutoTask() {
                     @Override
                     public boolean conditional() {
-                        return timer.milliseconds() <= 300;
+                        return timer.milliseconds() <= 450;
                     }
 
                     @Override
@@ -145,32 +183,32 @@ public class CabbageAuto extends AutoPipeline {
                 });
 
                 // Hopper OPEN
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, 0.0, 0.0, false);
                 timer.reset();
                 runTask(new AutoTask() {
                     @Override
                     public boolean conditional() {
-                        return timer.milliseconds() <= 250;
+                        return timer.milliseconds() <= 200;
                     }
 
                     @Override
                     public void run() {
-                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
                     }
                 });
             }
 
             // Linkage + Hopper reset
             if(cycle == 0) {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, 0.0, 0.0, false);
             } else {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, true, false, false, false);
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, true, 0.0, 0.0, false);
             }
             timer.reset();
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return timer.milliseconds() <= 500;
+                    return timer.milliseconds() <= 400;
                 }
                 @Override
                 public void run() {
@@ -179,11 +217,15 @@ public class CabbageAuto extends AutoPipeline {
             });
 
             // Lift + Turret reset, go from alliance to warehouse
-            subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, false, false, false);
+            subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, 0.0, 0.0, false);
             follower.followPath(allianceToWarehouse);
 
             // Intake, moving forward slowly until indexed
-            double turn = 0.06 * cycle;
+            double turn = 0.07 * cycle;
+            if(turn >= (0.07 * 3)) {
+                turn = 0.0;
+            }
+            double finalTurn = turn;
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
@@ -191,7 +233,7 @@ public class CabbageAuto extends AutoPipeline {
                 }
                 @Override
                 public void run() {
-                    subsystems.drivetrain.setPowers(0.25 + turn, 0.25 - turn, 0.25 + turn, 0.25 - turn);
+                    subsystems.drivetrain.setPowers(0.25 + finalTurn, 0.25 - finalTurn, 0.25 + finalTurn, 0.25 - finalTurn);
                     subsystems.intake.run(true, false, false);
                 }
             });
@@ -205,9 +247,16 @@ public class CabbageAuto extends AutoPipeline {
             follower.followPath(warehouseToAlliance);
             cycle++;
         }
+        subsystems.drivetrain.setPowers(0, 0, 0, 0);
+        if(isStopRequested()) {
+            timer.reset();
+            subsystems.lift.runTurretAndArm();
+            while(timer.milliseconds() < 2800 && !subsystems.lift.isReset()) {
+                subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, 0.0, 0.0, false);
+            }
+        }
 
         telemetry.addLine("done");
-        subsystems.drivetrain.setPowers(0, 0, 0, 0);
         Robot.stop();
     }
 

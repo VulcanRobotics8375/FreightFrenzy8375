@@ -61,7 +61,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
             })
             .addGuidePoint(new Pose2d(0,-0.5,0))
             .addTask(() -> {
-                subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, false, false, false);
+                subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
                 subsystems.intake.run(false, false, false);
             })
             .end(new Pose2d(16.0,-14.0,0))
@@ -82,7 +82,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
         waitForStart();
 
         // Go to preload and start bringing out lift/
-        subsystems.lift.runTurretAndArm(true, false, false, 0.0, 0.0, false, false, false, false, false);
+        subsystems.lift.runTurretAndArm(true, false, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
 
         follower.followPath(startToAlliance);
 
@@ -145,7 +145,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
                 });
 
                 // Hopper OPEN
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, 0.0, 0.0, false);
                 timer.reset();
                 runTask(new AutoTask() {
                     @Override
@@ -155,16 +155,16 @@ public class FlippedCabbageAuto extends AutoPipeline {
 
                     @Override
                     public void run() {
-                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, false, false, false);
+                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
                     }
                 });
             }
 
             // Linkage + Hopper reset
             if(cycle == 0) {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, false, false, false);
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, 0.0, 0.0, false);
             } else {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, true, false, false, false);
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, true, 0.0, 0.0, false);
             }
             timer.reset();
             runTask(new AutoTask() {
@@ -179,7 +179,6 @@ public class FlippedCabbageAuto extends AutoPipeline {
             });
 
             // Lift + Turret reset, go from alliance to warehouse
-            subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, false, false, false);
             follower.followPath(allianceToWarehouse);
 
             // Intake, moving forward slowly until indexed

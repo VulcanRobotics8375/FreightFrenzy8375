@@ -36,15 +36,15 @@ public class Lift extends Subsystem {
 
     private boolean auto = false;
 
+    private LinkageForwardKinematics linkageForwardKinematics = new LinkageForwardKinematics();
     private PolynomialSplineFunction inverseLinkageKinematics;
-
     private ElapsedTime linkageTimer = new ElapsedTime();
     private boolean linkageButton = false;
     private boolean linkageOpen = false;
     private double linkagePower;
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.86;
-    private final double LINKAGE_POWER_COEF = 0.0007;
+    private final double LINKAGE_POWER_COEF = 0.02;
     private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.47;
 
     private final double TURRET_TICKS_PER_DEGREE = 1456.0 / 360.0;
@@ -58,7 +58,7 @@ public class Lift extends Subsystem {
     private final double releasePosClosed = 0.4;
 
     private AnalogInput turretAngleAnalog; //Temporary until analog input
-    private final int turret90Degrees = -364;
+    private final int turret90Degrees = -390;
 
     public void init() {
 
@@ -143,7 +143,7 @@ public class Lift extends Subsystem {
             flippingSides = false;
         }
 
-        int turret90Degrees = (this.turret90Degrees + ((flipped ? 1 : -1) * (int)turretOffset)) * (flipped ? -1 : 1);
+        int turret90Degrees = (this.turret90Degrees + ((int)turretOffset)) * (flipped ? -1 : 1);
         int teleopAlliancePos;
         if(auto) {
             teleopAlliancePos = turret90Degrees;
@@ -170,7 +170,7 @@ public class Lift extends Subsystem {
         } else {
             linkagePower = linkageForward;
         }
-        linkageAdjustAmountInches += new LinkageForwardKinematics().value(linkagePower * LINKAGE_POWER_COEF);
+        linkageAdjustAmountInches += linkageForwardKinematics.value(linkagePos + linkagePower * LINKAGE_POWER_COEF) - linkageForwardKinematics.value(linkagePos);
 
 
         //Hopper Code
@@ -228,7 +228,11 @@ public class Lift extends Subsystem {
             case SHARED:
                 linkagePos = 0.4;
                 liftCleared = liftPos > LIFT_CLEARED_POS;
-                liftToPosition(LIFT_CLEARED_POS + 10, 1.0);
+                if(linkageOpen && !turretClosed) {
+                    liftToPosition(100, 1.0);
+                } else {
+                    liftToPosition(LIFT_CLEARED_POS + 10, 1.0);
+                }
                 if(liftCleared || turretOut) {
                     turretToPosition(turret90Degrees);
                 }
@@ -309,14 +313,12 @@ public class Lift extends Subsystem {
         }
 
         if(linkageOpen){
-            double linkageTargetInches = Range.clip(new LinkageForwardKinematics().value(linkagePos) + linkageAdjustAmountInches, 0.0, 23.6);
+            double linkageTargetInches = Range.clip(linkageForwardKinematics.value(linkagePos) + linkageAdjustAmountInches, 0.0, 23.6);
             double linkagePosOffset = inverseLinkageKinematics.value(linkageTargetInches);
             linkagePosOffset = Range.clip(linkagePosOffset, LINKAGE_MIN_POS, LINKAGE_MAX_POS);
-            linkageOne.setPosition(linkagePosOffset);
-            linkageTwo.setPosition(linkagePosOffset);
+            setLinkagePos(linkagePosOffset);
         } else {
-            linkageOne.setPosition(LINKAGE_MIN_POS);
-            linkageTwo.setPosition(LINKAGE_MIN_POS);
+            setLinkagePos(LINKAGE_MIN_POS);
         }
 
         if(!liftReady) {
