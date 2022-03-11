@@ -62,6 +62,7 @@ public class Intake extends Subsystem {
                     if(timer.milliseconds() > 100) {
                         timer.reset();
                         intakeState = IntakeState.INDEXED;
+                        gamepad1.rumble(100);
                     }
                 } else {
                     timer.reset();
@@ -81,6 +82,7 @@ public class Intake extends Subsystem {
                 extendServo1.setPosition(extendDepositPosition);
                 extendServo2.setPosition(extendDepositPosition);
                 intakeMotor.setPower(INTAKE_POWER * -1.0);
+                gamepad2.rumble(100);
                 break;
             case RESET:
                 rotateServo.setPosition(resetPosition);
