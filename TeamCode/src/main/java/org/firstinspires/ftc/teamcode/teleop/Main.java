@@ -14,6 +14,8 @@ public class Main extends OpModePipeline {
 
     FreightFrenzyConfig subsystems = new FreightFrenzyConfig();
 
+    private boolean dpad_up = false;
+
     public void init() {
         super.subsystems = subsystems;
         runMode = RobotRunMode.TELEOP;
@@ -25,6 +27,7 @@ public class Main extends OpModePipeline {
 
     }
 
+    private TeleOpState teleOpState = TeleOpState.MAIN;
     public void loop() {
         Robot.update();
 
@@ -35,23 +38,43 @@ public class Main extends OpModePipeline {
         telemetry.addData("right wheel", subsystems.localizer.getWheelPositions().get(1));
         telemetry.addData("center wheel", subsystems.localizer.getWheelPositions().get(2));
 
-//        subsystems.cap.run(gamepad2.left_trigger, gamepad2.right_trigger);
-         subsystems.lift.runTurretAndArm(
-                 gamepad2.x, //shared
-                 gamepad2.y, //alliance
-                 gamepad2.a, //home
-                 -gamepad2.left_stick_y, //lift manual
-                 gamepad2.right_stick_x, //turret manual
-                 gamepad2.b, //linkage
-                 gamepad2.right_bumper, //release
-                 gamepad2.right_trigger, //linkage adjust out
-                 gamepad2.left_trigger, //linkage adjust in
-                 gamepad2.dpad_left //alliance side flip
-         );
+        TeleOpState prevTeleOpState = teleOpState;
+        if(gamepad2.dpad_up && !this.dpad_up) {
+            this.dpad_up = true;
+            teleOpState = (teleOpState == TeleOpState.MAIN) ? TeleOpState.NO_LIMITS : TeleOpState.MAIN;
+        } else if(!gamepad2.dpad_up && this.dpad_up) {
+            this.dpad_up = false;
+        }
 
-         subsystems.carousel.run(gamepad2.dpad_right);
+        switch (teleOpState) {
+            case MAIN:
+                if(prevTeleOpState != teleOpState) {
+                    subsystems.lift.reset();
+                }
+                subsystems.lift.runTurretAndArm(
+                        gamepad2.x, //shared
+                        gamepad2.y, //alliance
+                        gamepad2.a, //home
+                        -gamepad2.left_stick_y, //lift manual
+                        gamepad2.right_stick_x, //turret manual
+                        gamepad2.b, //linkage
+                        gamepad2.right_bumper, //release
+                        gamepad2.right_trigger, //linkage adjust out
+                        gamepad2.left_trigger, //linkage adjust in
+                        gamepad2.dpad_left //alliance side flip
+                );
+                break;
+            case NO_LIMITS:
+                subsystems.lift.runNoLimits(
+                        gamepad2.left_stick_y, //lift manual
+                        gamepad2.right_stick_x //turret manual
+                );
+                break;
+        }
 
-         subsystems.cap.run(gamepad1.left_trigger, gamepad1.right_trigger);
+        subsystems.carousel.run(gamepad2.dpad_right);
+
+        subsystems.cap.run(gamepad1.left_trigger, gamepad1.right_trigger);
         subsystems.intake.run(gamepad2.dpad_down, gamepad2.x || gamepad2.y || gamepad2.left_bumper, subsystems.lift.isReset());
 
         if(gamepad1.dpad_up) {
@@ -64,6 +87,11 @@ public class Main extends OpModePipeline {
 
         telemetry.update();
 
+    }
+
+    public enum TeleOpState {
+        MAIN,
+        NO_LIMITS
     }
 
 }

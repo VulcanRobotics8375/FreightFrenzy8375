@@ -362,6 +362,19 @@ public class Lift extends Subsystem {
         runTurretAndArm(false, false, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
     }
 
+    public void runNoLimits(double liftPower, double turretPower) {
+        lift.setPower(liftPower);
+        turret.setPower(turretPower);
+    }
+
+    public void reset() {
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        turretOffset = (TURRET_TICKS_PER_VOLT * (turretAngleAnalog.getVoltage() - ANALOG_ENCODER_VOLTAGE_OFFSET));
+    }
+
     enum LiftState {
         SHARED,
         ALLIANCE,
