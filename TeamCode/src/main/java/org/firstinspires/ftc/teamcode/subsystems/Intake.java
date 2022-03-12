@@ -72,7 +72,7 @@ public class Intake extends Subsystem {
                 rotateServo.setPosition(depositPosition);
                 extendServo1.setPosition(extendDepositPosition);
                 extendServo2.setPosition(extendDepositPosition);
-                intakeMotor.setPower(INTAKE_POWER);
+                intakeMotor.setPower(INTAKE_POWER * 0.8);
                 if(liftReady && timer.seconds() > 0.7) {
                     gamepad2.rumble(500);
                     intakeState = IntakeState.DEPOSIT;

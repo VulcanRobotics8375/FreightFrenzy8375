@@ -15,7 +15,7 @@ public class ArucoPipeline extends OpenCvPipeline {
 
     private Telemetry telemetry;
     public boolean debug = true;
-    public double boundingBoxBoundaryOne = 0, boundingBoxBoundaryTwo = 0;
+    public double boundingBoxBoundaryOne = 78, boundingBoxBoundaryTwo = 175;
 
     public volatile Point markerPos = new Point(0, 0);
     public volatile double markerX = 0;

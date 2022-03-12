@@ -25,7 +25,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
     PurePursuit follower = new PurePursuit(this);
     FreightFrenzyConfig subsystems = new FreightFrenzyConfig();
     OpenCvWebcam webcam;
-    ArucoPipeline pipeline = new ArucoPipeline(telemetry);
+    ArucoPipeline pipeline;
     ElapsedTime timer = new ElapsedTime();
 
     Path startToAlliance = new PathBuilder()
@@ -72,6 +72,9 @@ public class FlippedCabbageAuto extends AutoPipeline {
             .build();
 
     public void runOpMode() {
+        pipeline = new ArucoPipeline(telemetry);
+        pipeline.boundingBoxBoundaryOne = 78;
+        pipeline.boundingBoxBoundaryTwo = 175;
         msStuckDetectStop = 2000;
         int preloadHeight;
 //        double preloadHeight = 220;
@@ -84,13 +87,10 @@ public class FlippedCabbageAuto extends AutoPipeline {
         robotInit();
         subsystems.lift.autoMode();
 
-        pipeline.boundingBoxBoundaryOne = 78;
-        pipeline.boundingBoxBoundaryTwo = 175;
-
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        webcam.setPipeline(new ArucoPipeline(telemetry));
+        webcam.setPipeline(pipeline);
         webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
@@ -111,6 +111,9 @@ public class FlippedCabbageAuto extends AutoPipeline {
         waitForStart();
 
         double markerPos = pipeline.markerPos.x;
+        telemetry.addData("marker pos", markerPos);
+        telemetry.update();
+        sleep(500);
 
         if(markerPos < pipeline.boundingBoxBoundaryOne) {
             preloadHeight = 70;
@@ -174,7 +177,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
                 runTask(new AutoTask() {
                     @Override
                     public boolean conditional() {
-                        return timer.milliseconds() <= 550;
+                        return timer.milliseconds() <= 450;
                     }
 
                     @Override
@@ -189,19 +192,19 @@ public class FlippedCabbageAuto extends AutoPipeline {
                 runTask(new AutoTask() {
                     @Override
                     public boolean conditional() {
-                        return timer.milliseconds() <= 200;
+                        return timer.milliseconds() <= 250;
                     }
 
                     @Override
                     public void run() {
-                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
+                        subsystems.lift.runTurretAndArm();
                     }
                 });
             }
 
             // Linkage + Hopper reset
             if(cycle == 0) {
-                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, 0.0, 0.0, false);
+                subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
             } else {
                 subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, true, true, 0.0, 0.0, false);
             }
@@ -242,13 +245,20 @@ public class FlippedCabbageAuto extends AutoPipeline {
             // Use IMU to correct heading
             Pose2d robotPose = Robot.getRobotPose();
             double robotAngle = Math.toRadians(subsystems.drivetrain.getIMU().getAngularOrientation().firstAngle);
-            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() - 0.0, robotAngle));
+            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() + 0.5, robotAngle));
 
 
             follower.followPath(warehouseToAlliance);
             cycle++;
         }
         subsystems.drivetrain.setPowers(0, 0, 0, 0);
+
+        if(Math.abs(subsystems.lift.getTurretPosition()) < 35) {
+            subsystems.lift.liftToPosition(0, 1.0);
+            while(subsystems.lift.getLiftPosition() > 10) {
+
+            }
+        }
 
         telemetry.addLine("done");
         Robot.stop();
