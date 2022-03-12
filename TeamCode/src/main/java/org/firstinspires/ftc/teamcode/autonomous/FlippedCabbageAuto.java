@@ -258,15 +258,9 @@ public class FlippedCabbageAuto extends AutoPipeline {
         }
         follower.following = false;
         subsystems.drivetrain.setPowers(0, 0, 0, 0);
-        timer.reset();
-        if(!subsystems.lift.isReset()) {
-            subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, 0.0, 0.0, false);
-            while(!subsystems.lift.isReset() && timer.milliseconds() < msStuckDetectStop - 200) {
-                subsystems.lift.runTurretAndArm();
-            }
-        }
 
         telemetry.addLine("done");
+        telemetry.update();
         Robot.stop();
     }
 

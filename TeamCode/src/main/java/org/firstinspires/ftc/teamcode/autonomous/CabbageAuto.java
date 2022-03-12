@@ -68,12 +68,13 @@ public class CabbageAuto extends AutoPipeline {
                 subsystems.lift.runTurretAndArm(false, true, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
                 subsystems.intake.run(false, false, false);
             })
-            .end(new Pose2d(13.0,13.0,0))
+            .end(new Pose2d(13.5,13.0,0))
             .build();
 
     public void runOpMode() {
         msStuckDetectStop = 2000;
         int preloadHeight;
+        double preloadLinkagePos;
 //        double preloadHeight = 220;
 //        double preloadHeight = subsystems.lift.getLiftAlliancePos();
         allianceToWarehouse.setPrecise(false);
@@ -114,10 +115,13 @@ public class CabbageAuto extends AutoPipeline {
 
         if(markerPos < pipeline.boundingBoxBoundaryOne) {
             preloadHeight = 70;
+            preloadLinkagePos = 0.78;
         } else if(markerPos >= pipeline.boundingBoxBoundaryOne && markerPos < pipeline.boundingBoxBoundaryTwo) {
             preloadHeight = 220;
+            preloadLinkagePos = 0.83;
         } else {
             preloadHeight = subsystems.lift.getLiftAlliancePos();
+            preloadLinkagePos = 0.9;
         }
 
         // Go to preload and start bringing out lift/
@@ -126,14 +130,14 @@ public class CabbageAuto extends AutoPipeline {
         follower.followPath(startToAlliance);
 
         int cycle = 0;
-        while(cycle <= 4) {
+        while(cycle <= 4 && !isStopRequested()) {
             // Bring lift and turret all the way out
             double targetLiftPos = cycle == 0 ? subsystems.lift.getLiftSharedPos() : subsystems.lift.getLiftAlliancePos();
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return Math.abs(subsystems.lift.getLiftPosition() - targetLiftPos) >= 10
-                            && Math.abs(subsystems.lift.getTurretPosition()) - Math.abs(subsystems.lift.getTurret90Degrees()) >= 20;
+                    return Math.abs(subsystems.lift.getLiftPosition() - targetLiftPos) >= 20
+                            && Math.abs(subsystems.lift.getTurretPosition()) - Math.abs(subsystems.lift.getTurret90Degrees()) >= 25;
                 }
                 @Override
                 public void run() {
@@ -152,7 +156,7 @@ public class CabbageAuto extends AutoPipeline {
 
                     @Override
                     public void run() {
-                        subsystems.lift.setLinkagePos(0.87);
+                        subsystems.lift.setLinkagePos(preloadLinkagePos);
                     }
                 });
                 timer.reset();
@@ -242,7 +246,7 @@ public class CabbageAuto extends AutoPipeline {
             // Use IMU to correct heading
             Pose2d robotPose = Robot.getRobotPose();
             double robotAngle = Math.toRadians(subsystems.drivetrain.getIMU().getAngularOrientation().firstAngle);
-            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() - 0.85, robotAngle));
+            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() - 1.0, robotAngle));
 
 
             follower.followPath(warehouseToAlliance);
