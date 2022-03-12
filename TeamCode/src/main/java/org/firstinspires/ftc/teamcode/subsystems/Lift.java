@@ -45,7 +45,7 @@ public class Lift extends Subsystem {
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.86;
     private final double LINKAGE_POWER_COEF = 0.02;
-    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.47;
+    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.37;
 
     private final double TURRET_TICKS_PER_DEGREE = 1456.0 / 360.0;
     private final double TURRET_VOLTS_PER_DEGREE = (3.3 * 5.0) / 360.0;
@@ -126,7 +126,7 @@ public class Lift extends Subsystem {
     boolean flippingSides = false;
     boolean flipped = false;
     boolean linkageGoingUp = false;
-    double linkageAdjustAmountInches = 0.0;
+    double linkageAdjustAmount = 0.0;
     boolean relocalize = false;
     boolean automaticLinkageExtend;
     double linkagePos = LINKAGE_MAX_POS;
@@ -143,7 +143,7 @@ public class Lift extends Subsystem {
             flippingSides = false;
         }
 
-        int turret90Degrees = (this.turret90Degrees + ((int)turretOffset)) * (flipped ? -1 : 1);
+        int turret90Degrees = (this.turret90Degrees + ((flipped ? 1 : -1)*(int)turretOffset)) * (flipped ? -1 : 1);
         int teleopAlliancePos;
         if(auto) {
             teleopAlliancePos = turret90Degrees;
@@ -170,7 +170,13 @@ public class Lift extends Subsystem {
         } else {
             linkagePower = linkageForward;
         }
-        linkageAdjustAmountInches += linkageForwardKinematics.value(linkagePos + linkagePower * LINKAGE_POWER_COEF) - linkageForwardKinematics.value(linkagePos);
+
+        linkageAdjustAmount += linkagePower * LINKAGE_POWER_COEF;
+        if(linkagePower + linkageAdjustAmount > LINKAGE_MAX_POS) {
+            linkageAdjustAmount = LINKAGE_MAX_POS - linkagePower;
+        } else if(linkagePower + linkageAdjustAmount < LINKAGE_MIN_POS) {
+            linkageAdjustAmount = LINKAGE_MIN_POS - linkagePower;
+        }
 
 
         //Hopper Code
@@ -238,7 +244,7 @@ public class Lift extends Subsystem {
                 }
                 break;
             case ALLIANCE:
-                linkageAdjustAmountInches = 0.0;
+                linkageAdjustAmount = 0.0;
                 linkagePos = LINKAGE_MAX_POS;
                 liftCleared = liftPos > LIFT_CLEARED_POS;
                 liftToPosition(LIFT_ALLIANCE_POS, 1.0);
@@ -313,10 +319,8 @@ public class Lift extends Subsystem {
         }
 
         if(linkageOpen){
-            double linkageTargetInches = Range.clip(linkageForwardKinematics.value(linkagePos) + linkageAdjustAmountInches, 0.0, 23.6);
-            double linkagePosOffset = inverseLinkageKinematics.value(linkageTargetInches);
-            linkagePosOffset = Range.clip(linkagePosOffset, LINKAGE_MIN_POS, LINKAGE_MAX_POS);
-            setLinkagePos(linkagePosOffset);
+            double linkageTarget = linkagePos + linkageAdjustAmount;
+            setLinkagePos(linkagePos);
         } else {
             setLinkagePos(LINKAGE_MIN_POS);
         }

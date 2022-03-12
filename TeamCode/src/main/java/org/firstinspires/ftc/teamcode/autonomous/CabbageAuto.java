@@ -72,7 +72,7 @@ public class CabbageAuto extends AutoPipeline {
             .build();
 
     public void runOpMode() {
-        msStuckDetectStop = 3000;
+        msStuckDetectStop = 2000;
         int preloadHeight;
 //        double preloadHeight = 220;
 //        double preloadHeight = subsystems.lift.getLiftAlliancePos();
@@ -252,7 +252,9 @@ public class CabbageAuto extends AutoPipeline {
         if(isStopRequested()) {
             timer.reset();
             subsystems.lift.runTurretAndArm();
+            subsystems.drivetrain.setPowers(0, 0, 0, 0);
             while(timer.milliseconds() < 2800 && !subsystems.lift.isReset()) {
+                subsystems.drivetrain.setPowers(0, 0, 0, 0);
                 subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, 0.0, 0.0, false);
             }
         }
