@@ -35,6 +35,7 @@ public class Lift extends Subsystem {
     private final double LIFT_LIMIT_RANGE = 100.0;
 
     private boolean auto = false;
+    private boolean flipped = false;
 
     private LinkageForwardKinematics linkageForwardKinematics = new LinkageForwardKinematics();
     private PolynomialSplineFunction inverseLinkageKinematics;
@@ -126,7 +127,6 @@ public class Lift extends Subsystem {
     boolean turretRunning = false;
     boolean liftReady = false;
     boolean flippingSides = false;
-    boolean flipped = false;
     LiftState linkageAdjustState = LiftState.SHARED;
     boolean linkageGoingUp = false;
     double linkageAdjustAmountInches = 0.0;
@@ -384,6 +384,8 @@ public class Lift extends Subsystem {
     }
 
     public int getTurret90Degrees() { return this.turret90Degrees; }
+
+    public double getTurretOffset() { return turretOffset; }
 
     public void turretToPosition(int pos){
         turret.setTargetPosition(pos);
