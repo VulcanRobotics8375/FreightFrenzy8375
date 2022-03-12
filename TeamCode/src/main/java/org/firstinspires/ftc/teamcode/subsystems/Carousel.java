@@ -18,7 +18,7 @@ public class Carousel extends Subsystem {
     public void run(boolean spin) {
         if(spin) {
             carousel.setPower(1.0);
-            carouselTwo.setPower(1.0);
+            carouselTwo.setPower(-1.0);
         } else{
             carousel.setPower(0);
             carouselTwo.setPower(0);
