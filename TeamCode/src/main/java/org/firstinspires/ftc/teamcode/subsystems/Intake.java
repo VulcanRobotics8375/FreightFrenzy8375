@@ -61,7 +61,7 @@ public class Intake extends Subsystem {
                 if(intakeMotor.getCurrent(CurrentUnit.AMPS) > 6.0) {
                     if(timer.milliseconds() > 100) {
                         timer.reset();
-                        gamepad1.rumble(100);
+                        gamepad1.rumble(500);
                         intakeState = IntakeState.INDEXED;
                     }
                 } else {
@@ -74,7 +74,7 @@ public class Intake extends Subsystem {
                 extendServo2.setPosition(extendDepositPosition);
                 intakeMotor.setPower(INTAKE_POWER);
                 if(liftReady && timer.seconds() > 0.7) {
-                    gamepad2.rumble(100);
+                    gamepad2.rumble(500);
                     intakeState = IntakeState.DEPOSIT;
                 }
                 break;
