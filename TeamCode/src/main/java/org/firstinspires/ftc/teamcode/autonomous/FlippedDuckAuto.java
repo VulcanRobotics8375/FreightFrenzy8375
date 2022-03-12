@@ -13,15 +13,14 @@ import org.firstinspires.ftc.teamcode.robotcorelib.opmode.AutoPipeline;
 import org.firstinspires.ftc.teamcode.robotcorelib.robot.Robot;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.AutoTask;
 import org.firstinspires.ftc.teamcode.robotcorelib.util.RobotRunMode;
-import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.vision.aruco.ArucoPipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(name = "Blue - Duck Side", group = "blue")
-public class DuckAuto extends AutoPipeline {
+@Autonomous(name = "Red - Duck Side", group = "red")
+public class FlippedDuckAuto extends AutoPipeline {
     PurePursuit follower = new PurePursuit(this);
     FreightFrenzyConfig subsystems = new FreightFrenzyConfig();
     OpenCvWebcam webcam;
@@ -35,28 +34,28 @@ public class DuckAuto extends AutoPipeline {
             .maintainHeading(true)
             .start(new Pose2d(0.0, 0.0, 0.0))
             .addGuidePoint(new Pose2d(0.0, 0.0, 0.0))
-            .end(new Pose2d(-8.0, -16.0, 0))
+            .end(new Pose2d(-6.0, 15.0, 0))
             .build();
 
     Path allianceToDuck = new PathBuilder()
             .speed(0.6)
             .turnSpeed(0.5)
             .maintainHeading(true)
-            .start(new Pose2d(-8.0, -16.0, 0))
-            .addGuidePoint(new Pose2d(-18.0, -8.0, 0))
+            .start(new Pose2d(-6.0, 15.0, 0))
+            .addGuidePoint(new Pose2d(-18.0, 8.0, 0))
             .addTask(() -> {
                 subsystems.lift.runTurretAndArm();
             })
-            .end(new Pose2d(-22, -6, 0))
+            .end(new Pose2d(-22, 6, 0))
             .build();
 
     Path duckToPark = new PathBuilder()
             .speed(0.5)
             .turnSpeed(0.5)
             .maintainHeading(true)
-            .start(new Pose2d(-22.0, -6.0, 0))
-            .addGuidePoint(new Pose2d(-22.01, -6.01, 0))
-            .end(new Pose2d(-28.0, -29.0, 0))
+            .start(new Pose2d(-22.0, 6.0, 0))
+            .addGuidePoint(new Pose2d(-22.01, 6.01, 0))
+            .end(new Pose2d(-28.0, 29.0, 0))
             .build();
 
     public void runOpMode() {
@@ -71,7 +70,7 @@ public class DuckAuto extends AutoPipeline {
         runMode = RobotRunMode.AUTONOMOUS;
         robotInit();
         subsystems.lift.autoMode();
-        int turretAlliancePos = (subsystems.lift.getTurret90Degrees() + (int) subsystems.lift.getTurretOffset() - 200);
+        int turretAlliancePos = -1 * (subsystems.lift.getTurret90Degrees() + (int) subsystems.lift.getTurretOffset() - 200);
 
         pipeline.boundingBoxBoundaryOne = 78;
         pipeline.boundingBoxBoundaryTwo = 175;

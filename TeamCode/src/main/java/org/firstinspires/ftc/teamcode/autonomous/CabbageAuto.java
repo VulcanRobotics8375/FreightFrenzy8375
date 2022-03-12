@@ -110,10 +110,7 @@ public class CabbageAuto extends AutoPipeline {
         });
         waitForStart();
 
-        double markerPos = 0;
-        if(pipeline.markerPos != null) {
-            markerPos = pipeline.markerPos.x;
-        }
+        double markerPos = pipeline.markerPos.x;
 
         if(markerPos < pipeline.boundingBoxBoundaryOne) {
             preloadHeight = 70;
@@ -127,8 +124,6 @@ public class CabbageAuto extends AutoPipeline {
         subsystems.lift.runTurretAndArm(true, false, false, 0.0, 0.0, false, false, 0.0, 0.0, true);
         subsystems.intake.run(false, true, false);
         follower.followPath(startToAlliance);
-
-
 
         int cycle = 0;
         while(cycle <= 4) {
@@ -247,7 +242,7 @@ public class CabbageAuto extends AutoPipeline {
             // Use IMU to correct heading
             Pose2d robotPose = Robot.getRobotPose();
             double robotAngle = Math.toRadians(subsystems.drivetrain.getIMU().getAngularOrientation().firstAngle);
-            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() - 1.2, robotAngle));
+            Robot.setRobotPose(new Pose2d(robotPose.getX(), robotPose.getY() - 0.85, robotAngle));
 
 
             follower.followPath(warehouseToAlliance);

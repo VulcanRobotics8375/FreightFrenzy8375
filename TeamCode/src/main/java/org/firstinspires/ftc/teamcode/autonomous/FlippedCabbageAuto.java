@@ -27,6 +27,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
     OpenCvWebcam webcam;
     ArucoPipeline pipeline;
     ElapsedTime timer = new ElapsedTime();
+    ElapsedTime fullTimer = new ElapsedTime();
 
     Path startToAlliance = new PathBuilder()
             .speed(0.8)
@@ -110,17 +111,20 @@ public class FlippedCabbageAuto extends AutoPipeline {
         });
         waitForStart();
 
+        fullTimer.reset();
+
         double markerPos = pipeline.markerPos.x;
-        telemetry.addData("marker pos", markerPos);
-        telemetry.update();
-        sleep(500);
+        double preloadLinkagePos;
 
         if(markerPos < pipeline.boundingBoxBoundaryOne) {
-            preloadHeight = 70;
+            preloadHeight = 30;
+            preloadLinkagePos = 0.78;
         } else if(markerPos >= pipeline.boundingBoxBoundaryOne && markerPos < pipeline.boundingBoxBoundaryTwo) {
             preloadHeight = 220;
+            preloadLinkagePos = 0.81;
         } else {
             preloadHeight = subsystems.lift.getLiftAlliancePos();
+            preloadLinkagePos = 0.9;
         }
 
         // Go to preload and start bringing out lift/
@@ -129,7 +133,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
         follower.followPath(startToAlliance);
 
         int cycle = 0;
-        while(cycle <= 4) {
+        while(cycle <= 4 && !isStopRequested()) {
             // Bring lift and turret all the way out
             double targetLiftPos = cycle == 0 ? subsystems.lift.getLiftSharedPos() : subsystems.lift.getLiftAlliancePos();
             runTask(new AutoTask() {
@@ -146,6 +150,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
 
             if(cycle == 0) {
                 subsystems.lift.liftToPosition(preloadHeight, 1.0);
+
                 timer.reset();
                 runTask(new AutoTask() {
                     @Override
@@ -155,7 +160,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
 
                     @Override
                     public void run() {
-                        subsystems.lift.setLinkagePos(0.87);
+                        subsystems.lift.setLinkagePos(preloadLinkagePos);
                     }
                 });
                 timer.reset();
@@ -212,7 +217,7 @@ public class FlippedCabbageAuto extends AutoPipeline {
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return timer.milliseconds() <= 450;
+                    return timer.milliseconds() <= 550;
                 }
                 @Override
                 public void run() {
@@ -251,12 +256,13 @@ public class FlippedCabbageAuto extends AutoPipeline {
             follower.followPath(warehouseToAlliance);
             cycle++;
         }
+        follower.following = false;
         subsystems.drivetrain.setPowers(0, 0, 0, 0);
-
-        if(Math.abs(subsystems.lift.getTurretPosition()) < 35) {
-            subsystems.lift.liftToPosition(0, 1.0);
-            while(subsystems.lift.getLiftPosition() > 10) {
-
+        timer.reset();
+        if(!subsystems.lift.isReset()) {
+            subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, 0.0, 0.0, false);
+            while(!subsystems.lift.isReset() && timer.milliseconds() < msStuckDetectStop - 200) {
+                subsystems.lift.runTurretAndArm();
             }
         }
 
