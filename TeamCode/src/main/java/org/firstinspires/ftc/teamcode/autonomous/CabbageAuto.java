@@ -25,7 +25,7 @@ public class CabbageAuto extends AutoPipeline {
     PurePursuit follower = new PurePursuit(this);
     FreightFrenzyConfig subsystems = new FreightFrenzyConfig();
     OpenCvWebcam webcam;
-    ArucoPipeline pipeline;
+    ArucoPipeline pipeline = new ArucoPipeline(telemetry);
     ElapsedTime timer = new ElapsedTime();
 
     Path startToAlliance = new PathBuilder()
@@ -84,6 +84,8 @@ public class CabbageAuto extends AutoPipeline {
         robotInit();
         subsystems.lift.autoMode();
 
+        pipeline.boundingBoxBoundaryOne = 78;
+        pipeline.boundingBoxBoundaryTwo = 175;
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -109,10 +111,13 @@ public class CabbageAuto extends AutoPipeline {
         waitForStart();
 
         double markerPos = 0;
+        if(pipeline.markerPos != null) {
+            markerPos = pipeline.markerPos.x;
+        }
 
-        if(markerPos < 250) {
+        if(markerPos < pipeline.boundingBoxBoundaryOne) {
             preloadHeight = 70;
-        } else if(markerPos >= 250 && markerPos < 500) {
+        } else if(markerPos >= pipeline.boundingBoxBoundaryOne && markerPos < pipeline.boundingBoxBoundaryTwo) {
             preloadHeight = 220;
         } else {
             preloadHeight = subsystems.lift.getLiftAlliancePos();
@@ -142,7 +147,7 @@ public class CabbageAuto extends AutoPipeline {
             });
 
             if(cycle == 0) {
-                subsystems.lift.liftToPosition(220, 1.0);
+                subsystems.lift.liftToPosition(preloadHeight, 1.0);
                 timer.reset();
                 runTask(new AutoTask() {
                     @Override
@@ -209,7 +214,7 @@ public class CabbageAuto extends AutoPipeline {
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return timer.milliseconds() <= 400;
+                    return timer.milliseconds() <= 450;
                 }
                 @Override
                 public void run() {
@@ -249,15 +254,6 @@ public class CabbageAuto extends AutoPipeline {
             cycle++;
         }
         subsystems.drivetrain.setPowers(0, 0, 0, 0);
-        if(isStopRequested()) {
-            timer.reset();
-            subsystems.lift.runTurretAndArm();
-            subsystems.drivetrain.setPowers(0, 0, 0, 0);
-            while(timer.milliseconds() < 2800 && !subsystems.lift.isReset()) {
-                subsystems.drivetrain.setPowers(0, 0, 0, 0);
-                subsystems.lift.runTurretAndArm(false, false, true, 0.0, 0.0, false, false, 0.0, 0.0, false);
-            }
-        }
 
         telemetry.addLine("done");
         Robot.stop();

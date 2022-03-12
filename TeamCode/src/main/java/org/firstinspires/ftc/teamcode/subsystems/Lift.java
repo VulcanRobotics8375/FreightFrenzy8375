@@ -44,6 +44,8 @@ public class Lift extends Subsystem {
     private double linkagePower;
     private final double LINKAGE_MIN_POS = 0.1;
     private final double LINKAGE_MAX_POS = 0.86;
+    private final double LINKAGE_MIN_INCHES = linkageForwardKinematics.value(LINKAGE_MIN_POS);
+    private final double LINKAGE_MAX_INCHES = linkageForwardKinematics.value(LINKAGE_MAX_POS);
     private final double LINKAGE_POWER_COEF = 0.02;
     private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.37;
 
@@ -125,8 +127,9 @@ public class Lift extends Subsystem {
     boolean liftReady = false;
     boolean flippingSides = false;
     boolean flipped = false;
+    LiftState linkageAdjustState = LiftState.SHARED;
     boolean linkageGoingUp = false;
-    double linkageAdjustAmount = 0.0;
+    double linkageAdjustAmountInches = 0.0;
     boolean relocalize = false;
     boolean automaticLinkageExtend;
     double linkagePos = LINKAGE_MAX_POS;
@@ -171,13 +174,12 @@ public class Lift extends Subsystem {
             linkagePower = linkageForward;
         }
 
-        linkageAdjustAmount += linkagePower * LINKAGE_POWER_COEF;
-        if(linkagePower + linkageAdjustAmount > LINKAGE_MAX_POS) {
-            linkageAdjustAmount = LINKAGE_MAX_POS - linkagePower;
-        } else if(linkagePower + linkageAdjustAmount < LINKAGE_MIN_POS) {
-            linkageAdjustAmount = LINKAGE_MIN_POS - linkagePower;
+        linkageAdjustAmountInches += linkageForwardKinematics.value(linkagePos + linkagePower * LINKAGE_POWER_COEF) - linkageForwardKinematics.value(linkagePos);
+        if(linkagePos + linkageAdjustAmountInches > LINKAGE_MAX_INCHES) {
+            linkageAdjustAmountInches = LINKAGE_MAX_INCHES - linkagePos;
+        } else if(linkagePos + linkageAdjustAmountInches < LINKAGE_MIN_INCHES) {
+            linkageAdjustAmountInches = LINKAGE_MIN_INCHES - linkagePos;
         }
-
 
         //Hopper Code
         if (releaseButton && !this.releaseButton) {
@@ -232,6 +234,11 @@ public class Lift extends Subsystem {
                 }
                 break;
             case SHARED:
+                if(!(linkageAdjustState == LiftState.SHARED)) {
+                    linkageAdjustAmountInches = 0.0;
+                    linkageAdjustState = LiftState.SHARED;
+                }
+
                 linkagePos = 0.4;
                 liftCleared = liftPos > LIFT_CLEARED_POS;
                 if(linkageOpen && !turretClosed) {
@@ -244,8 +251,14 @@ public class Lift extends Subsystem {
                 }
                 break;
             case ALLIANCE:
-                linkageAdjustAmount = 0.0;
-                linkagePos = LINKAGE_MAX_POS;
+                if(!(linkageAdjustState == LiftState.ALLIANCE)) {
+                    linkageAdjustAmountInches = 0.0;
+                    linkageAdjustState = LiftState.ALLIANCE;
+                }
+
+                if(prevLiftState != LiftState.ALLIANCE) {
+                    linkagePos = LINKAGE_MAX_POS;
+                }
                 liftCleared = liftPos > LIFT_CLEARED_POS;
                 liftToPosition(LIFT_ALLIANCE_POS, 1.0);
                 if(liftCleared && Math.abs(turretPos) >= Math.abs(turret90Degrees / 2.0) && !automaticLinkageExtend) {
@@ -319,8 +332,10 @@ public class Lift extends Subsystem {
         }
 
         if(linkageOpen){
-            double linkageTarget = linkagePos + linkageAdjustAmount;
-            setLinkagePos(linkagePos);
+            double linkageTargetInches = Range.clip(linkageForwardKinematics.value(linkagePos) + linkageAdjustAmountInches, 0.0, 23.6);
+            double linkageTargetPos = inverseLinkageKinematics.value(linkageTargetInches);
+            linkageTargetPos = Range.clip(linkageTargetPos, LINKAGE_MIN_POS, LINKAGE_MAX_POS);
+            setLinkagePos(linkageTargetPos);
         } else {
             setLinkagePos(LINKAGE_MIN_POS);
         }

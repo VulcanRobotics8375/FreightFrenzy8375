@@ -16,6 +16,10 @@ public class ArucoOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        ArucoPipeline pipeline = new ArucoPipeline(telemetry);
+        pipeline.boundingBoxBoundaryOne = 78;
+        pipeline.boundingBoxBoundaryTwo = 175;
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using a webcam. Note that you will need to
@@ -37,7 +41,7 @@ public class ArucoOpMode extends LinearOpMode {
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        webcam.setPipeline(new ArucoPipeline(telemetry));
+        webcam.setPipeline(pipeline);
 
         /*
          * Open the connection to the camera device. New in v1.4.0 is the ability
