@@ -133,7 +133,7 @@ public class CabbageAuto extends AutoPipeline {
                 @Override
                 public boolean conditional() {
                     return Math.abs(subsystems.lift.getLiftPosition() - targetLiftPos) >= 10
-                            && Math.abs(subsystems.lift.getTurretPosition() - subsystems.lift.getTurret90Degrees()) >= 20;
+                            && Math.abs(subsystems.lift.getTurretPosition()) - Math.abs(subsystems.lift.getTurret90Degrees()) >= 20;
                 }
                 @Override
                 public void run() {
