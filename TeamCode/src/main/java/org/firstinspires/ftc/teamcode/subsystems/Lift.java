@@ -174,11 +174,13 @@ public class Lift extends Subsystem {
             linkagePower = linkageForward;
         }
 
-        linkageAdjustAmountInches += linkageForwardKinematics.value(linkagePos + linkagePower * LINKAGE_POWER_COEF) - linkageForwardKinematics.value(linkagePos);
-        if(linkagePos + linkageAdjustAmountInches > LINKAGE_MAX_INCHES) {
-            linkageAdjustAmountInches = LINKAGE_MAX_INCHES - linkagePos;
-        } else if(linkagePos + linkageAdjustAmountInches < LINKAGE_MIN_INCHES) {
-            linkageAdjustAmountInches = LINKAGE_MIN_INCHES - linkagePos;
+        if(linkageOpen) {
+            linkageAdjustAmountInches += linkageForwardKinematics.value(linkagePos + linkagePower * LINKAGE_POWER_COEF) - linkageForwardKinematics.value(linkagePos);
+            if (linkagePos + linkageAdjustAmountInches > LINKAGE_MAX_INCHES) {
+                linkageAdjustAmountInches = LINKAGE_MAX_INCHES - linkagePos;
+            } else if (linkagePos + linkageAdjustAmountInches < LINKAGE_MIN_INCHES) {
+                linkageAdjustAmountInches = LINKAGE_MIN_INCHES - linkagePos;
+            }
         }
 
         //Hopper Code
@@ -349,10 +351,10 @@ public class Lift extends Subsystem {
         }
         liftReady = Math.abs(turretPos) < 30 && Math.abs(liftPos) < 10;
 
-        telemetry.addData("lift state", liftState.toString());
-        telemetry.addData("analog encoder", turretAngleAnalog.getVoltage());
-        telemetry.addData("turret pos", turretPos);
-        telemetry.addData("turret pos raw", turret.getCurrentPosition());
+//        telemetry.addData("lift state", liftState.toString());
+//        telemetry.addData("analog encoder", turretAngleAnalog.getVoltage());
+//        telemetry.addData("turret pos", turretPos);
+//        telemetry.addData("turret pos raw", turret.getCurrentPosition());
 //        telemetry.addData("lift pos", liftPos);
 //        telemetry.addData("lift current", lift.getCurrent(CurrentUnit.AMPS));
 
@@ -365,6 +367,10 @@ public class Lift extends Subsystem {
     public void runNoLimits(double liftPower, double turretPower) {
         lift.setPower(liftPower);
         turret.setPower(turretPower);
+    }
+
+    public boolean isLinkageOpen() {
+        return linkageOpen;
     }
 
     public void reset() {

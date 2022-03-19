@@ -62,6 +62,7 @@ public class DuckAuto extends AutoPipeline {
     public void runOpMode() {
         msStuckDetectStop = 2000;
         int preloadHeight;
+        double preloadLinkagePos = 0.9;
 //        double preloadHeight = 220;
 //        double preloadHeight = subsystems.lift.getLiftAlliancePos();
         allianceToDuck.setPrecise(false);
@@ -102,8 +103,10 @@ public class DuckAuto extends AutoPipeline {
             markerPos = pipeline.markerPos.x;
         }
 
+
         if (markerPos < pipeline.boundingBoxBoundaryOne) {
-            preloadHeight = 70;
+            preloadHeight = 60;
+            preloadLinkagePos = 0.8;
         } else if (markerPos >= pipeline.boundingBoxBoundaryOne && markerPos < pipeline.boundingBoxBoundaryTwo) {
             preloadHeight = 220;
         } else {
@@ -140,7 +143,7 @@ public class DuckAuto extends AutoPipeline {
         });
 
         subsystems.lift.liftToPosition(preloadHeight, 1.0);
-        subsystems.lift.setLinkagePos(0.9);
+        subsystems.lift.setLinkagePos(preloadLinkagePos);
 
         timer.reset();
         runTask(new AutoTask() {
