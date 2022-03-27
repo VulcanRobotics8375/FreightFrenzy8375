@@ -133,17 +133,19 @@ public class CabbageAuto extends AutoPipeline {
         while(cycle <= 4 && !isStopRequested()) {
             // Bring lift and turret all the way out
             double targetLiftPos = cycle == 0 ? subsystems.lift.getLiftSharedPos() : subsystems.lift.getLiftAlliancePos();
+            telemetry.addData("lift waiting", "true");
             runTask(new AutoTask() {
                 @Override
                 public boolean conditional() {
-                    return Math.abs(subsystems.lift.getLiftPosition() - targetLiftPos) >= 20
-                            && Math.abs(subsystems.lift.getTurretPosition()) - Math.abs(subsystems.lift.getTurret90Degrees()) >= 25;
+                    return Math.abs(subsystems.lift.getLiftPosition()) <= Math.abs(targetLiftPos) - 20;
                 }
                 @Override
                 public void run() {
                     subsystems.lift.runTurretAndArm();
+                    telemetry.addData("lift error", Math.abs(subsystems.lift.getLiftPosition()) - Math.abs(targetLiftPos));
                 }
             });
+            telemetry.addData("lift waiting", "false");
 
             if(cycle == 0) {
                 subsystems.lift.liftToPosition(preloadHeight, 1.0);
@@ -178,7 +180,7 @@ public class CabbageAuto extends AutoPipeline {
                 runTask(new AutoTask() {
                     @Override
                     public boolean conditional() {
-                        return timer.milliseconds() <= 450;
+                        return timer.milliseconds() <= 350;
                     }
 
                     @Override
@@ -186,7 +188,6 @@ public class CabbageAuto extends AutoPipeline {
                         subsystems.lift.runTurretAndArm();
                     }
                 });
-
                 // Hopper OPEN
                 subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, true, 0.0, 0.0, false);
                 timer.reset();
@@ -198,7 +199,7 @@ public class CabbageAuto extends AutoPipeline {
 
                     @Override
                     public void run() {
-                        subsystems.lift.runTurretAndArm(false, false, false, 0.0, 0.0, false, false, 0.0, 0.0, false);
+                        subsystems.lift.runTurretAndArm();
                     }
                 });
             }
@@ -226,10 +227,13 @@ public class CabbageAuto extends AutoPipeline {
             follower.followPath(allianceToWarehouse);
 
             // Intake, moving forward slowly until indexed
-            double turn = 0.07 * cycle;
-            if(turn >= (0.07 * 3)) {
+            double turn = 0.08 * cycle;
+            subsystems.intake.setExtendForwardPosition(subsystems.intake.getExtendForwardPosition() + 0.06);
+            if(turn >= (0.08 * 3)) {
                 turn = 0.0;
+                subsystems.intake.setExtendForwardPosition(0.05);
             }
+
             double finalTurn = turn;
             runTask(new AutoTask() {
                 @Override
