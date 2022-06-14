@@ -31,12 +31,7 @@ public class Main extends OpModePipeline {
     public void loop() {
         Robot.update();
 
-        telemetry.addData("imu angle", subsystems.drivetrain.getIMU().getAngularOrientation().firstAngle);
         subsystems.drivetrain.mechanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-
-        telemetry.addData("left wheel", subsystems.localizer.getWheelPositions().get(0));
-        telemetry.addData("right wheel", subsystems.localizer.getWheelPositions().get(1));
-        telemetry.addData("center wheel", subsystems.localizer.getWheelPositions().get(2));
 
         TeleOpState prevTeleOpState = teleOpState;
         if(gamepad2.dpad_up && !this.dpad_up) {
@@ -46,11 +41,12 @@ public class Main extends OpModePipeline {
             this.dpad_up = false;
         }
 
+        if(prevTeleOpState != teleOpState) {
+            subsystems.lift.reset();
+        }
+
         switch (teleOpState) {
             case MAIN:
-                if(prevTeleOpState != teleOpState) {
-                    subsystems.lift.reset();
-                }
                 subsystems.lift.runTurretAndArm(
                         gamepad2.x, //shared
                         gamepad2.y, //alliance
@@ -65,8 +61,10 @@ public class Main extends OpModePipeline {
                 );
                 break;
             case NO_LIMITS:
+                subsystems.lift.setLinkagePos(0.1);
+                subsystems.lift.setReleasePosition(0.4);
                 subsystems.lift.runNoLimits(
-                        gamepad2.left_stick_y, //lift manual
+                        -gamepad2.left_stick_y, //lift manual
                         gamepad2.right_stick_x //turret manual
                 );
                 break;
@@ -74,7 +72,7 @@ public class Main extends OpModePipeline {
 
         subsystems.carousel.run(gamepad2.dpad_right);
 
-        subsystems.cap.run(gamepad1.left_trigger, gamepad1.right_trigger);
+        subsystems.cap.run(subsystems.lift.isLinkageOpen() ? 0.0 : gamepad2.left_trigger, subsystems.lift.isLinkageOpen() ? 0.0 : gamepad2.right_trigger);
         subsystems.intake.run(gamepad2.dpad_down, gamepad2.x || gamepad2.y || gamepad2.left_bumper, subsystems.lift.isReset());
 
         if(gamepad1.dpad_up) {
@@ -83,7 +81,6 @@ public class Main extends OpModePipeline {
         if(gamepad1.dpad_down) {
             subsystems.drivetrain.stopOdometryLift();
         }
-
 
         telemetry.update();
 

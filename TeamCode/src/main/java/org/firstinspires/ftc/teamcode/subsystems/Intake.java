@@ -25,9 +25,9 @@ public class Intake extends Subsystem {
 
     public boolean lastExtend = false;
     public double extendOn = -1;
-    public final double extendBackPosition = 0.28;
-    public final double extendDepositPosition = 0.32;
-    public final double extendForwardPosition = 0.05;
+    private final double extendBackPosition = 0.28;
+    private final double extendDepositPosition = 0.32;
+    private double extendForwardPosition = 0.05;
 
     public final double INTAKE_POWER = 1;
 
@@ -159,7 +159,11 @@ public class Intake extends Subsystem {
         
     }
 
-
-
+    public double getExtendForwardPosition() {
+        return extendForwardPosition;
+    }
+    public void setExtendForwardPosition(double pos) {
+        this.extendForwardPosition = pos;
+    }
 
 }
