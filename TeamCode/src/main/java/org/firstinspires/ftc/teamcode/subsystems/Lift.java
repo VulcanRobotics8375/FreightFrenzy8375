@@ -48,11 +48,11 @@ public class Lift extends Subsystem {
     private final double LINKAGE_MIN_INCHES = linkageForwardKinematics.value(LINKAGE_MIN_POS);
     private final double LINKAGE_MAX_INCHES = linkageForwardKinematics.value(LINKAGE_MAX_POS);
     private final double LINKAGE_POWER_COEF = 0.02;
-    private final double ANALOG_ENCODER_VOLTAGE_OFFSET = 1.37;
 
     private final double TURRET_TICKS_PER_DEGREE = 1456.0 / 360.0;
     private final double TURRET_VOLTS_PER_DEGREE = (3.3 * 5.0) / 360.0;
     private final double TURRET_TICKS_PER_VOLT = TURRET_TICKS_PER_DEGREE / TURRET_VOLTS_PER_DEGREE;
+    private double ANALOG_ENCODER_VOLTAGE_OFFSET;
     private double turretOffset;
 
     private boolean releaseOpen = false;
@@ -110,7 +110,8 @@ public class Lift extends Subsystem {
         linkageTwo.setDirection(Servo.Direction.REVERSE);
 
         //calculate turet offset based on absolute encoder voltage
-        turretOffset = (TURRET_TICKS_PER_VOLT * (turretAngleAnalog.getVoltage() - ANALOG_ENCODER_VOLTAGE_OFFSET));
+        ANALOG_ENCODER_VOLTAGE_OFFSET = turretAngleAnalog.getVoltage();
+        turretOffset = 0;
         PIDFCoefficients stockTurretCoeff = turret.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
 //        turret.setVelocityPIDFCoefficients(stockTurretCoeff.p, stockTurretCoeff.i, stockTurretCoeff.d + 0.02, stockTurretCoeff.f);
 //        lift.setVelocityPIDFCoefficients(stockLiftCoeff.p, stockLiftCoeff.i, stockLiftCoeff.d + 0.01, stockLiftCoeff.f);
